@@ -1,0 +1,200 @@
+.playlist-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.filter-section {
+  flex: none;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  background-color: #fff;
+}
+
+.search-input {
+  width: 300px;
+}
+
+.song-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 20px;
+  padding-bottom: 100px; /* 为分页器预留空间 */
+}
+
+.song-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  background-color: #fafafa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  color: #909399;
+  font-size: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.song-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.song-item:hover {
+  background-color: #f5f7fa;
+}
+
+/* 列宽设置 */
+.col-index {
+  width: 60px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.song-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-duration {
+  width: 100px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-artist {
+  width: 120px;
+  flex: none;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-album {
+  width: 160px;
+  flex: none;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 歌曲封面 */
+.song-cover {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.song-cover .el-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.action-buttons .el-icon {
+  font-size: 18px;
+  color: #606266;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.action-buttons .el-icon:hover {
+  color: #409EFF;
+}
+
+.play-icon {
+  font-size: 18px;
+  color: #409EFF;
+  cursor: pointer;
+}
+
+/* 分页器 */
+.pagination {
+  position: fixed;
+  bottom: 80px;
+  left: 240px;
+  right: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+/* 封面预览 */
+.cover-preview {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 播放列表弹窗 */
+.playlist-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.create-playlist {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+  .filter-section {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .col-album {
+    display: none;
+  }
+  
+  .col-duration {
+    width: 80px;
+  }
+  
+  .col-artist {
+    width: 100px;
+  }
+} 

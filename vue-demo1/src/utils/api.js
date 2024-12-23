@@ -1,0 +1,48 @@
+import { ElMessage, ElMessageBox } from 'element-plus';
+//这应该是设置拦截器和后端地址的，现在废除了
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3000', // 后端 API 根地址
+  timeout: 10000, // 超时时间
+  headers: {
+    'Content-Type': 'application/json',  // 设置请求头中的 Content-Type 为 JSON
+  },
+});
+
+api.interceptors.request.use(
+  (config) => {
+    if (config.url === '/user/login' || config.url === '/user/regist') {
+      return config;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      ElMessage.error('请先登录');
+      setTimeout(() => {
+        window.location.href = '/login';  // 跳转到登录页
+      }, 1000);
+      return Promise.reject('No token');
+    }
+    config.headers['Authorization'] = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      ElMessage.error('身份验证失败，请重新登录');
+      setTimeout(() => {
+        useRouter().push('/login'); // 使用 Vue Router 进行页面跳转
+      }, 1000);
+      return Promise.resolve(null);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export { api };
