@@ -86,9 +86,9 @@
                 <el-tooltip content="添加到播放列表" placement="top">
                   <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
                 </el-tooltip>
-                <el-tooltip content="收藏专辑" placement="top">
+                <!-- <el-tooltip content="收藏专辑" placement="top">
                   <el-icon @click="addAlbum(song)"><FolderAdd /></el-icon>
-                </el-tooltip>
+                </el-tooltip> -->
                 <el-tooltip content="评论" placement="top">
                   <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
                 </el-tooltip>
@@ -294,11 +294,11 @@ const likeSong = async (song) => {
   }
 }
 
-const addAlbum = (song) => {
-  console.log(song);
-  store.dispatch('addToPlaylist', song)
-  ElMessage.success(`已收藏专辑: ${song.album.name}`)
-}
+// const addAlbum = (song) => {
+//   console.log(song);
+//   store.dispatch('addToPlaylist', song)
+//   ElMessage.success(`已收藏专辑: ${song.album.name}`)
+// }
 
 const formatDuration = (seconds) => {
   if (!seconds) return '00:00'
