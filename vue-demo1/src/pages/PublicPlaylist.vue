@@ -453,7 +453,8 @@ defineExpose({
 
 <style scoped>
 .playlist-container {
-  padding: 24px;
+  padding: 24px 32px;
+  margin-right: 16px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
@@ -487,21 +488,22 @@ defineExpose({
   position: sticky;
   top: 0;
   display: grid;
-  grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
-  padding: 12px 20px;
+  grid-template-columns: 60px minmax(300px, 2.5fr) 180px minmax(160px, 1fr) minmax(160px, 1fr);
+  padding: 12px 24px;
   background-color: #f5f7fa;
   border-bottom: 1px solid #ebeef5;
   font-weight: 600;
   color: #606266;
   align-items: center;
   z-index: 1;
+  gap: 12px;
 }
 
 /* 歌曲项样式 */
 .song-item {
   display: grid;
-  grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
-  padding: 12px 20px;
+  grid-template-columns: 60px minmax(300px, 2.5fr) 180px minmax(160px, 1fr) minmax(160px, 1fr);
+  padding: 12px 24px;
   border-bottom: 1px solid #ebeef5;
   align-items: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -552,48 +554,48 @@ defineExpose({
 
 /* 时长列 */
 .col-duration {
-  text-align: center;
-  color: #606266;
-  font-size: 14px;
+  min-width: 180px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-right: 24px;
 }
 
 /* 歌手和专辑列 */
 .col-artist, .col-album {
-  color: #606266;
-  cursor: pointer;
-  transition: color 0.3s ease;
+  padding: 0 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 10px;
+  cursor: pointer;
+  color: #606266;
 }
 
 .col-artist:hover, .col-album:hover {
-  color: var(--el-color-primary);
-  text-decoration: underline;
+  color: #409EFF;
 }
 
 /* 操作按钮 */
 .action-buttons {
   display: flex;
-  gap: 16px;
-  justify-content: center;
+  gap: 20px;
+  justify-content: flex-start;
   align-items: center;
 }
 
-.el-icon {
-  font-size: 18px;
-  color: #909399;
+.action-buttons .el-icon {
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 6px;
-  border-radius: 50%;
+  color: #606266;
+  transition: all 0.3s;
 }
 
-.el-icon:hover {
-  transform: scale(1.2);
-  color: var(--el-color-primary);
-  background-color: rgba(64, 158, 255, 0.1);
+.action-buttons .el-icon.is-liked {
+  color: #ffcc00;
+}
+
+.action-buttons .el-icon:hover {
+  color: #409EFF;
 }
 
 /* 喜欢图标特殊样式 */

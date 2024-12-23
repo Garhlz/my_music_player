@@ -80,7 +80,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CaretRight, Delete, ArrowLeft, ArrowRight, VideoPlay, VideoPause } from '@element-plus/icons-vue'
-import { getPlaylistSongs, removeFromPlaylist } from '@/api/axiosFile'
+import { getPlaylistById, removeSongFromPlaylist } from '@/api/axiosFile'
 import { usePlayerStore } from '@/stores/player'
 
 const route = useRoute()
@@ -95,7 +95,7 @@ const isLoading = ref(false)
 const loadData = async () => {
   isLoading.value = true
   try {
-    const response = await getPlaylistSongs(route.params.id)
+    const response = await getPlaylistById(route.params.id)
     if (response.data.message) {
       currentPlaylist.value = response.data.data.playlist
       songs.value = response.data.data.songs || []
@@ -139,7 +139,7 @@ const removeSong = (song) => {
     }
   ).then(async () => {
     try {
-      const response = await removeFromPlaylist(currentPlaylist.value.id, song.id)
+      const response = await removeSongFromPlaylist(currentPlaylist.value.id, song.id)
       if (response.data.message) {
         ElMessage.success('移除成功')
         loadData() // 重新加载数据

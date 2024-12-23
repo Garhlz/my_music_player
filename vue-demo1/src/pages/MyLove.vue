@@ -127,6 +127,74 @@
             <el-icon><ArrowRight /></el-icon>
           </el-button>
         </div>
+
+        <!-- 添加歌单弹窗 -->
+        <el-dialog
+          v-model="playlistDialogVisible"
+          title="添加到歌单"
+          width="30%"
+          :before-close="handleDialogClose"
+        >
+          <div class="playlist-dialog-content">
+            <div class="create-playlist-section">
+              <el-button type="primary" @click="showCreatePlaylist">
+                <el-icon><Plus /></el-icon>创建新歌单
+              </el-button>
+            </div>
+            
+            <div v-if="showCreateForm" class="create-playlist-form">
+              <el-input
+                v-model="newPlaylistName"
+                placeholder="歌单名称"
+                maxlength="50"
+                show-word-limit
+              />
+              <el-input
+                v-model="newPlaylistDescription"
+                type="textarea"
+                placeholder="歌单描述"
+                maxlength="200"
+                show-word-limit
+                rows="3"
+                class="mt-3"
+              />
+              <div class="dialog-footer">
+                <el-button @click="cancelCreate">取消</el-button>
+                <el-button type="primary" @click="handleCreatePlaylist">
+                  创建
+                </el-button>
+              </div>
+            </div>
+            
+            <div v-else class="playlists-list">
+              <el-empty v-if="!userPlaylists.length" description="暂无歌单" />
+              <el-radio-group v-else v-model="selectedPlaylist">
+                <el-radio
+                  v-for="playlist in userPlaylists"
+                  :key="playlist.id"
+                  :label="playlist.id"
+                  class="playlist-radio"
+                >
+                  {{ playlist.name }}
+                  <span class="song-count">({{ playlist.song_count || 0 }}首)</span>
+                </el-radio>
+              </el-radio-group>
+            </div>
+          </div>
+          
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button @click="handleDialogClose">取消</el-button>
+              <el-button 
+                type="primary" 
+                @click="confirmAddToPlaylist"
+                :disabled="!selectedPlaylist && !showCreateForm"
+              >
+                确定
+              </el-button>
+            </span>
+          </template>
+        </el-dialog>
       </div>
     </template>
   </CommonLayout>
@@ -136,16 +204,26 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, ArrowLeft, ArrowRight, VideoPlay, VideoPause } from '@element-plus/icons-vue'
-import { getLikedSongs, removeLikedSong } from '@/api/axiosFile'
-import { usePlayerStore } from '@/stores/player'
-import CommonLayout from '@/layouts/CommonLayout.vue'
-import {
+import { 
+  Search, 
+  VideoPlay, 
+  VideoPause, 
   Star,
   Plus,
   FolderAdd,
   ChatDotRound,
+  ArrowLeft,
+  ArrowRight
 } from '@element-plus/icons-vue'
+import { 
+  getLikedSongs, 
+  removeLikedSong,
+  getMyPlaylists as fetchUserPlaylists,
+  createPlaylist as createNewPlaylist,
+  addSongToPlaylist 
+} from '@/api/axiosFile'
+import { usePlayerStore } from '@/stores/player'
+import CommonLayout from '@/layouts/CommonLayout.vue'
 
 // 响应式状态
 const currentName = ref('我喜欢的音乐')
@@ -160,6 +238,15 @@ const hoveredSong = ref(null)
 
 const router = useRouter()
 const playerStore = usePlayerStore()
+
+// 歌单相关的响应式变量
+const playlistDialogVisible = ref(false)
+const showCreateForm = ref(false)
+const selectedPlaylist = ref(null)
+const newPlaylistName = ref('')
+const newPlaylistDescription = ref('')
+const userPlaylists = ref([])
+const selectedSong = ref(null)
 
 // 加载数据
 const loadData = async () => {
@@ -223,9 +310,10 @@ const unlikeSong = async (song) => {
 }
 
 // 添加到播放列表
-const addToPlaylist = (song) => {
-  playerStore.setPlaylist([song])
-  ElMessage.success(`已添加到播放列表: ${song.name}`)
+const addToPlaylist = async (song) => {
+  selectedSong.value = song
+  playlistDialogVisible.value = true
+  await loadUserPlaylists() // 等待歌单加载完成
 }
 
 const addAlbum = (song) => {
@@ -264,6 +352,104 @@ const goToPlayer = (song) => {
   router.push('/player')
 }
 
+// 加载用户歌单
+const loadUserPlaylists = async () => {
+  try {
+    const response = await fetchUserPlaylists()
+    console.log('歌单数据:', response.data)
+    if (response.data.message) {
+      // 确保数据格式正确
+      userPlaylists.value = response.data.data.map(playlist => ({
+        id: playlist.id,
+        name: playlist.name,
+        song_count: playlist.song_count || 0,
+        description: playlist.description
+      }))
+    } else {
+      throw new Error(response.data.error || '获取歌单失败')
+    }
+  } catch (error) {
+    console.error('获取歌单失败:', error)
+    ElMessage.error('获取歌单失败，请稍后重试')
+  }
+}
+
+// 显示创建歌单表单
+const showCreatePlaylist = () => {
+  showCreateForm.value = true
+}
+
+// 取消创建歌单
+const cancelCreate = () => {
+  showCreateForm.value = false
+  newPlaylistName.value = ''
+  newPlaylistDescription.value = ''
+}
+
+// 创建新歌单
+const handleCreatePlaylist = async () => {
+  if (!newPlaylistName.value.trim()) {
+    ElMessage.warning('请输入歌单名称')
+    return
+  }
+
+  try {
+    const response = await createNewPlaylist({
+      name: newPlaylistName.value,
+      description: newPlaylistDescription.value,
+      isPublic: false
+    })
+
+    if (response.data.message) {
+      userPlaylists.value.unshift({
+        ...response.data.data,
+        songCount: 0
+      })
+      selectedPlaylist.value = response.data.data.id
+      showCreateForm.value = false
+      newPlaylistName.value = ''
+      newPlaylistDescription.value = ''
+      ElMessage.success('歌单创建成功')
+    } else {
+      throw new Error(response.data.error || '创建歌单失败')
+    }
+  } catch (error) {
+    console.error('创建歌单失败:', error)
+    ElMessage.error(error.message || '创建歌单失败，请稍后重试')
+  }
+}
+
+// 确认添加到歌单
+const confirmAddToPlaylist = async () => {
+  if (!selectedPlaylist.value) {
+    ElMessage.warning('请选择歌单')
+    return
+  }
+
+  try {
+    const response = await addSongToPlaylist(selectedPlaylist.value, selectedSong.value.id)
+    if (response.data.message) {
+      ElMessage.success('添加成功')
+      playlistDialogVisible.value = false
+      selectedPlaylist.value = null
+    } else {
+      throw new Error(response.data.error || '添加失败')
+    }
+  } catch (error) {
+    console.error('添加失败:', error)
+    ElMessage.error(error.message || '添加失败，请稍后重试')
+  }
+}
+
+// 关闭弹窗
+const handleDialogClose = () => {
+  playlistDialogVisible.value = false
+  showCreateForm.value = false
+  selectedPlaylist.value = null
+  newPlaylistName.value = ''
+  newPlaylistDescription.value = ''
+}
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadData()
@@ -272,7 +458,8 @@ onMounted(() => {
 
 <style scoped>
 .playlist-container {
-  padding: 24px;
+  padding: 24px 32px;
+  margin-right: 16px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
@@ -294,36 +481,38 @@ onMounted(() => {
 
 .song-list {
   margin-top: 20px;
-  border: 1px solid #ebeef5;
+  border: 1px solid #EBEEF5;
   border-radius: 4px;
   overflow: hidden;
+  margin-bottom: 24px;
 }
 
 .song-header {
   position: sticky;
   top: 0;
   display: grid;
-  grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
-  padding: 12px 20px;
+  grid-template-columns: 60px minmax(300px, 2.5fr) 180px minmax(160px, 1fr) minmax(160px, 1fr);
+  padding: 12px 24px;
   background-color: #f5f7fa;
   border-bottom: 1px solid #ebeef5;
   font-weight: 600;
   color: #606266;
   align-items: center;
   z-index: 1;
+  gap: 12px;
 }
 
 .song-item {
   display: grid;
-  grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
-  padding: 12px 20px;
+  grid-template-columns: 60px minmax(300px, 2.5fr) 180px minmax(160px, 1fr) minmax(160px, 1fr);
+  padding: 12px 24px;
   border-bottom: 1px solid #ebeef5;
   align-items: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .song-item:hover {
-  background-color: #f5f7fa;
+  background-color: #F5F7FA;
   transform: translateX(4px);
 }
 
@@ -365,31 +554,45 @@ onMounted(() => {
 }
 
 .col-duration {
-  text-align: center;
+  min-width: 180px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-right: 24px;
   color: #606266;
   font-size: 14px;
 }
 
 .col-artist, .col-album {
-  color: #606266;
-  cursor: pointer;
-  transition: color 0.3s ease;
+  padding: 0 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 10px;
+  cursor: pointer;
+  color: #606266;
 }
 
 .col-artist:hover, .col-album:hover {
-  color: var(--el-color-primary);
-  text-decoration: underline;
+  color: #409EFF;
 }
 
 .action-buttons {
   display: flex;
-  gap: 16px;
-  justify-content: center;
+  gap: 20px;
+  justify-content: flex-start;
   align-items: center;
+}
+
+.action-buttons .el-icon {
+  font-size: 16px;
+  cursor: pointer;
+  color: #606266;
+  transition: color 0.3s;
+  padding: 4px;
+}
+
+.action-buttons .el-icon:hover {
+  color: #409EFF;
 }
 
 .el-icon {
@@ -484,5 +687,54 @@ onMounted(() => {
   .search-input {
     width: 100%;
   }
+}
+
+/* 歌单弹窗样式 */
+.playlist-dialog-content {
+  padding: 20px 0;
+}
+
+.create-playlist-section {
+  margin-bottom: 20px;
+}
+
+.create-playlist-form {
+  margin-top: 20px;
+}
+
+.playlists-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+.playlist-radio {
+  display: block;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.playlist-radio:hover {
+  background-color: #f5f7fa;
+}
+
+.song-count {
+  color: #909399;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.el-radio {
+  width: 100%;
+  margin-right: 0;
+  margin-bottom: 8px;
+}
+
+.el-radio__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
