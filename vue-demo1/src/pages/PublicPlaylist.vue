@@ -345,6 +345,11 @@ defineExpose({
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  /* 添加滚动容器 */
+  height: 100%;
+  overflow-y: auto;
+  /* 确保内容不会被播放器遮挡 */
+  padding-bottom: 100px;
 }
 
 .filter-section {
@@ -367,6 +372,8 @@ defineExpose({
 
 /* 表头样式 */
 .song-header {
+  position: sticky;
+  top: 0;
   display: grid;
   grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
   padding: 12px 20px;
@@ -375,6 +382,7 @@ defineExpose({
   font-weight: 600;
   color: #606266;
   align-items: center;
+  z-index: 1;
 }
 
 /* 歌曲项样式 */
@@ -495,10 +503,14 @@ defineExpose({
 
 /* 分页器 */
 .pagination {
+  position: sticky;
+  bottom: 0;
   margin-top: 24px;
+  padding: 16px 0;
+  background-color: #fff;
   display: flex;
   justify-content: center;
-  padding: 16px 0;
+  box-shadow: 0 -2px 12px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* 动画效果 */
@@ -538,5 +550,19 @@ defineExpose({
   .search-input {
     width: 100%;
   }
+}
+
+/* 添加滚动条样式 */
+.playlist-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.playlist-container::-webkit-scrollbar-thumb {
+  background-color: #dcdfe6;
+  border-radius: 3px;
+}
+
+.playlist-container::-webkit-scrollbar-track {
+  background-color: #f5f7fa;
 }
 </style>
