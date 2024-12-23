@@ -112,6 +112,21 @@
           @size-change="handlePageSizeChange"
           @current-change="handlePageChange"
         />
+
+        <div class="player-controls" v-if="showPlayerControls">
+          <el-button circle @click="previousSong">
+            <el-icon><ArrowLeft /></el-icon>
+          </el-button>
+          <el-button circle @click="togglePlay">
+            <el-icon>
+              <VideoPlay v-if="!isPlaying" />
+              <VideoPause v-else />
+            </el-icon>
+          </el-button>
+          <el-button circle @click="nextSong">
+            <el-icon><ArrowRight /></el-icon>
+          </el-button>
+        </div>
       </div>
     </template>
   </CommonLayout>
@@ -120,18 +135,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
-import CommonLayout from '@/layouts/CommonLayout.vue'
 import { ElMessage } from 'element-plus'
+import { Search, ArrowLeft, ArrowRight, VideoPlay, VideoPause } from '@element-plus/icons-vue'
+import { getLikedSongs, removeLikedSong } from '@/api/axiosFile'
+import { usePlayerStore } from '@/stores/player'
+import CommonLayout from '@/layouts/CommonLayout.vue'
 import {
-  Search,
-  VideoPlay,
   Star,
   Plus,
   FolderAdd,
   ChatDotRound,
 } from '@element-plus/icons-vue'
-import { getLikedSongs, removeLikedSong } from '@/api/axiosFile'
 
 // 响应式状态
 const currentName = ref('我喜欢的音乐')
@@ -145,7 +159,7 @@ const sortBy = ref('latest')
 const hoveredSong = ref(null)
 
 const router = useRouter()
-const store = useStore()
+const playerStore = usePlayerStore()
 
 // 加载数据
 const loadData = async () => {
@@ -192,7 +206,8 @@ const handlePageSizeChange = async (newSize) => {
 
 // 播放歌曲
 const handlePlaySong = (song) => {
-  store.dispatch('player/playSong', song)
+  playerStore.setPlaylist([song])
+  playerStore.play(0)
 }
 
 // 取消喜欢
@@ -209,13 +224,13 @@ const unlikeSong = async (song) => {
 
 // 添加到播放列表
 const addToPlaylist = (song) => {
-  store.dispatch('addToPlaylist', song)
+  playerStore.setPlaylist([song])
   ElMessage.success(`已添加到播放列表: ${song.name}`)
 }
 
 const addAlbum = (song) => {
   console.log(song);
-  store.dispatch('addToPlaylist', song)
+  playerStore.setPlaylist([song])
   ElMessage.success(`已收藏专辑: ${song.album.name}`)
 }
 

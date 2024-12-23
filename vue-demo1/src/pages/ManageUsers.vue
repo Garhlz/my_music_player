@@ -145,108 +145,97 @@
   </CommonLayout>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
 import CommonLayout from '@/layouts/CommonLayout.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
-export default {
-  name: 'ManageUsers',
-  components: {
-    CommonLayout,
-    Search,
-  },
-  data() {
-    return {
-      currentName: '用户管理',
-      users: [],
-      page: 1,
-      pageSize: 10,
-      totalUsers: 0,
-      isLoading: false,
-      searchQuery: '',
-      role: '',
-      editDialogVisible: false,
-      editForm: {
-        id: '',
-        username: '',
-        name: '',
-        email: '',
-        role: 'user'
-      }
-    }
-  },
-  mounted() {
-    this.loadData()
-  },
-  methods: {
-    async handleSearch() {
-      this.page = 1
-      await this.loadData()
-    },
+const currentName = ref('用户管理')
+const users = ref([])
+const page = ref(1)
+const pageSize = ref(10)
+const totalUsers = ref(0)
+const isLoading = ref(false)
+const searchQuery = ref('')
+const role = ref('')
+const editDialogVisible = ref(false)
+const editForm = ref({
+  id: '',
+  username: '',
+  name: '',
+  email: '',
+  role: 'user'
+})
 
-    async handlePageChange(newPage) {
-      this.page = newPage
-      await this.loadData()
-    },
+const handleSearch = async () => {
+  page.value = 1
+  await loadData()
+}
 
-    async handlePageSizeChange(newSize) {
-      this.pageSize = newSize
-      this.page = 1
-      await this.loadData()
-    },
+const handlePageChange = async (newPage) => {
+  page.value = newPage
+  await loadData()
+}
 
-    async loadData() {
-      this.isLoading = true
-      try {
-        // TODO: 实现获取用户列表的接口
-        // const response = await getUsers(this.page, this.pageSize, this.role)
-        this.isLoading = false
-      } catch (error) {
-        console.error('加载数据失败:', error)
-        ElMessage.error('加载数据失败，请稍后重试')
-        this.isLoading = false
-      }
-    },
+const handlePageSizeChange = async (newSize) => {
+  pageSize.value = newSize
+  page.value = 1
+  await loadData()
+}
 
-    editUser(user) {
-      this.editForm = { ...user }
-      this.editDialogVisible = true
-    },
-
-    async submitEdit() {
-      // TODO: 实现编辑用户的接口
-      ElMessage.success('用户信息已更新')
-      this.editDialogVisible = false
-      await this.loadData()
-    },
-
-    async handleStatusChange(user) {
-      // TODO: 实现更新用户状态的接口
-      ElMessage.success(`用户状态已${user.is_active ? '启用' : '禁用'}`)
-    },
-
-    async deleteUser(user) {
-      try {
-        await ElMessageBox.confirm(
-          '确定要删除这个用户吗？此操作不可恢复！',
-          '删除用户',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-        // TODO: 实现删除用户的接口
-        ElMessage.success('用户已删除')
-        await this.loadData()
-      } catch {
-        // 用户取消删除
-      }
-    }
+const loadData = async () => {
+  isLoading.value = true
+  try {
+    // TODO: 实现获取用户列表的接口
+    // const response = await getUsers(page.value, pageSize.value, role.value)
+    isLoading.value = false
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    ElMessage.error('加载数据失败，请稍后重试')
+    isLoading.value = false
   }
 }
+
+const editUser = (user) => {
+  editForm.value = { ...user }
+  editDialogVisible.value = true
+}
+
+const submitEdit = async () => {
+  // TODO: 实现编辑用户的接口
+  ElMessage.success('用户信息已更新')
+  editDialogVisible.value = false
+  await loadData()
+}
+
+const handleStatusChange = async (user) => {
+  // TODO: 实现更新用户状态的接口
+  ElMessage.success(`用户状态已${user.is_active ? '启用' : '禁用'}`)
+}
+
+const deleteUser = async (user) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这个用户吗？此操作不可恢复！',
+      '删除用户',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    // TODO: 实现删除用户的接口
+    ElMessage.success('用户已删除')
+    await loadData()
+  } catch {
+    // 用户取消删除
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>

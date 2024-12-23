@@ -1,5 +1,4 @@
 import { ElMessage, ElMessageBox } from 'element-plus';
-//这应该是设置拦截器和后端地址的，现在废除了
 import axios from 'axios';
 
 const api = axios.create({
@@ -37,7 +36,7 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       ElMessage.error('身份验证失败，请重新登录');
       setTimeout(() => {
-        useRouter().push('/login'); // 使用 Vue Router 进行页面跳转
+        window.location.href = '/login';  // 跳转到登录页
       }, 1000);
       return Promise.resolve(null);
     }

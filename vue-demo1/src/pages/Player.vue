@@ -19,10 +19,26 @@
             <p class="song-artist">{{ currentSong?.artist || '未知歌手' }}</p>
           </div>
 
+          <!-- 播放控制 -->
+          <div class="player-controls">
+            <el-button circle @click="previousSong">
+              <el-icon><ArrowLeft /></el-icon>
+            </el-button>
+            <el-button circle @click="togglePlay">
+              <el-icon>
+                <VideoPlay v-if="!isPlaying" />
+                <VideoPause v-else />
+              </el-icon>
+            </el-button>
+            <el-button circle @click="nextSong">
+              <el-icon><ArrowRight /></el-icon>
+            </el-button>
+          </div>
+
           <!-- 音频控制器 -->
           <audio 
             v-if="currentSong" 
-            :src="currentSong.file" 
+            :src="currentSong.url" 
             ref="audioPlayer"
             @play="handlePlay"
             @pause="handlePause"
@@ -37,47 +53,55 @@
   </CommonLayout>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import CommonLayout from '@/layouts/CommonLayout.vue'
-import { mapState, mapActions } from 'vuex'
+import { usePlayerStore } from '@/stores/player'
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  VideoPlay, 
+  VideoPause 
+} from '@element-plus/icons-vue'
 
-export default {
-  name: 'Player',
-  components: {
-    CommonLayout
-  },
-  data() {
-    return {
-      currentName: '正在播放',
-      isPlaying: false,
-      currentTime: 0,
-      duration: 0
-    }
-  },
-  computed: {
-    ...mapState(['currentSong'])
-  },
-  methods: {
-    ...mapActions(['playSong', 'playNext']),
+const router = useRouter()
+const playerStore = usePlayerStore()
+const currentName = ref('正在播放')
 
-    handlePlay() {
-      this.isPlaying = true
-    },
+const currentSong = computed(() => playerStore.getCurrentSong)
+const isPlaying = computed(() => playerStore.getIsPlaying)
 
-    handlePause() {
-      this.isPlaying = false
-    },
-
-    handleEnded() {
-      this.isPlaying = false
-      this.playNext()
-    },
-
-    handleTimeUpdate(e) {
-      this.currentTime = e.target.currentTime
-      this.duration = e.target.duration
-    }
+const togglePlay = () => {
+  if (isPlaying.value) {
+    playerStore.pause()
+  } else {
+    playerStore.resume()
   }
+}
+
+const previousSong = () => {
+  playerStore.previous()
+}
+
+const nextSong = () => {
+  playerStore.next()
+}
+
+const handlePlay = () => {
+  playerStore.resume()
+}
+
+const handlePause = () => {
+  playerStore.pause()
+}
+
+const handleEnded = () => {
+  playerStore.next()
+}
+
+const handleTimeUpdate = (event) => {
+  // 可以在这里处理播放进度更新
 }
 </script>
 
@@ -144,6 +168,12 @@ export default {
   font-size: 16px;
   color: #666;
   margin: 0;
+}
+
+.player-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .audio-player {

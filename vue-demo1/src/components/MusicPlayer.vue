@@ -19,7 +19,7 @@
       <div class="center-section">
         <div class="control-buttons">
           <el-button circle @click="previousSong">
-            <el-icon><CaretLeft /></el-icon>
+            <el-icon><ArrowLeft /></el-icon>
           </el-button>
           <el-button circle @click="togglePlay">
             <el-icon>
@@ -28,7 +28,7 @@
             </el-icon>
           </el-button>
           <el-button circle @click="nextSong">
-            <el-icon><CaretRight /></el-icon>
+            <el-icon><ArrowRight /></el-icon>
           </el-button>
         </div>
         <div class="progress-bar">
@@ -65,162 +65,130 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapActions } from 'vuex';
-import { ref, computed, onMounted, watch } from 'vue';
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue'
+import { usePlayerStore } from '@/stores/player'
 import { 
-  CaretLeft, 
-  CaretRight, 
+  ArrowLeft, 
+  ArrowRight, 
   VideoPlay, 
   VideoPause, 
   CaretTop, 
   CaretBottom 
-} from '@element-plus/icons-vue';
+} from '@element-plus/icons-vue'
 
-export default {
-  components: {
-    CaretLeft,
-    CaretRight,
-    VideoPlay,
-    VideoPause,
-    CaretTop,
-    CaretBottom
-  },
-  
-  setup() {
-    const audio = ref(null);
-    const currentProgress = ref(0);
-    const maxDuration = ref(0);
-    const volume = ref(100);
-    const previousVolume = ref(100);
+const playerStore = usePlayerStore()
+const audio = ref(null)
+const currentProgress = ref(0)
+const maxDuration = ref(0)
+const volume = ref(100)
+const previousVolume = ref(100)
 
-    // 处理音频进度更新
-    const updateProgress = () => {
-      if (audio.value) {
-        const current = audio.value.currentTime;
-        const duration = audio.value.duration;
-        
-        if (isFinite(current)) {
-          currentProgress.value = current;
-        }
-        if (isFinite(duration)) {
-          maxDuration.value = duration;
-        }
-      }
-    };
+// 计算属性
+const currentSong = computed(() => playerStore.getCurrentSong)
+const isPlaying = computed(() => playerStore.getIsPlaying)
 
-    // 处理进度条改变
-    const handleProgressChange = (value) => {
-      if (audio.value && isFinite(value)) {
-        try {
-          audio.value.currentTime = value;
-        } catch (error) {
-          console.error('设置播放进度失败:', error);
-        }
-      }
-    };
-
-    // 格式化时间
-    const formatTime = (seconds) => {
-      if (!isFinite(seconds)) return '0:00';
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    onMounted(() => {
-      // 初始化音频元素引用
-      audio.value = document.querySelector('audio');
-    });
-
-    return {
-      audio,
-      currentProgress,
-      maxDuration,
-      volume,
-      previousVolume,
-      updateProgress,
-      handleProgressChange,
-      formatTime
-    };
-  },
-
-  computed: {
-    ...mapState('player', ['currentSong', 'isPlaying']),
-  },
-
-  methods: {
-    ...mapActions('player', ['playSong', 'pauseSong', 'nextSong', 'previousSong']),
-
-    togglePlay() {
-      if (!this.audio) return;
-
-      if (this.isPlaying) {
-        this.audio.pause();
-        this.pauseSong();
-      } else if (this.currentSong) {
-        this.audio.play().catch(error => {
-          console.error('播放失败:', error);
-        });
-        this.playSong(this.currentSong);
-      }
-    },
-
-    toggleMute() {
-      if (this.volume > 0) {
-        this.previousVolume = this.volume;
-        this.volume = 0;
-      } else {
-        this.volume = this.previousVolume;
-      }
-      this.setVolume(this.volume);
-    },
-
-    setVolume(value) {
-      if (this.audio) {
-        this.audio.volume = value / 100;
-      }
-    },
-
-    goToPlayer() {
-      this.$router.push('/player');
-    },
-  },
-
-  watch: {
-    currentSong: {
-      handler(newSong) {
-        if (newSong && this.isPlaying && this.audio) {
-          this.$nextTick(() => {
-            this.audio.play().catch(error => {
-              console.error('播放失败:', error);
-            });
-          });
-        }
-      },
-      immediate: true
+// 处理音频进度更新
+const updateProgress = () => {
+  if (audio.value) {
+    const current = audio.value.currentTime
+    const duration = audio.value.duration
+    
+    if (isFinite(current)) {
+      currentProgress.value = current
     }
-  },
-
-  mounted() {
-    // 初始化音量
-    if (this.audio) {
-      this.audio.volume = this.volume / 100;
-    }
-
-    // 添加进度更新监听
-    if (this.audio) {
-      this.audio.addEventListener('timeupdate', this.updateProgress);
-    }
-  },
-
-  beforeUnmount() {
-    // 清理事件监听
-    if (this.audio) {
-      this.audio.removeEventListener('timeupdate', this.updateProgress);
+    if (isFinite(duration)) {
+      maxDuration.value = duration
     }
   }
-};
+}
+
+// 处理进度条改变
+const handleProgressChange = (value) => {
+  if (audio.value && isFinite(value)) {
+    try {
+      audio.value.currentTime = value
+    } catch (error) {
+      console.error('设置播放进度失败:', error)
+    }
+  }
+}
+
+// 格式化时间
+const formatTime = (seconds) => {
+  if (!isFinite(seconds)) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+// 播放控制方法
+const togglePlay = () => {
+  if (!audio.value) return
+
+  if (isPlaying.value) {
+    audio.value.pause()
+    playerStore.pause()
+  } else if (currentSong.value) {
+    audio.value.play().catch(error => {
+      console.error('播放失败:', error)
+    })
+    playerStore.resume()
+  }
+}
+
+const previousSong = () => {
+  playerStore.previous()
+}
+
+const nextSong = () => {
+  playerStore.next()
+}
+
+const toggleMute = () => {
+  if (volume.value > 0) {
+    previousVolume.value = volume.value
+    volume.value = 0
+  } else {
+    volume.value = previousVolume.value
+  }
+  setVolume(volume.value)
+}
+
+const setVolume = (value) => {
+  if (audio.value) {
+    audio.value.volume = value / 100
+  }
+}
+
+const handleSongEnd = () => {
+  playerStore.next()
+}
+
+const onCanPlay = () => {
+  if (isPlaying.value) {
+    audio.value?.play().catch(error => {
+      console.error('播放失败:', error)
+    })
+  }
+}
+
+// 监听歌曲变化
+watch(() => currentSong.value, (newSong) => {
+  if (newSong && isPlaying.value && audio.value) {
+    audio.value.play().catch(error => {
+      console.error('播放失败:', error)
+    })
+  }
+}, { immediate: true })
+
+// 组件挂载
+onMounted(() => {
+  audio.value = document.querySelector('audio')
+  if (audio.value) {
+    audio.value.volume = volume.value / 100
+  }
+})
 </script>
 
 <style scoped>

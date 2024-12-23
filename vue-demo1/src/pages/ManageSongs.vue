@@ -122,162 +122,162 @@
           @size-change="handlePageSizeChange"
           @current-change="handlePageChange"
         />
+
+        <div class="player-controls">
+          <el-button circle @click="previousSong">
+            <el-icon><ArrowLeft /></el-icon>
+          </el-button>
+          <el-button circle @click="togglePlay">
+            <el-icon>
+              <VideoPlay v-if="!isPlaying" />
+              <VideoPause v-else />
+            </el-icon>
+          </el-button>
+          <el-button circle @click="nextSong">
+            <el-icon><ArrowRight /></el-icon>
+          </el-button>
+        </div>
       </div>
     </template>
   </CommonLayout>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
 import CommonLayout from '@/layouts/CommonLayout.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Search,
-  VideoPlay,
-} from '@element-plus/icons-vue'
-import { mapActions } from 'vuex'
+import { Search, VideoPlay, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { usePlayerStore } from '@/stores/player'
 
-export default {
-  name: 'ManageSongs',
-  components: {
-    CommonLayout,
-    Search,
-    VideoPlay,
-  },
-  data() {
-    return {
-      currentName: '音乐管理',
-      songs: [],
-      page: 1,
-      pageSize: 10,
-      totalSongs: 0,
-      isLoading: false,
-      searchQuery: '',
-      status: '',
-      hoveredSong: null,
-    }
-  },
-  mounted() {
-    this.loadData()
-  },
-  methods: {
-    ...mapActions(['playSong']),
+const playerStore = usePlayerStore()
 
-    handlePlaySong(song) {
-      this.playSong(song)
-    },
+const currentName = ref('音乐管理')
+const songs = ref([])
+const page = ref(1)
+const pageSize = ref(10)
+const totalSongs = ref(0)
+const isLoading = ref(false)
+const searchQuery = ref('')
+const status = ref('')
+const hoveredSong = ref(null)
 
-    formatDuration(seconds) {
-      const minutes = Math.floor(seconds / 60)
-      const remainingSeconds = seconds % 60
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-    },
+const handlePlaySong = (song) => {
+  playerStore.setPlaylist([song])
+  playerStore.play(0)
+}
 
-    getStatusType(status) {
-      const types = {
-        pending: 'warning',
-        approved: 'success',
-        rejected: 'danger'
-      }
-      return types[status] || 'info'
-    },
+const formatDuration = (seconds) => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
 
-    getStatusText(status) {
-      const texts = {
-        pending: '待审核',
-        approved: '已通过',
-        rejected: '已拒绝'
-      }
-      return texts[status] || '未知'
-    },
+const getStatusType = (status) => {
+  const types = {
+    pending: 'warning',
+    approved: 'success',
+    rejected: 'danger'
+  }
+  return types[status] || 'info'
+}
 
-    async handleSearch() {
-      this.page = 1
-      await this.loadData()
-    },
+const getStatusText = (status) => {
+  const texts = {
+    pending: '待审核',
+    approved: '已通过',
+    rejected: '已拒绝'
+  }
+  return texts[status] || '未知'
+}
 
-    async handlePageChange(newPage) {
-      this.page = newPage
-      await this.loadData()
-    },
+const handleSearch = async () => {
+  page.value = 1
+  await loadData()
+}
 
-    async handlePageSizeChange(newSize) {
-      this.pageSize = newSize
-      this.page = 1
-      await this.loadData()
-    },
+const handlePageChange = async (newPage) => {
+  page.value = newPage
+  await loadData()
+}
 
-    async loadData() {
-      this.isLoading = true
-      try {
-        // TODO: 实现获取音乐列表的接口
-        // const response = await getSongs(this.page, this.pageSize, this.status)
-        this.isLoading = false
-      } catch (error) {
-        console.error('加载数据失败:', error)
-        ElMessage.error('加载数据失败，请稍后重试')
-        this.isLoading = false
-      }
-    },
+const handlePageSizeChange = async (newSize) => {
+  pageSize.value = newSize
+  page.value = 1
+  await loadData()
+}
 
-    async approveSong(song) {
-      try {
-        await ElMessageBox.confirm(
-          '确定通过这首音乐的审核吗？',
-          '审核音乐',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'success'
-          }
-        )
-        // TODO: 实现通过审核的接口
-        ElMessage.success(`已通过音乐: ${song.name}`)
-        await this.loadData()
-      } catch {
-        // 用户取消操作
-      }
-    },
-
-    async rejectSong(song) {
-      try {
-        await ElMessageBox.confirm(
-          '确定拒绝这首音乐的审核吗？',
-          '审核音乐',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-        // TODO: 实现拒绝审核的接口
-        ElMessage.success(`已拒绝音乐: ${song.name}`)
-        await this.loadData()
-      } catch {
-        // 用户取消操作
-      }
-    },
-
-    async deleteSong(song) {
-      try {
-        await ElMessageBox.confirm(
-          '确定要删除这首音乐吗？',
-          '删除音乐',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-        // TODO: 实现删除音乐的接口
-        ElMessage.success(`音乐已删除: ${song.name}`)
-        await this.loadData()
-      } catch {
-        // 用户取消删除
-      }
-    }
+const loadData = async () => {
+  isLoading.value = true
+  try {
+    // TODO: 实现获取音乐列表的接口
+    isLoading.value = false
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    ElMessage.error('加载数据失败，请稍后重试')
+    isLoading.value = false
   }
 }
+
+const approveSong = async (song) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定通过这首音乐的审核吗？',
+      '审核音乐',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'success'
+      }
+    )
+    // TODO: 实现通过审核的接口
+    ElMessage.success(`已通过音乐: ${song.name}`)
+    await loadData()
+  } catch {
+    // 用户取消操作
+  }
+}
+
+const rejectSong = async (song) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定拒绝这首音乐的审核吗？',
+      '审核音乐',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    // TODO: 实现拒绝审核的接口
+    ElMessage.success(`已拒绝音乐: ${song.name}`)
+    await loadData()
+  } catch {
+    // 用户取消操作
+  }
+}
+
+const deleteSong = async (song) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这首音乐吗？',
+      '删除音乐',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    // TODO: 实现删除音乐的接口
+    ElMessage.success(`音乐已删除: ${song.name}`)
+    await loadData()
+  } catch {
+    // 用户取消删除
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>

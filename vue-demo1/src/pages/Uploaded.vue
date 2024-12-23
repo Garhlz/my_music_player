@@ -149,149 +149,44 @@
   </CommonLayout>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
 import CommonLayout from '@/layouts/CommonLayout.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Search,
-  VideoPlay,
-  Upload,
-  Edit,
-  Delete,
-  UploadFilled
-} from '@element-plus/icons-vue'
-import { mapActions } from 'vuex'
+import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
+import { usePlayerStore } from '@/stores/player'
 
-export default {
-  name: 'Uploaded',
-  components: {
-    CommonLayout,
-    Search,
-    VideoPlay,
-    Upload,
-    Edit,
-    Delete,
-    UploadFilled
-  },
-  data() {
-    return {
-      currentName: '上传的音乐',
-      songs: [],
-      page: 1,
-      pageSize: 10,
-      totalSongs: 0,
-      isLoading: false,
-      searchQuery: '',
-      hoveredSong: null,
-      uploadDialogVisible: false,
-      uploadForm: {
-        name: '',
-        artist: '',
-        album: '',
-        file: null
-      }
-    }
-  },
-  mounted() {
-    this.loadData()
-  },
-  methods: {
-    ...mapActions(['playSong']),
+const playerStore = usePlayerStore()
 
-    handlePlaySong(song) {
-      this.playSong(song)
-    },
+const currentName = ref('我的上传')
+const songs = ref([])
+const isLoading = ref(false)
+const searchQuery = ref('')
 
-    formatDuration(seconds) {
-      const minutes = Math.floor(seconds / 60)
-      const remainingSeconds = seconds % 60
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-    },
+const handlePlaySong = (song) => {
+  playerStore.setPlaylist([song])
+  playerStore.play(0)
+}
 
-    async handleSearch() {
-      this.page = 1
-      await this.loadData()
-    },
-
-    async handlePageChange(newPage) {
-      this.page = newPage
-      await this.loadData()
-    },
-
-    async handlePageSizeChange(newSize) {
-      this.pageSize = newSize
-      this.page = 1
-      await this.loadData()
-    },
-
-    async loadData() {
-      this.isLoading = true
-      try {
-        // TODO: 实现获取上传音乐列表的接口
-        // const response = await getUploadedSongs(this.page, this.pageSize)
-        this.isLoading = false
-      } catch (error) {
-        console.error('加载数据失败:', error)
-        ElMessage.error('加载数据失败，请稍后重试')
-        this.isLoading = false
-      }
-    },
-
-    uploadMusic() {
-      this.uploadDialogVisible = true
-    },
-
-    handleFileChange(file) {
-      this.uploadForm.file = file.raw
-    },
-
-    async submitUpload() {
-      if (!this.uploadForm.file) {
-        ElMessage.warning('请选择要上传的音乐文件')
-        return
-      }
-      if (!this.uploadForm.name) {
-        ElMessage.warning('请输入歌曲名称')
-        return
-      }
-      // TODO: 实现上传音乐的接口
-      ElMessage.success('音乐上传成功，等待审核')
-      this.uploadDialogVisible = false
-      this.uploadForm = {
-        name: '',
-        artist: '',
-        album: '',
-        file: null
-      }
-      await this.loadData()
-    },
-
-    async editSong(song) {
-      // TODO: 实现编辑音乐的功能
-      ElMessage.success(`编辑音乐: ${song.name}`)
-    },
-
-    async deleteSong(song) {
-      try {
-        await ElMessageBox.confirm(
-          '确定要删除这首音乐吗？',
-          '删除音乐',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-        // TODO: 实现删除音乐的接口
-        ElMessage.success(`音乐已删除: ${song.name}`)
-        await this.loadData()
-      } catch {
-        // 用户取消删除
-      }
-    }
+const loadData = async () => {
+  isLoading.value = true
+  try {
+    // TODO: 实现获取上传音乐列表的接口
+    isLoading.value = false
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    ElMessage.error('加载数据失败，请稍后重试')
+    isLoading.value = false
   }
 }
+
+const handleSearch = () => {
+  loadData()
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>

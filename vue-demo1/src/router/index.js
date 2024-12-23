@@ -83,6 +83,11 @@ const routes = [
     name: 'Uploaded',
     component: Uploaded
   },
+  {
+    path: '/playlist/:id',
+    name: 'PlaylistDetail',
+    component: () => import('@/pages/MyNewPlaylist.vue')
+  },
 ];
 
 const router = createRouter({
