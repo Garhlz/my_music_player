@@ -2,7 +2,6 @@
 import {api} from '@/utils/api';
 
 
-
 //---用户信息相关接口---
 export const  login = async (username, password) => {
     const resp = await api.post('/user/login',{
@@ -24,11 +23,6 @@ export const getSongs = async (params) => {
   return resp;
 };
 
-export const getLikedSongs = async () => {
-  const resp = await api.get('/liked-songs');
-  return resp;
-};
-
 //---艺术家相关接口---
 export const getArtists = async (ids) => {
   const resp = await api.get('/artists', { params: { ids } });
@@ -39,4 +33,27 @@ export const getArtists = async (ids) => {
 export const getAlbums = async (ids) => {
   const resp = await api.get('/albums', { params: { ids } });
   return resp;
+};
+
+//---喜欢的歌曲相关接口---
+export const getLikedSongsById = async (id) => {
+  const response = await api.get(`/liked-songs/${id}`);
+  return response;
+};
+
+//获取喜欢的歌曲
+export const getLikedSongs = async (params) => {
+  const response = await api.get('/liked-songs', { params });
+  return response;
+};
+
+// 添加喜欢的歌曲
+export const addLikedSong = async (songId) => {
+    await api.post(`/like/${songId}`);
+};
+  
+  // 取消喜欢的歌曲
+export const removeLikedSong = async (songId) => {
+  const response = await api.delete(`/like/${songId}`);
+  return response;
 };

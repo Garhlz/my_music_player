@@ -6,11 +6,12 @@ const bcrypt = require('bcryptjs'); // 引入 bcrypt 库
 const jwt = require('jsonwebtoken'); // 引入 jwt 库
 const dotenv = require('dotenv');
 
+
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // JWT 密钥
 const {verifyToken} = require('./middleware/authMiddleware');
-// 用户登录接口
 
+// 用户登录接口
 router.post('/user/login', async (req, res) => {
     const { username, password } = req.body;
     console.log(username,password);
@@ -25,7 +26,7 @@ router.post('/user/login', async (req, res) => {
             const isMatch = await bcrypt.compare(password, rows[0].password);
             if (isMatch) {
                 const token = jwt.sign({ id: rows[0].id, username }, JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: '登录成功', token });
+                return res.status(200).json({ message: '登录成功', token, userId:rows[0].id });
             } else {
                 return res.status(401).json({ error: '密码错误' });
             }
@@ -152,26 +153,96 @@ router.get('/songs', verifyToken, async (req, res) => {
   }
 });
 
-// 获取用户喜欢的歌曲列表
+//获取用户喜欢的歌曲
+//注意两个接口的区别，一个是获取单个用户的所有喜欢的歌曲，一个是用户的喜欢的歌曲，分页查询  
+//注意一定要打上反双引号，否则保留字报错
+router.get('/liked-songs/:id', verifyToken, async (req, res) => {
+  const userId = req.params.id;
+  const songs = await db.execute('SELECT * FROM song WHERE id IN (SELECT song_id FROM `like` WHERE user_id = ?)', [userId]);
+  res.json({ message: true, data: songs });
+});
+
+// 获取用户喜欢的歌曲，分页查询
 router.get('/liked-songs', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const query = `
-      SELECT song_id 
-      FROM \`like\`
-      WHERE user_id = ?
+    // 确保所有参数都被正确转换
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = String(req.query.search || '');
+    const sortBy = String(req.query.sortBy || 'latest');
+    const offset = (page - 1) * pageSize;
+
+    // 构建基础查询
+    let query = `
+      SELECT 
+        s.*,
+        a.name as artist_name,
+        al.name as album_name,
+        al.cover as album_cover
+      FROM \`like\` l
+      JOIN song s ON l.song_id = s.id
+      LEFT JOIN artist a ON s.author_id = a.id
+      LEFT JOIN album al ON s.album_id = al.id
+      WHERE l.user_id = ${userId}
     `;
+
+    // 构建计数查询
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM \`like\` l
+      JOIN song s ON l.song_id = s.id
+      WHERE l.user_id = ${userId}
+    `;
+
+    // 添加搜索条件
+    if (search) {
+      query += ` AND (s.name LIKE '%${search}%' OR a.name LIKE '%${search}%')`;
+      countQuery += ` AND (s.name LIKE '%${search}%' OR a.name LIKE '%${search}%')`;
+    }
+
+    // 添加排序
+    const sortMapping = {
+      'latest': 'l.created_at DESC',
+      'oldest': 'l.created_at ASC',
+      'name': 's.name ASC',
+      'duration': 's.duration ASC'
+    };
     
-    const [rows] = await db.execute(query, [userId]);
-    const likedSongs = rows.map(row => row.song_id);
-    
+    query += ` ORDER BY ${sortMapping[sortBy] || 'l.created_at DESC'}`;
+
+    // 添加分页
+    query += ` LIMIT ${pageSize} OFFSET ${offset}`;
+
+    // 执行查询
+    const [songs] = await db.execute(query);
+    const [totalResult] = await db.execute(countQuery);
+
+    // 格式化返回数据
+    const formattedSongs = songs.map(song => ({
+      id: song.id,
+      name: song.name,
+      artist: song.artist_name || '未知歌手',
+      album: song.album_name || '未知专辑',
+      cover: song.album_cover || '/assets/default-cover.jpg',
+      duration: song.duration || 0,
+      url: song.url
+    }));
+
     res.json({
       message: true,
-      data: likedSongs
+      data: {
+        total: totalResult[0].total,
+        list: formattedSongs
+      }
     });
+
   } catch (error) {
-    console.error('获取喜欢的歌曲列表失败:', error);
-    res.status(500).json({ message: false, error: '获取喜欢的歌曲列表失败' });
+    console.error('获取喜欢的歌曲失败:', error);
+    res.status(500).json({
+      message: false,
+      error: '获取喜欢的歌曲失败'
+    });
   }
 });
 
@@ -251,59 +322,75 @@ router.get('/albums', verifyToken, async (req, res) => {
   }
 });
 
-// 添加喜欢歌曲
+// 添加喜欢的歌曲
 router.post('/like/:songId', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const songId = req.params.songId;
 
     // 检查歌曲是否存在
-    const [songExists] = await db.execute('SELECT id FROM song WHERE id = ?', [songId]);
+    const [songExists] = await db.execute(
+      'SELECT id FROM song WHERE id = ?',
+      [songId]
+    );
+
     if (songExists.length === 0) {
-      return res.status(404).json({ message: false, error: '歌曲不存在' });
+      return res.status(404).json({
+        message: false,
+        error: '歌曲不存在'
+      });
     }
 
-    // 添加喜欢记录
+    // 添加到喜欢列表
     await db.execute(
       'INSERT INTO `like` (user_id, song_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE created_at = CURRENT_TIMESTAMP',
       [userId, songId]
     );
 
-    // 更新歌曲点赞数
-    await db.execute(
-      'UPDATE song SET like_count = (SELECT COUNT(*) FROM `like` WHERE song_id = ?) WHERE id = ?',
-      [songId, songId]
-    );
+    res.json({
+      message: true,
+      data: '添加成功'
+    });
 
-    res.json({ message: true });
   } catch (error) {
-    console.error('添加喜欢失败:', error);
-    res.status(500).json({ message: false, error: '添加喜欢失败' });
+    console.error('添加喜欢的歌曲失败:', error);
+    res.status(500).json({
+      message: false,
+      error: '添加喜欢的歌曲失败'
+    });
   }
 });
 
-// 取消喜欢歌曲
+// 取消喜欢的歌曲
 router.delete('/like/:songId', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const songId = req.params.songId;
 
     // 删除喜欢记录
-    await db.execute(
+    const [result] = await db.execute(
       'DELETE FROM `like` WHERE user_id = ? AND song_id = ?',
       [userId, songId]
     );
 
-    // 更新歌曲点赞数
-    await db.execute(
-      'UPDATE song SET like_count = (SELECT COUNT(*) FROM `like` WHERE song_id = ?) WHERE id = ?',
-      [songId, songId]
-    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: false,
+        error: '该歌曲不在喜欢列表中'
+      });
+    }
 
-    res.json({ message: true });
+    res.json({
+      message: true,
+      data: '取消成功'
+    });
+
   } catch (error) {
-    console.error('取消喜欢失败:', error);
-    res.status(500).json({ message: false, error: '取消喜欢失败' });
+    console.error('取消喜欢的歌曲失败:', error);
+    res.status(500).json({
+      message: false,
+      error: '取消喜欢的歌曲失败'
+    });
   }
 });
 
@@ -554,4 +641,15 @@ router.delete('/songs/:songId', verifyToken, async (req, res) => {
         });
     }
 });
+
+// 添加喜欢的歌曲
+const addLikedSong = async (songId) => {
+  await axios.post(`/like/${songId}`);
+};
+
+// 取消喜欢的歌曲
+const removeLikedSong = async (songId) => {
+  await axios.delete(`/like/${songId}`);
+};
+
 module.exports = router;

@@ -86,6 +86,9 @@
                 <el-tooltip content="添加到播放列表" placement="top">
                   <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
                 </el-tooltip>
+                <el-tooltip content="收藏专辑" placement="top">
+                  <el-icon @click="addAlbum(song)"><FolderAdd /></el-icon>
+                </el-tooltip>
                 <el-tooltip content="评论" placement="top">
                   <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
                 </el-tooltip>
@@ -175,8 +178,7 @@ import { ElMessage } from 'element-plus'
 import { getSongs } from '@/api/axiosFile'
 import { getAlbums } from '@/api/axiosFile'
 import { getArtists } from '@/api/axiosFile'
-import { getLikedSongs} from '@/api/axiosFile'
-// import { getLikedSongs, addLikedSong, removeLikedSong } from '@/api/axiosFile'
+import { getLikedSongsById, addLikedSong, removeLikedSong } from '@/api/axiosFile'
 //需要添加
 import CommonLayout from '@/layouts/CommonLayout.vue'
 import {
@@ -184,6 +186,7 @@ import {
   VideoPlay,
   Star,
   Plus,
+  FolderAdd,
   ChatDotRound,
   Download
 } from '@element-plus/icons-vue'
@@ -228,7 +231,9 @@ const loadData = async () => {
     const songsList = songsData.list || []
 
     // 2. 获取喜欢列表
-    const likedResponse = await getLikedSongs()
+    const userId = localStorage.getItem('userId');
+    console.log(userId);
+    const likedResponse = await getLikedSongsById(userId);
     if (likedResponse.data.message) {
       likedSongs.value = likedResponse.data.data || []
     }
@@ -289,6 +294,12 @@ const likeSong = async (song) => {
   }
 }
 
+const addAlbum = (song) => {
+  console.log(song);
+  store.dispatch('addToPlaylist', song)
+  ElMessage.success(`已收藏专辑: ${song.album.name}`)
+}
+
 const formatDuration = (seconds) => {
   if (!seconds) return '00:00'
   const minutes = Math.floor(seconds / 60)
@@ -329,5 +340,203 @@ defineExpose({
 </script>
 
 <style scoped>
-@import '../styles/common.css';
+.playlist-container {
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+.filter-section {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.search-input {
+  width: 300px;
+}
+
+.song-list {
+  margin-top: 20px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  overflow: hidden; /* 确保圆角生效 */
+}
+
+/* 表头样式 */
+.song-header {
+  display: grid;
+  grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
+  padding: 12px 20px;
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #ebeef5;
+  font-weight: 600;
+  color: #606266;
+  align-items: center;
+}
+
+/* 歌曲项样式 */
+.song-item {
+  display: grid;
+  grid-template-columns: 60px 3fr 100px 1.5fr 1.5fr 120px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ebeef5;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.song-item:hover {
+  background-color: #f5f7fa;
+  transform: translateX(4px);
+}
+
+/* 序号列 */
+.col-index {
+  text-align: center;
+  color: #909399;
+  font-size: 14px;
+}
+
+/* 标题列 */
+.col-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0; /* 防止内容溢出 */
+}
+
+.song-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0; /* 防止图片被压缩 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.song-cover:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.song-name {
+  font-weight: 500;
+  color: #303133;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 时长列 */
+.col-duration {
+  text-align: center;
+  color: #606266;
+  font-size: 14px;
+}
+
+/* 歌手和专辑列 */
+.col-artist, .col-album {
+  color: #606266;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 10px;
+}
+
+.col-artist:hover, .col-album:hover {
+  color: var(--el-color-primary);
+  text-decoration: underline;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+
+.el-icon {
+  font-size: 18px;
+  color: #909399;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 6px;
+  border-radius: 50%;
+}
+
+.el-icon:hover {
+  transform: scale(1.2);
+  color: var(--el-color-primary);
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+/* 喜欢图标特殊样式 */
+.liked {
+  color: #ffcc00 !important;
+  transform: scale(1.1);
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+/* 播放图标 */
+.play-icon {
+  color: var(--el-color-primary);
+  font-size: 20px;
+}
+
+.play-icon:hover {
+  animation: pulse 1s infinite;
+}
+
+/* 分页器 */
+.pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+/* 动画效果 */
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1.1); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 1200px) {
+  .song-header, .song-item {
+    grid-template-columns: 60px 2.5fr 100px 1.2fr 1.2fr 120px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .song-header, .song-item {
+    grid-template-columns: 50px 3fr 1.5fr 100px;
+  }
+  
+  .col-album, .col-duration {
+    display: none;
+  }
+  
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+}
 </style>

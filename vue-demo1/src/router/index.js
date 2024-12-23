@@ -9,7 +9,9 @@ const Profile = () => import('@/pages/Profile.vue');
 const Player = () => import('@/pages/Player.vue');
 const ManageUsers = () => import('@/pages/ManageUsers.vue');
 const MyPlaylist = () => import('@/pages/MyPlaylist.vue');
-
+const MyLove = () => import('@/pages/MyLove.vue');
+const MyAlbum = () => import('@/pages/MyAlbum.vue');
+const Uploaded = () => import('@/pages/Uploaded.vue');
 const routes = [
   {
     path: '/',
@@ -65,6 +67,21 @@ const routes = [
     path: '/my-playlist',
     name: 'MyPlaylist',
     component: MyPlaylist
+  },
+  {
+    path: '/my-love',
+    name: 'MyLove',
+    component: MyLove
+  },
+  {
+    path: '/my-album',
+    name: 'MyAlbum',
+    component: MyAlbum
+  },
+  {
+    path: '/uploaded',
+    name: 'Uploaded',
+    component: Uploaded
   },
 ];
 

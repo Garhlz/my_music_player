@@ -131,7 +131,9 @@ const handleLogin = async () => {
     const result = await login(loginForm.value.username, loginForm.value.password)
     
     if (result.data.message) {
-      localStorage.setItem('token', result.data.token)
+      localStorage.setItem('token', result.data.token);
+      localStorage.setItem('userId', result.data.userId);
+      
       
       if (rememberMe.value) {
         localStorage.setItem('remembered_username', loginForm.value.username)

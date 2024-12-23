@@ -50,7 +50,9 @@
 
             <div class="comment-content">
               <div class="song-info">
-                <el-icon><Music /></el-icon>
+                <el-icon>
+                  <Notebook />
+                </el-icon>
                 <span>评论歌曲：{{ comment.song.name }} - {{ comment.song.artist }}</span>
               </div>
               <div class="content-text">{{ comment.content }}</div>
@@ -112,7 +114,7 @@ import CommonLayout from '@/layouts/CommonLayout.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
-  Music,
+  Notebook,
   Star,
   ChatDotRound
 } from '@element-plus/icons-vue'
@@ -122,7 +124,7 @@ export default {
   components: {
     CommonLayout,
     Search,
-    Music,
+    Notebook,
     Star,
     ChatDotRound
   },

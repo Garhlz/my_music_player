@@ -36,7 +36,7 @@
       <span>上传的音乐</span>
     </el-menu-item>
 
-    <el-menu-divider />
+    <!-- <el-menu-divider /> -->
 
     <el-menu-item index="/comments" @click="navigateTo('/comments')">
       <el-icon><ChatDotRound /></el-icon>
