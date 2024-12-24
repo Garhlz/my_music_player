@@ -204,44 +204,6 @@ router.get('/artists', verifyToken, async (req, res) => {
     res.status(500).json({ message: false, error: '获取歌手信息失败' });
   }
 });
-
-// 获取专辑信息
-router.get('/albums', verifyToken, async (req, res) => {
-  try {
-    const { ids } = req.query;
-    if (!ids) {
-      return res.status(400).json({ message: false, error: '缺少专辑ID' });
-    }
-
-    // 处理数组格式的参数
-    let albumIds = Array.isArray(ids) ? ids : [ids];
-    
-    // 确保所有ID都是数字
-    albumIds = albumIds.map(id => parseInt(id)).filter(id => !isNaN(id));
-    
-    if (albumIds.length === 0) {
-      return res.status(400).json({ message: false, error: '无效的专辑ID' });
-    }
-
-    // 构建查询语句
-    const placeholders = albumIds.map(() => '?').join(',');
-    const query = `
-      SELECT id, name, cover, release_date, description
-      FROM album
-      WHERE id IN (${placeholders})
-    `;
-    
-    const [albums] = await db.execute(query, albumIds);
-    
-    res.json({
-      message: true,
-      data: albums
-    });
-  } catch (error) {
-    console.error('获取专辑信息失败:', error);
-    res.status(500).json({ message: false, error: '获取专辑信息失败' });
-  }
-});
 //----------------------------------歌曲----------------------------------
 
 
@@ -272,8 +234,10 @@ router.get('/liked-songs', verifyToken, async (req, res) => {
       SELECT 
         s.*,
         a.name as artist_name,
+        a.id as artist_id,
         al.name as album_name,
-        al.cover as album_cover
+        al.cover as album_cover,
+        al.id as album_id
       FROM \`like\` l
       JOIN song s ON l.song_id = s.id
       LEFT JOIN artist a ON s.author_id = a.id
@@ -320,7 +284,10 @@ router.get('/liked-songs', verifyToken, async (req, res) => {
       album: song.album_name || '未知专辑',
       cover: song.album_cover || '/assets/default-cover.jpg',
       duration: song.duration || 0,
+      artist_id: song.artist_id,
+      album_id: song.album_id,
       url: song.url
+      //注意这里也需要修改，返回了格式化数据，前后端方便对接
     }));
 
     res.json({
@@ -711,9 +678,12 @@ router.get('/playlist/:id', async (req, res) => {
     
     // 获取歌单信息
     const [playlist] = await db.query(
-      `SELECT * FROM playlist_info WHERE id = ?`,
+      `SELECT pi.*, u.username as creator_name 
+      FROM playlist_info pi 
+      LEFT JOIN user u ON pi.user_id = u.id WHERE pi.id = ?`,
       [playlistId]
     );
+    //这里一路溯源过来调整了后端查找信息
 
     if (playlist.length === 0) {
       return res.json({
@@ -832,5 +802,188 @@ router.delete('/playlist/:playlistId/songs/:songId', async (req, res) => {
   }
 });
 //----------------------------------歌单----------------------------------
+
+
+
+//----------------------------------专辑----------------------------------
+
+// 获取专辑列表
+router.get('/albums', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || 'latest';
+    const offset = (page - 1) * pageSize;
+
+    // 定义允许的排序字段
+    const allowedSortFields = {
+      'id': 'a.id',
+      'name': 'a.name',
+      'latest': 'a.created_at',
+      'oldest': 'a.created_at ASC',
+      'release_date': 'a.release_date'
+    };
+
+    // 验证排序字段
+    const sortField = allowedSortFields[sortBy] || 'a.created_at';
+    const sortOrder = sortBy === 'oldest' ? '' : 'DESC';
+
+    // 构建查询
+    let query = `
+      SELECT DISTINCT
+        a.*,
+        GROUP_CONCAT(DISTINCT ar.name) as artist_names,
+        COUNT(DISTINCT s.id) as song_count
+      FROM album a
+      LEFT JOIN artist_album aa ON a.id = aa.album_id
+      LEFT JOIN artist ar ON aa.artist_id = ar.id
+      LEFT JOIN song s ON a.id = s.album_id
+    `;
+
+    let countQuery = `
+      SELECT COUNT(DISTINCT a.id) as total
+      FROM album a
+      LEFT JOIN artist_album aa ON a.id = aa.album_id
+      LEFT JOIN artist ar ON aa.artist_id = ar.id
+    `;
+
+    let queryParams = [];
+    let countParams = [];
+
+    // 添加搜索条件
+    if (search) {
+      query += ` WHERE a.name LIKE ? OR ar.name LIKE ?`;
+      countQuery += ` WHERE a.name LIKE ? OR ar.name LIKE ?`;
+      const searchPattern = `%${search}%`;
+      queryParams.push(searchPattern, searchPattern);
+      countParams.push(searchPattern, searchPattern);
+    }
+
+    query += ` GROUP BY a.id ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`;
+    queryParams.push(pageSize, offset);
+
+    // 执行查询
+    const [albums] = await db.query(query, queryParams);
+    const [totalResult] = await db.query(countQuery, countParams);
+
+    res.json({
+      message: true,
+      data: {
+        total: totalResult[0].total,
+        albums: albums
+      }
+    });
+  } catch (error) {
+    console.error('获取专辑列表失败:', error);
+    res.json({
+      message: false,
+      error: '获取专辑列表失败'
+    });
+  }
+});
+
+// 获取专辑详情及其歌曲
+router.get('/album/:id', async (req, res) => {
+  try {
+    const albumId = req.params.id.toString();
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || 'latest';
+    const offset = (page - 1) * pageSize;
+
+    // 定义允许的排序字段
+    const allowedSortFields = {
+      'id': 's.id',
+      'name': 's.name',
+      'latest': 's.create_time',
+      'oldest': 's.create_time ASC',
+      'duration': 's.duration',
+      'play_count': 's.play_count'
+    };
+
+    // 验证排序字段
+    const sortField = allowedSortFields[sortBy] || 's.create_time';
+    const sortOrder = sortBy === 'oldest' ? '' : 'DESC';
+
+    // 获取专辑信息
+    const [album] = await db.query(
+      `SELECT a.*, 
+        GROUP_CONCAT(DISTINCT ar.name) as artist_names,
+        GROUP_CONCAT(DISTINCT ar.id) as artist_ids
+      FROM album a
+      LEFT JOIN artist_album aa ON a.id = aa.album_id
+      LEFT JOIN artist ar ON aa.artist_id = ar.id
+      WHERE a.id = ?
+      GROUP BY a.id`,
+      [albumId]
+    );
+
+    if (album.length === 0) {
+      return res.json({
+        message: false,
+        error: '专辑不存在'
+      });
+    }
+
+    // 构建歌曲查询
+    let query = `
+      SELECT 
+        s.*,
+        a.name as artist_name,
+        al.cover as album_cover,
+        al.name as album_name
+      FROM song s
+      LEFT JOIN artist a ON s.author_id = a.id
+      LEFT JOIN album al ON s.album_id = al.id
+      WHERE s.album_id = ?
+    `;
+
+    // 构建计数查询
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM song s
+      LEFT JOIN artist a ON s.author_id = a.id
+      WHERE s.album_id = ?
+    `;
+
+    let queryParams = [albumId];
+    let countParams = [albumId];
+
+    // 添加搜索条件
+    if (search) {
+      query += ` AND (s.name LIKE ? OR a.name LIKE ?)`;
+      countQuery += ` AND (s.name LIKE ? OR a.name LIKE ?)`;
+      const searchPattern = `%${search}%`;
+      queryParams.push(searchPattern, searchPattern);
+      countParams.push(searchPattern, searchPattern);
+    }
+
+    // 添加排序和分页
+    query += ` ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`;
+    queryParams.push(pageSize, offset);
+
+    // 执行查询
+    const [songs] = await db.query(query, queryParams);
+    const [totalResult] = await db.query(countQuery, countParams);
+
+    res.json({
+      message: true,
+      data: {
+        album: album[0],
+        total: totalResult[0].total,
+        songs: songs
+      }
+    });
+  } catch (error) {
+    console.error('获取专辑详情失败:', error);
+    res.json({
+      message: false,
+      error: '获取专辑详情失败'
+    });
+  }
+});
+//----------------------------------专辑----------------------------------
 
 module.exports = router;

@@ -128,68 +128,66 @@
           </el-button>
         </div>
 
-        <!-- 添加歌单弹窗 -->
-        <el-dialog
+          <el-dialog
           v-model="playlistDialogVisible"
           title="添加到歌单"
-          width="30%"
-          :before-close="handleDialogClose"
+          width="600px"
+          @close="selectedPlaylist = null"
         >
           <div class="playlist-dialog-content">
-            <div class="create-playlist-section">
-              <el-button type="primary" @click="showCreatePlaylist">
-                <el-icon><Plus /></el-icon>创建新歌单
-              </el-button>
+            <!-- 现有歌单列表，设置为可见之后弹出 -->
+            <div class="existing-playlists">
+              <el-scrollbar height="400px">
+                <div class="playlist-list">
+                  <div 
+                    v-for="playlist in userPlaylists" 
+                    :key="playlist.id" 
+                    class="playlist-item"
+                    :class="{ 'playlist-item-selected': selectedPlaylist === playlist.id }"
+                    @click="selectedPlaylist = playlist.id"
+                  >
+                    <div class="playlist-info-row">
+                      <el-image 
+                        :src="playlist.cover || '/assets/default-cover.jpg'" 
+                        class="playlist-cover-img"
+                      />
+                      <div class="playlist-details">
+                        <div class="playlist-name">{{ playlist.name }}</div>
+                        <div class="playlist-description">{{ playlist.description || '暂无描述' }}</div>
+                        <div class="playlist-count">{{ playlist.song_count || 0 }}首歌曲</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </el-scrollbar>
             </div>
-            
-            <div v-if="showCreateForm" class="create-playlist-form">
-              <el-input
-                v-model="newPlaylistName"
-                placeholder="歌单名称"
-                maxlength="50"
-                show-word-limit
-              />
-              <el-input
-                v-model="newPlaylistDescription"
-                type="textarea"
-                placeholder="歌单描述"
-                maxlength="200"
-                show-word-limit
-                rows="3"
-                class="mt-3"
-              />
-              <div class="dialog-footer">
-                <el-button @click="cancelCreate">取消</el-button>
-                <el-button type="primary" @click="handleCreatePlaylist">
+
+            <!-- 创建新歌单 -->
+            <div class="create-playlist">
+              <el-divider>创建新歌单</el-divider>
+              <div class="create-playlist-form">
+                <el-input
+                  v-model="newPlaylistName"
+                  placeholder="请输入歌单名称"
+                  clearable
+                />
+                <el-input
+                  v-model="newPlaylistDescription"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="添加歌单描述（选填）"
+                  class="mt-3"
+                />
+                <el-button type="primary" @click="createNewPlaylist" class="mt-3">
                   创建
                 </el-button>
               </div>
             </div>
-            
-            <div v-else class="playlists-list">
-              <el-empty v-if="!userPlaylists.length" description="暂无歌单" />
-              <el-radio-group v-else v-model="selectedPlaylist">
-                <el-radio
-                  v-for="playlist in userPlaylists"
-                  :key="playlist.id"
-                  :label="playlist.id"
-                  class="playlist-radio"
-                >
-                  {{ playlist.name }}
-                  <span class="song-count">({{ playlist.song_count || 0 }}首)</span>
-                </el-radio>
-              </el-radio-group>
-            </div>
           </div>
-          
           <template #footer>
             <span class="dialog-footer">
-              <el-button @click="handleDialogClose">取消</el-button>
-              <el-button 
-                type="primary" 
-                @click="confirmAddToPlaylist"
-                :disabled="!selectedPlaylist && !showCreateForm"
-              >
+              <el-button @click="playlistDialogVisible = false">取消</el-button>
+              <el-button type="primary" @click="confirmAddToPlaylist">
                 确定
               </el-button>
             </span>
@@ -218,8 +216,8 @@ import {
 import { 
   getLikedSongs, 
   removeLikedSong,
-  getMyPlaylists as fetchUserPlaylists,
-  createPlaylist as createNewPlaylist,
+  getMyPlaylists, // 直接都采用相同的接口函数即可
+  createPlaylist,
   addSongToPlaylist 
 } from '@/api/axiosFile'
 import { usePlayerStore } from '@/stores/player'
@@ -308,93 +306,32 @@ const unlikeSong = async (song) => {
     ElMessage.error('操作失败，请稍后重试')
   }
 }
-
-// 添加到播放列表
 const addToPlaylist = async (song) => {
   selectedSong.value = song
   playlistDialogVisible.value = true
-  await loadUserPlaylists() // 等待歌单加载完成
-}
-
-const addAlbum = (song) => {
-  console.log(song);
-  playerStore.setPlaylist([song])
-  ElMessage.success(`已收藏专辑: ${song.album.name}`)
-}
-
-// 显示评论
-const showComments = (song) => {
-  router.push(`/song/${song.id}/comments`)
-}
-
-// 格式化时长
-const formatDuration = (seconds) => {
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = seconds % 60
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-}
-
-// 添加路由跳转方法
-const goToArtist = (artistId) => {
-  if (artistId) {
-    router.push(`/artist/${artistId}`)
-  }
-}
-
-const goToAlbum = (albumId) => {
-  if (albumId) {
-    router.push(`/album/${albumId}`)
-  }
-}
-
-const goToPlayer = (song) => {
-  handlePlaySong(song) // 点击封面时同时开始播放
-  router.push('/player')
-}
-
-// 加载用户歌单
-const loadUserPlaylists = async () => {
+  //在这里修改显示状态，然后弹出一个弹窗
   try {
-    const response = await fetchUserPlaylists()
-    console.log('歌单数据:', response.data)
+    const response = await getMyPlaylists()
     if (response.data.message) {
-      // 确保数据格式正确
-      userPlaylists.value = response.data.data.map(playlist => ({
-        id: playlist.id,
-        name: playlist.name,
-        song_count: playlist.song_count || 0,
-        description: playlist.description
-      }))
+      // console.log(response.data.data);
+      userPlaylists.value = response.data.data.playlists
     } else {
       throw new Error(response.data.error || '获取歌单失败')
     }
   } catch (error) {
     console.error('获取歌单失败:', error)
-    ElMessage.error('获取歌单失败，请稍后重试')
+    ElMessage.error(error.message || '获取歌单失败，请稍后重试')
   }
 }
 
-// 显示创建歌单表单
-const showCreatePlaylist = () => {
-  showCreateForm.value = true
-}
-
-// 取消创建歌单
-const cancelCreate = () => {
-  showCreateForm.value = false
-  newPlaylistName.value = ''
-  newPlaylistDescription.value = ''
-}
-
-// 创建新歌单
-const handleCreatePlaylist = async () => {
+const createNewPlaylist = async () => {
   if (!newPlaylistName.value.trim()) {
     ElMessage.warning('请输入歌单名称')
     return
   }
 
   try {
-    const response = await createNewPlaylist({
+    const response = await createPlaylist({
       name: newPlaylistName.value,
       description: newPlaylistDescription.value,
       isPublic: false
@@ -406,7 +343,6 @@ const handleCreatePlaylist = async () => {
         songCount: 0
       })
       selectedPlaylist.value = response.data.data.id
-      showCreateForm.value = false
       newPlaylistName.value = ''
       newPlaylistDescription.value = ''
       ElMessage.success('歌单创建成功')
@@ -419,7 +355,6 @@ const handleCreatePlaylist = async () => {
   }
 }
 
-// 确认添加到歌单
 const confirmAddToPlaylist = async () => {
   if (!selectedPlaylist.value) {
     ElMessage.warning('请选择歌单')
@@ -441,15 +376,47 @@ const confirmAddToPlaylist = async () => {
   }
 }
 
-// 关闭弹窗
-const handleDialogClose = () => {
-  playlistDialogVisible.value = false
-  showCreateForm.value = false
-  selectedPlaylist.value = null
-  newPlaylistName.value = ''
-  newPlaylistDescription.value = ''
+const addAlbum = (song) => {
+  console.log(song);
+  // playerStore.setPlaylist([song])
+  ElMessage.success(`已收藏专辑: ${song.album.name}`)
 }
 
+// 显示评论
+const showComments = (song) => {
+  router.push(`/song/${song.id}/comments`)
+}
+
+// 格式化时长
+const formatDuration = (seconds) => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
+// 添加路由跳转方法
+const goToArtist = (artistId) => {
+  if (artistId) {
+    router.push(`/artist/${artistId}`)
+  }
+  else{
+    ElMessage.error("歌手不存在!")
+  }
+}
+
+const goToAlbum = (albumId) => {
+  if (albumId) {
+    router.push(`/album/${albumId}`)
+  }
+  else{
+    ElMessage.error("专辑不存在!")
+  }
+}
+
+const goToPlayer = (song) => {
+  handlePlaySong(song) // 点击封面时同时开始播放
+  router.push('/player')
+}
 // 组件挂载时加载数据
 onMounted(() => {
   loadData()
@@ -688,53 +655,149 @@ onMounted(() => {
     width: 100%;
   }
 }
+/* 添加滚动条样式 */
+.playlist-container::-webkit-scrollbar {
+  width: 6px;
+}
 
-/* 歌单弹窗样式 */
+.playlist-container::-webkit-scrollbar-thumb {
+  background-color: #dcdfe6;
+  border-radius: 3px;
+}
+
+.playlist-container::-webkit-scrollbar-track {
+  background-color: #f5f7fa;
+}
+
 .playlist-dialog-content {
   padding: 20px 0;
 }
 
-.create-playlist-section {
-  margin-bottom: 20px;
+.existing-playlists {
+  max-height: 400px;
+  overflow: hidden;
+  margin: 0 -20px; /* 扩展到对话框边缘 */
+}
+
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.playlist-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.playlist-item:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+.playlist-item-selected {
+  background-color: var(--el-color-primary-light-9);
+}
+
+.playlist-item-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--el-color-primary);
+}
+
+.playlist-info-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.playlist-cover-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.playlist-item:hover .playlist-cover-img {
+  transform: scale(1.05);
+}
+
+/* 自定义滚动条样式 */
+.existing-playlists :deep(.el-scrollbar__wrap) {
+  overflow-x: hidden;
+}
+
+.existing-playlists :deep(.el-scrollbar__bar.is-vertical) {
+  width: 6px;
+}
+
+.existing-playlists :deep(.el-scrollbar__thumb) {
+  background-color: var(--el-border-color);
+  border-radius: 3px;
+}
+
+.existing-playlists :deep(.el-scrollbar__thumb:hover) {
+  background-color: var(--el-border-color-darker);
+}
+
+/* 选中状态的额外样式 */
+.playlist-item-selected .playlist-name {
+  color: var(--el-color-primary);
+  font-weight: 600;
+}
+
+.playlist-item-selected .playlist-description,
+.playlist-item-selected .playlist-count {
+  color: var(--el-color-primary-light-3);
+}
+
+/* 添加动画效果 */
+.playlist-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.playlist-item:active {
+  transform: scale(0.98);
+}
+
+.create-playlist {
+  margin-top: 20px;
+  padding: 0 20px;
 }
 
 .create-playlist-form {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
 }
 
-.playlists-list {
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 12px 0;
+.mt-3 {
+  margin-top: 12px;
 }
 
-.playlist-radio {
-  display: block;
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+/* 自定义滚动条样式 */
+:deep(.el-scrollbar__wrap) {
+  overflow-x: hidden !important;
 }
 
-.playlist-radio:hover {
-  background-color: #f5f7fa;
-}
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+  .playlist-item {
+    padding: 12px 16px;
+  }
 
-.song-count {
-  color: #909399;
-  font-size: 12px;
-  margin-left: 8px;
-}
-
-.el-radio {
-  width: 100%;
-  margin-right: 0;
-  margin-bottom: 8px;
-}
-
-.el-radio__label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  .playlist-cover-img {
+    width: 48px;
+    height: 48px;
+  }
 }
 </style>

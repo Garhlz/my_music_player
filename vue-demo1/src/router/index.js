@@ -12,6 +12,7 @@ const MyPlaylist = () => import('@/pages/MyPlaylist.vue');
 const MyLove = () => import('@/pages/MyLove.vue');
 const MyAlbum = () => import('@/pages/MyAlbum.vue');
 const Uploaded = () => import('@/pages/Uploaded.vue');
+const Albums = () => import('@/pages/Albums.vue');
 const routes = [
   {
     path: '/',
@@ -87,6 +88,11 @@ const routes = [
     path: '/playlist/:id',
     name: 'PlaylistDetail',
     component: () => import('@/pages/MyNewPlaylist.vue')
+  },
+  {
+    path: '/album/:id',
+    name: 'AlbumDetail',
+    component: () => import('@/pages/Albums.vue')
   },
 ];
 

@@ -91,6 +91,7 @@
               </div>
             </div>
 
+
             <!-- 歌手 -->
             <div class="col-artist" @click="goToArtist(song.author_id)">
               {{ song.artist }}
@@ -139,7 +140,7 @@
         @close="selectedPlaylist = null"
       >
         <div class="playlist-dialog-content">
-          <!-- 现有歌单列表 -->
+          <!-- 现有歌单列表，设置为可见之后弹出 -->
           <div class="existing-playlists">
             <el-scrollbar height="400px">
               <div class="playlist-list">
@@ -158,7 +159,7 @@
                     <div class="playlist-details">
                       <div class="playlist-name">{{ playlist.name }}</div>
                       <div class="playlist-description">{{ playlist.description || '暂无描述' }}</div>
-                      <div class="playlist-count">{{ playlist.songCount || 0 }}首歌曲</div>
+                      <div class="playlist-count">{{ playlist.song_count || 0 }}首歌曲</div>
                     </div>
                   </div>
                 </div>
@@ -197,6 +198,7 @@
           </span>
         </template>
       </el-dialog>
+
     </template>
   </CommonLayout>
 </template>
@@ -319,10 +321,11 @@ const likeSong = async (song) => {
 const addToPlaylist = async (song) => {
   selectedSong.value = song
   playlistDialogVisible.value = true
-  
+  //在这里修改显示状态，然后弹出一个弹窗
   try {
     const response = await getMyPlaylists()
     if (response.data.message) {
+      // console.log(response.data.data);
       userPlaylists.value = response.data.data.playlists
     } else {
       throw new Error(response.data.error || '获取歌单失败')
@@ -416,11 +419,17 @@ const goToArtist = (artistId) => {
   if (artistId) {
     router.push(`/artist/${artistId}`)
   }
+  else{
+    ElMessage.error("歌手不存在!")
+  }
 }
 
 const goToAlbum = (albumId) => {
   if (albumId) {
     router.push(`/album/${albumId}`)
+  }
+  else{
+    ElMessage.error("专辑不存在!")
   }
 }
 
