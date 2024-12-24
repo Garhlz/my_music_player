@@ -24,13 +24,8 @@ export const getSongs = async (params) => {
   const resp = await api.get('/songs', { params });
   return resp;
 };
-
-//---艺术家相关接口---
-export const getArtists = async (ids) => {
-  const resp = await api.get('/artists', { params: { ids } });
-  return resp;
-};
 //----------------------------------歌曲相关接口----------------------------------
+
 
 
 
@@ -120,7 +115,23 @@ export const getAlbumById = async (albumId, params) => {
     const resp = await api.get(`/album/${albumId}`, { params });
     return resp;
 }
+//----------------------------------专辑相关接口----------------------------------
 
+
+
+//----------------------------------歌手相关接口----------------------------------
+// 获取歌手列表
+export const getArtists = async (params) => {
+    const resp = await api.get('/artists', { params });
+    return resp;
+}
+
+// 获取歌手详情
+export const getArtistById = async (artistId, params) => {
+    const resp = await api.get(`/artist/${artistId}`, { params });
+    return resp;
+}
+//----------------------------------歌手相关接口----------------------------------
 
 
 

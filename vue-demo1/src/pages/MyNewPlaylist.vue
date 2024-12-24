@@ -321,18 +321,16 @@ const loadData = async () => {
       search: searchQuery.value,
       sortBy: sortBy.value
     });
+    console.log(songsResponse);
     //此处已经在后端处理了多表查询了，所以这里不需要再处理
     if (!songsResponse.data.message) {
       throw new Error(songsResponse.data.error || '获取歌曲列表失败')
     }
-    console.log(songsResponse);
+    
     const songsData = songsResponse.data.data;
     totalSongs.value = songsData.total;
     const songsList = songsData.songs || []
     currentPlaylist.value = songsData.playlist;
-    console.log(currentPlaylist.value);
-    console.log(currentPlaylist.value.user_id);
-    console.log(localStorage.getItem('userId'));
     // 2. 获取喜欢列表
     const userId = localStorage.getItem('userId')
     const likedResponse = await getLikedSongsById(userId)

@@ -656,7 +656,7 @@ router.post('/playlist/:playlistId/songs', verifyToken, async (req, res) => {
 // 从歌单中获取歌曲
 router.get('/playlist/:id', async (req, res) => {
   try {
-    const playlistId = req.params.id.toString(); // 转为字符串
+    const playlistId = req.params.id.toString();
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const search = req.query.search || '';
@@ -667,23 +667,23 @@ router.get('/playlist/:id', async (req, res) => {
     const allowedSortFields = {
       'id': 's.id',
       'name': 's.name',
-      'latest': 's.create_time',
-      'oldest': 's.create_time ASC',
+      'latest': 'ps.added_at',
+      'oldest': 'ps.added_at ASC',
       'duration': 's.duration'
     };
 
     // 验证排序字段
-    const sortField = allowedSortFields[sortBy] || 's.create_time';
+    const sortField = allowedSortFields[sortBy] || 'ps.added_at';
     const sortOrder = sortBy === 'oldest' ? '' : 'DESC';
     
     // 获取歌单信息
     const [playlist] = await db.query(
       `SELECT pi.*, u.username as creator_name 
       FROM playlist_info pi 
-      LEFT JOIN user u ON pi.user_id = u.id WHERE pi.id = ?`,
+      LEFT JOIN user u ON pi.user_id = u.id 
+      WHERE pi.id = ?`,
       [playlistId]
     );
-    //这里一路溯源过来调整了后端查找信息
 
     if (playlist.length === 0) {
       return res.json({
@@ -692,25 +692,28 @@ router.get('/playlist/:id', async (req, res) => {
       });
     }
 
-    // 构建歌曲查询
+    // 修改歌曲查询，通过 playlist_songs 表关联
     let query = `
       SELECT 
         s.*,
-        a.name as artist_name,
         al.name as album_name,
-        al.cover as album_cover
-      FROM song s
-      JOIN playlist_songs ps ON s.id = ps.song_id
-      LEFT JOIN artist a ON s.author_id = a.id
+        al.cover as album_cover,
+        al.id as album_id,
+        ar.name as artist_name,
+        ar.id as artist_id,
+        ps.added_at
+      FROM playlist_songs ps
+      JOIN song s ON ps.song_id = s.id
       LEFT JOIN album al ON s.album_id = al.id
+      LEFT JOIN artist ar ON s.author_id = ar.id
       WHERE ps.playlist_id = ?
     `;
 
-    // 构建计数查询
+    // 修改计数查询
     let countQuery = `
       SELECT COUNT(*) as total
-      FROM song s
-      JOIN playlist_songs ps ON s.id = ps.song_id
+      FROM playlist_songs ps
+      JOIN song s ON ps.song_id = s.id
       WHERE ps.playlist_id = ?
     `;
 
@@ -719,8 +722,8 @@ router.get('/playlist/:id', async (req, res) => {
 
     // 添加搜索条件
     if (search) {
-      query += ` AND (s.name LIKE ? OR a.name LIKE ?)`;
-      countQuery += ` AND (s.name LIKE ? OR a.name LIKE ?)`;
+      query += ` AND (s.name LIKE ? OR ar.name LIKE ?)`;
+      countQuery += ` AND (s.name LIKE ? OR ar.name LIKE ?)`;
       const searchPattern = `%${search}%`;
       queryParams.push(searchPattern, searchPattern);
       countParams.push(searchPattern, searchPattern);
@@ -985,5 +988,124 @@ router.get('/album/:id', async (req, res) => {
   }
 });
 //----------------------------------专辑----------------------------------
+
+
+
+//----------------------------------歌手----------------------------------
+// 获取艺术家详情及其歌曲
+router.get('/artist/:id', async (req, res) => {
+  try {
+    const artistId = req.params.id.toString();
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || 'latest';
+    const offset = (page - 1) * pageSize;
+
+    // 定义允许的排序字段
+    const allowedSortFields = {
+      'id': 's.id',
+      'name': 's.name',
+      'latest': 's.create_time',
+      'oldest': 's.create_time ASC',
+      'duration': 's.duration',
+      'play_count': 's.play_count'
+    };
+
+    // 验证排序字段
+    const sortField = allowedSortFields[sortBy] || 's.create_time';
+    const sortOrder = sortBy === 'oldest' ? '' : 'DESC';
+
+    // 获取艺术家信息
+    const [artist] = await db.query(
+      `SELECT ar.*, 
+        GROUP_CONCAT(DISTINCT al.name) as album_names,
+        GROUP_CONCAT(DISTINCT al.id) as album_ids
+      FROM artist ar
+      LEFT JOIN artist_album aa ON ar.id = aa.artist_id
+      LEFT JOIN album al ON aa.album_id = al.id
+      WHERE ar.id = ?
+      GROUP BY ar.id`,
+      [artistId]
+    );
+    //最好还是把所有信息都left_join出来
+
+    if (artist.length === 0) {
+      return res.json({
+        message: false,
+        error: '艺术家不存在'
+      });
+    }
+
+    // 构建歌曲查询
+    let query = `
+      SELECT 
+        s.*,
+        al.name as album_name,
+        al.cover as album_cover,
+        al.id as album_id,
+        ar.name as artist_name,
+        ar.id as artist_id
+      FROM song s
+      LEFT JOIN album al ON s.album_id = al.id
+      LEFT JOIN artist ar ON s.author_id = ar.id
+      WHERE s.author_id = ?
+    `;
+
+    // 构建计数查询
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM song s
+      WHERE s.author_id = ?
+    `;
+
+    let queryParams = [artistId];
+    let countParams = [artistId];
+
+    // 添加搜索条件
+    if (search) {
+      query += ` AND (s.name LIKE ? OR al.name LIKE ?)`;
+      countQuery += ` AND s.name LIKE ?`;
+      const searchPattern = `%${search}%`;
+      queryParams.push(searchPattern, searchPattern);
+      countParams.push(searchPattern);
+    }
+
+    // 添加排序和分页
+    query += ` ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`;
+    queryParams.push(pageSize, offset);
+
+    // 执行查询
+    const [songs] = await db.query(query, queryParams);
+    const [totalResult] = await db.query(countQuery, countParams);
+
+    // 处理专辑ID和名称字符串
+    if (artist[0].album_ids) {
+      artist[0].album_ids = artist[0].album_ids.split(',').map(id => parseInt(id));
+      artist[0].album_names = artist[0].album_names.split(',');
+    } else {
+      artist[0].album_ids = [];
+      artist[0].album_names = [];
+    }
+
+    res.json({
+      message: true,
+      data: {
+        artist: artist[0],
+        total: totalResult[0].total,
+        songs: songs
+      }
+    });
+  } catch (error) {
+    console.error('获取艺术家详情失败:', error);
+    res.json({
+      message: false,
+      error: '获取艺术家详情失败'
+    });
+  }
+});
+//----------------------------------歌手----------------------------------
+
+
 
 module.exports = router;

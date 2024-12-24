@@ -7,15 +7,16 @@
             <div class="playlist-info-card">
               <div class="playlist-cover">
                 <el-image 
-                  :src="currnetAlbum?.cover || '/assets/default-cover.jpg'"
+                  :src="currentArtist?.cover || '/assets/default-cover.jpg'"
                   fit="cover"
                 />
               </div>
-              <h2>{{ currnetAlbum?.name || '我的歌单' }}</h2>
+              <h2>{{ currentArtist?.name || '我的歌单' }}</h2>
               <div class="playlist-info">
                 <span>{{ songs.length }}首歌曲</span>
+                <span>{{ currentArtist?.album_ids.length }}张专辑</span>
               </div>
-              <p class="playlist-description">{{ currnetAlbum?.description || '暂无描述' }}</p>
+              <p class="playlist-description">{{ currentArtist?.description || '暂无描述' }}</p>
             </div>
           </div>
   
@@ -63,7 +64,7 @@
                 <div class="col-title">
                   <div class="song-cover">
                     <el-image 
-                    :src="currnetAlbum?.cover || '/assets/default-cover.jpg'"
+                    :src="song?.cover || '/assets/default-cover.jpg'"
                     fit="cover"
                     />
                   </div>
@@ -187,6 +188,7 @@
   import { 
     getAlbums,
     getAlbumById,
+    getArtistById,
     removeSongFromPlaylist,
     getLikedSongsById, 
     addLikedSong, 
@@ -202,7 +204,7 @@
   const playerStore = usePlayerStore()
   
   // 基础数据
-  const currentName = ref('专辑详情')
+  const currentName = ref('歌手详情')
   const songs = ref([])
   const page = ref(1)
   const pageSize = ref(10)
@@ -219,14 +221,14 @@
   const newPlaylistName = ref('')
   const newPlaylistDescription = ref('')
   const userPlaylists = ref([])
-  const currnetAlbum = ref(null)
+  const currentArtist = ref(null)
   // 方法定义
   const loadData = async () => {
     isLoading.value = true
     try {
       // 1. 获取歌曲列表
       //注意这里的route文件获取当前路径id的方式
-      const songsResponse = await getAlbumById(router.currentRoute.value.params.id,{
+      const songsResponse = await getArtistById(router.currentRoute.value.params.id,{
         page: page.value,
         pageSize: pageSize.value,
         search: searchQuery.value,
@@ -236,12 +238,11 @@
       if (!songsResponse.data.message) {
         throw new Error(songsResponse.data.error || '获取歌曲列表失败')
       }
-
-      console.log(songsResponse);
       const songsData = songsResponse.data.data;
       totalSongs.value = songsData.total;
       const songsList = songsData.songs || []
-      currnetAlbum.value = songsData.album;
+      currentArtist.value = songsData.artist;
+      console.log(currentArtist.value);
       // 2. 获取喜欢列表
       const userId = localStorage.getItem('userId')
       const likedResponse = await getLikedSongsById(userId)
@@ -249,7 +250,6 @@
         likedSongs.value = likedResponse.data.data || []
       }
       // 3. 组装完整的歌曲信息,只是重新处理罢了
-      console.log(songsList);
       songs.value = songsList.map(song => {
         return {
           ...song,
@@ -405,7 +405,7 @@
   //TODO 管理员可以对专辑页面进行增删改
 //   const removeSong = async (song) => {
 //     try {
-//       const response = await removeSongFromPlaylist(currnetAlbum.value.id, song.id)
+//       const response = await removeSongFromPlaylist(currentArtist.value.id, song.id)
 //       if (response.data.message) {
 //         ElMessage.success('删除成功')
 //         loadData()

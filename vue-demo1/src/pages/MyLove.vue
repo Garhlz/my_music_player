@@ -82,9 +82,10 @@
                 <el-tooltip content="添加到播放列表" placement="top">
                   <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
                 </el-tooltip>
-                <el-tooltip content="收藏专辑" placement="top">
+                <!-- <el-tooltip content="收藏专辑" placement="top">
                   <el-icon @click="goToAlbum(song.album_id)"><FolderAdd /></el-icon>
-                </el-tooltip>
+                </el-tooltip> -->
+                <!-- 暂时废弃这个功能不显示 -->
                 <el-tooltip content="评论" placement="top">
                   <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
                 </el-tooltip>
