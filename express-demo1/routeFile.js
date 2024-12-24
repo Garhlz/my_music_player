@@ -250,13 +250,12 @@ router.get('/albums', verifyToken, async (req, res) => {
 //----------------------------------喜欢的歌曲----------------------------------
 //获取用户喜欢的歌曲
 router.get('/liked-songs/:id', verifyToken, async (req, res) => {
-    //注意两个接口的区别，一个是获取单个用户的所有喜欢的歌曲，一个是用户的喜欢的歌曲，分页查询  
-    //注意一定要打上反双引号，否则保留字报错
   const userId = req.params.id;
   const songs = await db.execute('SELECT * FROM song WHERE id IN (SELECT song_id FROM `like` WHERE user_id = ?)', [userId]);
   res.json({ message: true, data: songs });
+  //注意两个接口的区别，一个是获取单个用户的所有喜欢的歌曲，一个是用户的喜欢的歌曲，分页查询  
+  //注意一定要打上反双引号，否则保留字报错
 });
-
 // 获取用户喜欢的歌曲，分页查询
 router.get('/liked-songs', verifyToken, async (req, res) => {
   try {
@@ -378,7 +377,6 @@ router.post('/like/:songId', verifyToken, async (req, res) => {
     });
   }
 });
-
 // 取消喜欢的歌曲
 router.delete('/like/:songId', verifyToken, async (req, res) => {
   try {
@@ -411,7 +409,7 @@ router.delete('/like/:songId', verifyToken, async (req, res) => {
     });
   }
 });
-//----------------------------------歌曲----------------------------------
+//----------------------------------喜欢的歌曲----------------------------------
 
 
 
@@ -684,6 +682,152 @@ router.post('/playlist/:playlistId/songs', verifyToken, async (req, res) => {
     res.json({
       message: false,
       error: '添加歌曲失败'
+    });
+  }
+});
+
+// 从歌单中获取歌曲
+router.get('/playlist/:id', async (req, res) => {
+  try {
+    const playlistId = req.params.id.toString(); // 转为字符串
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || 'latest';
+    const offset = (page - 1) * pageSize;
+
+    // 定义允许的排序字段
+    const allowedSortFields = {
+      'id': 's.id',
+      'name': 's.name',
+      'latest': 's.create_time',
+      'oldest': 's.create_time ASC',
+      'duration': 's.duration'
+    };
+
+    // 验证排序字段
+    const sortField = allowedSortFields[sortBy] || 's.create_time';
+    const sortOrder = sortBy === 'oldest' ? '' : 'DESC';
+    
+    // 获取歌单信息
+    const [playlist] = await db.query(
+      `SELECT * FROM playlist_info WHERE id = ?`,
+      [playlistId]
+    );
+
+    if (playlist.length === 0) {
+      return res.json({
+        message: false,
+        error: '歌单不存在'
+      });
+    }
+
+    // 构建歌曲查询
+    let query = `
+      SELECT 
+        s.*,
+        a.name as artist_name,
+        al.name as album_name,
+        al.cover as album_cover
+      FROM song s
+      JOIN playlist_songs ps ON s.id = ps.song_id
+      LEFT JOIN artist a ON s.author_id = a.id
+      LEFT JOIN album al ON s.album_id = al.id
+      WHERE ps.playlist_id = ?
+    `;
+
+    // 构建计数查询
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM song s
+      JOIN playlist_songs ps ON s.id = ps.song_id
+      WHERE ps.playlist_id = ?
+    `;
+
+    let queryParams = [playlistId];
+    let countParams = [playlistId];
+
+    // 添加搜索条件
+    if (search) {
+      query += ` AND (s.name LIKE ? OR a.name LIKE ?)`;
+      countQuery += ` AND (s.name LIKE ? OR a.name LIKE ?)`;
+      const searchPattern = `%${search}%`;
+      queryParams.push(searchPattern, searchPattern);
+      countParams.push(searchPattern, searchPattern);
+    }
+
+    // 添加排序和分页
+    query += ` ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`;
+    queryParams.push(pageSize, offset);
+
+    // 执行查询
+    const [songs] = await db.query(query, queryParams);
+    const [totalResult] = await db.query(countQuery, countParams);
+
+    res.json({
+      message: true,
+      data: {
+        playlist: playlist[0],
+        total: totalResult[0].total,
+        songs: songs
+      }
+    });
+  } catch (error) {
+    console.error('获取歌单歌曲失败:', error);
+    res.json({
+      message: false,
+      error: '获取歌单歌曲失败'
+    });
+  }
+});
+
+// 从歌单中移除歌曲
+router.delete('/playlist/:playlistId/songs/:songId', async (req, res) => {
+  try {
+    const playlistId = req.params.playlistId.toString();
+    const songId = req.params.songId.toString();
+    
+    // 检查歌单是否存在
+    const [playlist] = await db.query(
+      'SELECT * FROM playlist_info WHERE id = ?',
+      [playlistId]
+    );
+
+    if (playlist.length === 0) {
+      return res.json({
+        message: false,
+        error: '歌单不存在'
+      });
+    }
+
+    // 检查歌曲是否在歌单中
+    const [playlistSong] = await db.query(
+      'SELECT * FROM playlist_songs WHERE playlist_id = ? AND song_id = ?',
+      [playlistId, songId]
+    );
+
+    if (playlistSong.length === 0) {
+      return res.json({
+        message: false,
+        error: '歌曲不在歌单中'
+      });
+    }
+
+    // 从歌单中移除歌曲
+    await db.query(
+      'DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?',
+      [playlistId, songId]
+    );
+
+    res.json({
+      message: true,
+      data: '歌曲已从歌单中移除'
+    });
+  } catch (error) {
+    console.error('移除歌曲失败:', error);
+    res.json({
+      message: false,
+      error: '移除歌曲失败'
     });
   }
 });

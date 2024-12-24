@@ -100,4 +100,16 @@ export const addSongToPlaylist = async (playlistId, songId) => {
   const resp = await api.post(`/playlist/${playlistId}/songs`, { songId })
   return resp
 }
+
+// 从歌单中获取歌曲
+export const getSongFromPlaylistById = async (playlistId, params) => {
+    const resp = await api.get(`/playlist/${playlistId}`,{ params });
+    return resp
+}
+
+// 从歌单中移除歌曲
+export const removeSongFromPlaylist = async (playlistId, songId) => {
+    const resp = await api.delete(`/playlist/${playlistId}/songs/${songId}`);
+    return resp
+}
 //----------------------------------歌单相关接口----------------------------------

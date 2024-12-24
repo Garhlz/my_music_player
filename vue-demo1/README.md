@@ -133,116 +133,143 @@ import export 需要{}，规则我还不是很明确
 
 使用了ai，生产力大大提升，接下来首先是对接好所有接口
 
-接口对接必须自己进行，ai这方面能力堪忧
+接口对接必须自己进行，ai这方面能力堪忧。其实不一定，只是需要足够的引导，而且最好集成所有的接口信息，不要分开
 
 # API 接口文档
 
+## 用户接口
+
+### 用户认证
+- **用户注册**
+  - **方法**: `POST /api/user/register`
+  - **请求体**:
+    - `username`: 用户名
+    - `password`: 密码
+    - `name`: 姓名
+    - `phone`: 电话
+    - `email`: 邮箱
+    - `sex`: 性别
+  - **响应**:
+    - `message`: 成功消息
+
+- **用户登录**
+  - **方法**: `POST /api/user/login`
+  - **请求体**:
+    - `username`: 用户名
+    - `password`: 密码
+  - **响应**:
+    - `message`: 成功消息
+    - `token`: JWT 令牌
+
+- **获取用户信息**
+  - **方法**: `GET /api/user/info`
+  - **请求头**:
+    - `Authorization`: Bearer token
+  - **响应**:
+    - `message`: 成功消息
+    - `data`: 用户信息对象
+
+- **更新用户信息**
+  - **方法**: `PUT /api/user/info`
+  - **请求头**:
+    - `Authorization`: Bearer token
+  - **请求体**:
+    - `name`: 姓名
+    - `phone`: 电话
+    - `email`: 邮箱
+    - `sex`: 性别
+  - **响应**:
+    - `message`: 成功消息
+
 ## 歌曲接口
 
-- **获取歌曲列表**
-  - **方法**: `GET /api/song`
+### 公共歌曲
+- **获取公共歌曲列表**
+  - **方法**: `GET /api/songs/public`
   - **请求参数**:
-    - `page`: 页码 (默认为 1)
-    - `pageSize`: 每页数量 (默认为 10)
+    - `page`: 页码
+    - `pageSize`: 每页数量
+    - `search`: 搜索关键词
+    - `sortBy`: 排序方式
   - **响应**:
     - `message`: 成功消息
-    - `data`:
-      - `totalCount`: 总记录数
-      - `data`: 歌曲列表
+    - `data`: 
+      - `list`: 歌曲列表
+      - `total`: 总数
 
-- **添加歌曲**
-  - **方法**: `POST /api/song`
+### 喜欢的歌曲
+- **获取喜欢的歌曲**
+  - **方法**: `GET /api/songs/liked`
+  - **响应**:
+    - `message`: 成功消息
+    - `data`: 喜欢的歌曲列表
+
+- **添加喜欢的歌曲**
+  - **方法**: `POST /api/songs/liked/:songId`
+  - **响应**:
+    - `message`: 成功消息
+
+- **取消喜欢歌曲**
+  - **方法**: `DELETE /api/songs/liked/:songId`
+  - **响应**:
+    - `message`: 成功消息
+
+## 歌单接口
+
+### 用户歌单
+- **获取用户歌单列表**
+  - **方法**: `GET /api/playlists`
+  - **响应**:
+    - `message`: 成功消息
+    - `data`: 歌单列表
+
+- **创建歌单**
+  - **方法**: `POST /api/playlists`
   - **请求体**:
-    - `name`: 歌曲名称
-    - `author_id`: 作者ID
-    - `album_id`: 专辑ID
-    - `url`: 歌曲URL
-    - `cover`: 封面图URL
-    - `duration`: 时长
+    - `name`: 歌单名称
+    - `description`: 歌单描述
+    - `isPublic`: 是否公开
+  - **响应**:
+    - `message`: 成功消息
+    - `data`: 创建的歌单信息
+
+- **获取歌单详情**
+  - **方法**: `GET /api/playlists/:id`
+  - **响应**:
+    - `message`: 成功消息
+    - `data`: 
+      - `playlist`: 歌单信息
+      - `songs`: 歌曲列表
+
+- **添加歌曲到歌单**
+  - **方法**: `POST /api/playlists/:playlistId/songs/:songId`
   - **响应**:
     - `message`: 成功消息
 
-- **获取单曲信息**
-  - **方法**: `GET /api/song/:id`
+- **从歌单移除歌曲**
+  - **方法**: `DELETE /api/playlists/:playlistId/songs/:songId`
+  - **响应**:
+    - `message`: 成功消息
+
+## 评论接口
+
+- **获取歌曲评论**
+  - **方法**: `GET /api/comments/song/:songId`
   - **请求参数**:
-    - `id`: 歌曲ID
+    - `page`: 页码
+    - `pageSize`: 每页数量
   - **响应**:
     - `message`: 成功消息
-    - `data`: 单曲信息
+    - `data`: 
+      - `list`: 评论列表
+      - `total`: 总数
 
-## 专辑接口
-
-- **获取专辑列表**
-  - **方法**: `GET /api/album`
-  - **请求参数**:
-    - `page`: 页码 (默认为 1)
-    - `pageSize`: 每页数量 (默认为 10)
+- **发表评论**
+  - **方法**: `POST /api/comments/song/:songId`
+  - **请求体**:
+    - `content`: 评论内容
   - **响应**:
     - `message`: 成功消息
-    - `data`:
-      - `totalCount`: 总记录数
-      - `data`: 专辑列表
 
-- **获取单个专辑信息**
-  - **方法**: `GET /api/album/:id`
-  - **请求参数**:
-    - `id`: 专辑ID
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 专辑信息
-
-## 歌手接口
-
-- **获取歌手列表**
-  - **方法**: `GET /api/artist`
-  - **请求参数**:
-    - `page`: 页码 (默认为 1)
-    - `pageSize`: 每页数量 (默认为 10)
-  - **响应**:
-    - `message`: 成功消息
-    - `data`:
-      - `totalCount`: 总记录数
-      - `data`: 歌手列表
-
-- **获取单个歌手信息**
-  - **方法**: `GET /api/artist/:id`
-  - **请求参数**:
-    - `id`: 歌手ID
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 歌手信息
-
-## 用户接口文档
-
-### 用户注册
-
-- **方法**: `POST /api/user/register`
-- **请求体**:
-  - `username`: 用户名
-  - `password`: 密码
-  - `name`: 姓名
-  - `phone`: 电话
-  - `email`: 邮箱
-  - `sex`: 性别
-- **响应**:
-  - `message`: 成功消息
-
-### 用户登录
-
-- **方法**: `POST /api/user/login`
-- **请求体**:
-  - `username`: 用户名
-  - `password`: 密码
-- **响应**:
-  - `message`: 成功消息
-  - `token`: JWT 令牌
-
-### 获取用户信息
-
-- **方法**: `GET /api/user`
-- **请求头**:
-  - `Authorization`: Bearer token
-- **响应**:
-  - `message`: 成功消息
-  - `data`: 用户信息对象
+注意：所有需要认证的接口都需要在请求头中携带 `Authorization: Bearer token`
 

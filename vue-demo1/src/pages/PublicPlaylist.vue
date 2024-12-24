@@ -216,8 +216,6 @@ import {
 } from '@element-plus/icons-vue'
 import { 
   getSongs, 
-  getAlbums, 
-  getArtists, 
   getLikedSongsById, 
   addLikedSong, 
   removeLikedSong,
@@ -261,11 +259,11 @@ const loadData = async () => {
       search: searchQuery.value,
       sortBy: sortBy.value
     })
-
+    //此处已经在后端处理了多表查询了，所以这里不需要再处理
     if (!songsResponse.data.message) {
       throw new Error(songsResponse.data.error || '获取歌曲列表失败')
     }
-
+    
     const songsData = songsResponse.data.data
     totalSongs.value = songsData.total
     const songsList = songsData.list || []
@@ -277,28 +275,14 @@ const loadData = async () => {
       likedSongs.value = likedResponse.data.data || []
     }
 
-    // 3. 获取歌手和专辑信息
-    const artistIds = [...new Set(songsList.map(song => song.author_id).filter(Boolean))]
-    const albumIds = [...new Set(songsList.map(song => song.album_id).filter(Boolean))]
-
-    const [artistsResponse, albumsResponse] = await Promise.all([
-      artistIds.length > 0 ? getArtists(artistIds) : Promise.resolve({ data: { message: true, data: [] } }),
-      albumIds.length > 0 ? getAlbums(albumIds) : Promise.resolve({ data: { message: true, data: [] } })
-    ])
-
-    const artists = artistsResponse.data.message ? artistsResponse.data.data : []
-    const albums = albumsResponse.data.message ? albumsResponse.data.data : []
     
-    // 4. 组装完整的歌曲信息
+    // 3. 组装完整的歌曲信息,只是重新处理罢了
     songs.value = songsList.map(song => {
-      const artist = artists.find(a => a.id === song.author_id)
-      const album = albums.find(a => a.id === song.album_id)
-      
       return {
         ...song,
-        artist: artist ? artist.name : '未知歌手',
-        album: album ? album.name : '未知专辑',
-        cover: album ? album.cover : '/assets/default-cover.jpg',
+        artist: song.artist_name ? song.artist_name : '未知歌手',
+        album: song.album_name ? song.album_name : '未知专辑',
+        cover: song.album_cover ? song.album_cover : '/assets/default-cover.jpg',
         duration: song.duration || 0
       }
     })
