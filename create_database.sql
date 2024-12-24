@@ -1,3 +1,9 @@
+CREATE DATABASE IF NOT EXISTS `music_player`
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE `music_player`;
+
 -- 创建用户表
 CREATE TABLE `user` (
     `id` INT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID,主键,自动递增',
