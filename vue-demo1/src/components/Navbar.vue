@@ -26,9 +26,14 @@
       <span>我的歌单</span>
     </el-menu-item>
 
-    <el-menu-item index="/my-album" @click="navigateTo('/my-album')">
+    <!-- <el-menu-item index="/my-album" @click="navigateTo('/my-album')">
       <el-icon><Files /></el-icon>
       <span>收藏的专辑</span>
+    </el-menu-item> -->
+    
+    <el-menu-item index="/comments" @click="navigateTo('/comments')">
+      <el-icon><ChatDotRound /></el-icon>
+      <span>所有评论</span>
     </el-menu-item>
 
     <el-menu-item index="/uploaded" @click="navigateTo('/uploaded')">
@@ -38,10 +43,7 @@
 
     <!-- <el-menu-divider /> -->
 
-    <el-menu-item index="/comments" @click="navigateTo('/comments')">
-      <el-icon><ChatDotRound /></el-icon>
-      <span>所有评论</span>
-    </el-menu-item>
+    
 
     <el-menu-item index="/manage-users" @click="navigateTo('/manage-users')">
       <el-icon><User /></el-icon>

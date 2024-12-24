@@ -53,7 +53,7 @@
 
             <!-- 歌曲信息 -->
             <div class="col-title">
-              <div class="song-cover" @click="showCover(song)">
+              <div class="song-cover" @click="goToPlayer(song)">
                 <el-image 
                   :src="song.cover || '/assets/default-cover.jpg'"
                   fit="cover"
@@ -431,6 +431,11 @@ const goToAlbum = (albumId) => {
   else{
     ElMessage.error("专辑不存在!")
   }
+}
+
+const goToPlayer = (song) => {
+  handlePlaySong(song) // 点击封面时同时开始播放
+  router.push('/player')
 }
 
 // 生命周期钩子
