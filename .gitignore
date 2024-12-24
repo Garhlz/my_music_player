@@ -1,5 +1,6 @@
 express-demo1/node_modules/
 vue-demo1/node_modules/
 express-demo1/.env
-
+vue-demo1/.idea
+vue-demo1/.vscode
 
