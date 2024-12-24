@@ -24,18 +24,27 @@
           <!-- 统一的评论输入框 -->
           <el-card class="comment-input">
             <div class="input-area">
+              <!-- 添加回复对象提示 -->
+              <div v-if="activeReplyTarget" class="reply-target">
+                <el-tag size="small" class="reply-tag" type="info" closable @close="cancelReply">
+                  <el-icon><ChatDotRound /></el-icon>
+                  回复 @{{ activeReplyTarget.username }}
+                </el-tag>
+              </div>
               <el-input
                 v-model="newComment"
                 type="textarea"
                 :rows="3"
-                :placeholder="replyToUser ? `回复 @${replyToUser.username}...` : '发表评论...'"
+                :placeholder="activeReplyTarget ? `回复 @${activeReplyTarget.username}...` : '发表评论...'"
               />
               <div class="comment-actions">
-                <el-button v-if="replyToUser" type="text" @click="cancelReply">
-                  取消回复
-                </el-button>
-                <el-button type="primary" @click="handleSubmitComment" :disabled="!newComment.trim()">
-                  {{ replyToUser ? '回复' : '发表评论' }}
+                <el-button v-if="activeReplyTarget" @click="cancelReply">取消回复</el-button>
+                <el-button 
+                  type="primary" 
+                  @click="activeReplyTarget ? submitReply() : submitComment()" 
+                  :disabled="!newComment.trim()"
+                >
+                  {{ activeReplyTarget ? '回复' : '发表评论' }}
                 </el-button>
               </div>
             </div>
@@ -73,38 +82,41 @@
 
                   <!-- 嵌套的回复列表 -->
                   <div v-if="comment.replies && comment.replies.length > 0" class="replies">
-                    <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
-                      <el-avatar :size="30" :src="reply.avatar" />
-                      <div class="reply-content">
-                        <div class="reply-header">
-                          <span class="username">{{ reply.username }}</span>
-                          <span class="time">{{ formatTime(reply.created_at) }}</span>
-                        </div>
-                        <p class="text">
-                          <el-tag size="small" class="reply-tag" type="info">
-                            回复 @{{ reply.reply_to_username || comment.username }}
-                          </el-tag>
-                          {{ reply.text }}
-                        </p>
-                        <div class="reply-actions">
-                          <el-button type="text" @click="handleLikeComment(reply)">
-                            <el-icon><ArrowUpBold /></el-icon>
-                            {{ reply.like_count || 0 }}
-                          </el-button>
-                          <el-button type="text" @click="showReplyInput(comment, reply)">
-                            <el-icon><ChatLineRound /></el-icon>
-                            回复
-                          </el-button>
-                          <el-button 
-                            v-if="reply.user_id === currentUser.id" 
-                            type="text" 
-                            @click="handleDeleteComment(reply.id)"
-                          >
-                            删除
-                          </el-button>
+                    <template v-for="reply in comment.replies" :key="reply.id">
+                      <div class="reply-item">
+                        <el-avatar :size="30" :src="reply.avatar" />
+                        <div class="reply-content">
+                          <div class="reply-header">
+                            <span class="username">{{ reply.username }}</span>
+                            <span class="time">{{ formatTime(reply.created_at) }}</span>
+                          </div>
+                          <p class="text">
+                            <el-tag size="small" class="reply-tag" type="info">
+                              <el-icon><ChatDotRound /></el-icon>
+                              @{{ reply.reply_to_username || comment.username }}
+                            </el-tag>
+                            {{ reply.text }}
+                          </p>
+                          <div class="reply-actions">
+                            <el-button type="text" @click="handleLikeComment(reply)">
+                              <el-icon><ArrowUpBold /></el-icon>
+                              {{ reply.like_count || 0 }}
+                            </el-button>
+                            <el-button type="text" @click="showReplyInput(comment, reply)">
+                              <el-icon><ChatLineRound /></el-icon>
+                              回复
+                            </el-button>
+                            <el-button 
+                              v-if="reply.user_id === currentUser.id" 
+                              type="text" 
+                              @click="handleDeleteComment(reply.id)"
+                            >
+                              删除
+                            </el-button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -158,9 +170,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const newComment = ref('')
-const replyText = ref('')
-const activeReplyId = ref(null)
-const replyToUser = ref(null)
+const activeReplyTarget = ref(null)
 
 // 获取歌曲信息
 const fetchSongInfo = async () => {
@@ -207,46 +217,41 @@ const fetchComments = async () => {
 }
 
 // 提交评论
-const handleSubmitComment = async () => {
+const submitComment = async () => {
   try {
-    const commentData = {
+    const resp = await createComment({
       songId: route.params.id,
-      text: newComment.value,
-      parentId: replyToUser.value?.parentId,
-      replyToUserId: replyToUser.value?.id
-    };
-
-    const resp = await submitReply(commentData);
-    
+      text: newComment.value
+    })
     if (resp.data.message) {
-      ElMessage.success(replyToUser.value ? '回复成功' : '评论成功');
-      newComment.value = '';
-      replyToUser.value = null;
-      await fetchComments();
+      ElMessage.success('评论成功')
+      newComment.value = ''
+      await fetchComments()
     }
   } catch (error) {
-    console.error('提交失败:', error);
-    ElMessage.error('提交失败');
+    console.error('发表评论失败:', error)
+    ElMessage.error('发表评论失败')
   }
-};
+}
 
 // 提交回复
-const submitReply = async (comment) => {
+const submitReply = async () => {
+  if (!activeReplyTarget.value) return
+  
   try {
     const data = {
       songId: route.params.id,
-      text: replyText.value,
-      parentId: comment.id,
-      replyToUserId: replyToUser.value?.id || comment.user_id // 如果没有特定回复对象，则回复主评论作者
+      text: newComment.value,
+      parentId: activeReplyTarget.value.commentId,
+      replyToUserId: activeReplyTarget.value.id
     }
     
     const resp = await createComment(data)
     if (resp.data.message) {
       ElMessage.success('回复成功')
-      replyText.value = ''
-      activeReplyId.value = null
-      replyToUser.value = null
-      await fetchComments() // 重新获取评论列表
+      newComment.value = ''
+      activeReplyTarget.value = null
+      await fetchComments()
     }
   } catch (error) {
     console.error('回复评论失败:', error)
@@ -280,19 +285,37 @@ const handleDeleteComment = async (commentId) => {
   }
 }
 
-// 显示回复输入框
+// 修改显示回复输入框的逻辑
 const showReplyInput = (comment, replyTo = null) => {
-  replyToUser.value = {
-    id: replyTo ? replyTo.user_id : comment.user_id,
-    username: replyTo ? replyTo.username : comment.username,
-    parentId: comment.id  // 保存父评论ID
-  };
-  document.querySelector('.comment-input').scrollIntoView({ behavior: 'smooth' });
+  // 如果点击的是同一个回复目标，则取消回复
+  if (activeReplyTarget.value?.id === (replyTo?.user_id || comment.user_id)) {
+    cancelReply()
+    return
+  }
+  
+  if (replyTo) {
+    // 回复某条回复
+    activeReplyTarget.value = {
+      id: replyTo.user_id,
+      username: replyTo.username,
+      commentId: comment.id // 保存父评论ID
+    }
+  } else {
+    // 回复主评论
+    activeReplyTarget.value = {
+      id: comment.user_id,
+      username: comment.username,
+      commentId: comment.id
+    }
+  }
+  
+  // 滚动到输入框
+  document.querySelector('.comment-input')?.scrollIntoView({ behavior: 'smooth' })
 }
 
-// 取消回复
+// 修改取消回复的逻辑
 const cancelReply = () => {
-  replyToUser.value = null
+  activeReplyTarget.value = null
   newComment.value = ''
 }
 
@@ -393,10 +416,26 @@ onMounted(() => {
   gap: 12px;
 }
 
+.reply-target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reply-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--el-color-info-light-9);
+  border-color: var(--el-color-info-light-8);
+  color: var(--el-color-info-dark-2);
+}
+
 .comment-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin-top: 8px;
 }
 
 .comment-list {
@@ -441,26 +480,27 @@ onMounted(() => {
 }
 
 .reply-input.nested {
-  margin: 8px 0;
-  padding: 8px;
+  margin: 8px 0 8px 30px;
+  padding: 12px;
   background: var(--el-color-primary-light-9);
   border-radius: 4px;
 }
 
 .replies {
-  margin: 12px 0 0 40px;
-  padding: 12px;
+  margin: 10px 0 0 40px;
+  padding: 10px;
   background: var(--el-fill-color-light);
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .reply-item {
+  display: flex;
+  gap: 10px;
   padding: 12px;
   margin-bottom: 8px;
   background: var(--el-bg-color);
-  border-radius: 8px;
-  display: flex;
-  gap: 12px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .reply-item:last-child {
