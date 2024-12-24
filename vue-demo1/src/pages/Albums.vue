@@ -86,7 +86,7 @@
                       <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
                     </el-tooltip>
                     <el-tooltip content="评论" placement="top">
-                      <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
+                      <el-icon @click="goToComment(song)"><ChatDotRound /></el-icon>
                     </el-tooltip>
                     <el-tooltip content="下载" placement="top">
                       <el-icon @click="downloadSong(song)"><Download /></el-icon>
@@ -401,6 +401,9 @@
     else{
       ElMessage.error("专辑不存在!")
     }
+  }
+  const goToComment = (song) => {
+    router.push(`/comment/${song.id}`)
   }
   //TODO 管理员可以对专辑页面进行增删改
 //   const removeSong = async (song) => {

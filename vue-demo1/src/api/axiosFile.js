@@ -19,9 +19,15 @@ export const register = async (userData) => {
 
 
 
+
 //----------------------------------歌曲相关接口----------------------------------
 export const getSongs = async (params) => {
   const resp = await api.get('/songs', { params });
+  return resp;
+};
+
+export const getSongById = async (id) => {
+  const resp = await api.get(`/song/${id}`);
   return resp;
 };
 //----------------------------------歌曲相关接口----------------------------------
@@ -132,6 +138,57 @@ export const getArtistById = async (artistId, params) => {
     return resp;
 }
 //----------------------------------歌手相关接口----------------------------------
+
+
+
+//----------------------------------评论相关接口----------------------------------
+// 获取歌曲评论列表
+export const getComments = async (songId, params) => {
+  const resp = await api.get(`/comments/${songId}`, { params });
+  return resp;
+};
+
+// 获取评论回复列表
+export const getCommentReplies = async (commentId, params) => {
+  const resp = await api.get(`/comments/${commentId}/replies`, { params });
+  return resp;
+};
+
+// 发表评论
+export const createComment = async (data) => {
+  const resp = await api.post('/comments', {
+    songId: data.songId,
+    text: data.text,
+    parentId: data.parentId,
+    replyToUserId: data.replyToUserId
+  });
+  return resp;
+};
+
+// 点赞评论
+export const likeComment = async (commentId) => {
+  const resp = await api.post(`/comments/${commentId}/like`);
+  return resp;
+};
+
+// 删除评论
+export const deleteComment = async (commentId) => {
+  const resp = await api.delete(`/comments/${commentId}`);
+  return resp;
+};
+//----------------------------------评论相关接口----------------------------------
+
+// 获取用户信息
+export const getUserInfo = async (userId) => {
+  const resp = await api.get(`/user/${userId}`);
+  return resp;
+};
+
+// 更新用户信息
+export const updateUserInfo = async (userId, data) => {
+  const resp = await api.put(`/user/${userId}`, data);
+  return resp;
+};
 
 
 

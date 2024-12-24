@@ -76,20 +76,119 @@ router.post('/user/register', async (req, res) => {
 
 //----------------------------------用户信息----------------------------------
 // 获取用户信息接口
-router.get('/user/{id}',verifyToken,  async (req, res) => {
+router.get('/user/:id', async (req, res) => {
+  try {
     const userId = req.params.id;
+    
+    // 获取基本用户信息
+    const [user] = await db.execute(`
+      SELECT 
+        u.id,
+        u.username,
+        u.name,
+        u.avatar,
+        u.email,
+        u.phone,
+        u.gender,
+        u.birthday,
+        u.location,
+        u.bio,
+        COALESCE((SELECT COUNT(*) FROM follow WHERE follower_id = u.id), 0) as followings,
+        COALESCE((SELECT COUNT(*) FROM follow WHERE following_id = u.id), 0) as followers
+      FROM user u
+      WHERE u.id = ?
+    `, [userId]);
 
-    try {
-        const [user] = await db.execute('SELECT id, username, name, phone, email, sex FROM user WHERE id = ?', [userId]);
-        if (user.length > 0) {
-            return res.status(200).json({ user: user[0] });
-        } else {
-            return res.status(404).json({ error: '用户未找到' });
-        }
-    } catch (error) {
-        console.error('数据库查询失败:', error);
-        return res.status(500).json({ error: '服务器错误' });
+    if (!user[0]) {
+      return res.status(404).json({
+        message: false,
+        data: null,
+        error: '用户不存在'
+      });
     }
+
+    res.json({
+      message: true,
+      data: {
+        data: user[0]
+      }
+    });
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+    res.status(500).json({
+      message: false,
+      data: null,
+      error: '获取用户信息失败'
+    });
+  }
+});
+
+// 更新用户信息（需要验证身份）
+router.put('/user/:id', verifyToken, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // 验证是否是当前用户
+    if (userId !== req.user.id) {
+      return res.status(403).json({
+        message: false,
+        data: null,
+        error: '无权修改其他用户信息'
+      });
+    }
+
+    const {
+      name,
+      avatar,
+      email,
+      phone,
+      gender,
+      birthday,
+      location,
+      bio
+    } = req.body;
+
+    // 更新用户信息
+    const query = `
+      UPDATE user 
+      SET 
+        name = ?,
+        avatar = ?,
+        email = ?,
+        phone = ?,
+        gender = ?,
+        birthday = ?,
+        location = ?,
+        bio = ?
+      WHERE id = ?
+    `;
+
+    await db.execute(query, [
+      name,
+      avatar,
+      email,
+      phone,
+      gender,
+      birthday,
+      location,
+      bio,
+      userId
+    ]);
+
+    res.json({
+      message: true,
+      data: {
+        data: { updated: true }
+      }
+    });
+  } catch (error) {
+    console.error('更新用户信息失败:', error);
+    res.status(500).json({
+      message: false,
+      data: null,
+      error: '更新用户信息失败'
+    });
+  }
 });
 //----------------------------------用户信息----------------------------------
 
@@ -99,6 +198,61 @@ router.get('/user/{id}',verifyToken,  async (req, res) => {
 
 //----------------------------------歌曲----------------------------------
 // 获取歌曲列表接口
+router.get('/song/:id', verifyToken, async (req, res) => {
+    try {
+        const songId = req.params.id;
+        const query = `
+            SELECT 
+                s.*,
+                a.name as artist_name,
+                a.id as artist_id,
+                al.name as album_name,
+                al.id as album_id,
+                al.cover as album_cover
+            FROM song s
+            LEFT JOIN artist a ON s.author_id = a.id
+            LEFT JOIN album al ON s.album_id = al.id
+            WHERE s.id = ?
+        `;
+
+        const [song] = await db.execute(query, [songId]);
+
+        if (song.length === 0) {
+            return res.status(404).json({
+                message: false,
+                error: '歌曲不存在'
+            });
+        }
+
+        // 格式化返回数据
+        const formattedSong = {
+            id: song[0].id,
+            name: song[0].name,
+            artist_name: song[0].artist_name || '未知歌手',
+            artist_id: song[0].artist_id,
+            album_name: song[0].album_name || '未知专辑',
+            album_id: song[0].album_id,
+            cover: song[0].album_cover || '/assets/default-cover.jpg',
+            duration: song[0].duration,
+            url: song[0].url,
+            create_time: song[0].create_time,
+            play_count: song[0].play_count || 0,
+            like_count: song[0].like_count || 0
+        };
+
+        res.json({
+            message: true,
+            data: formattedSong
+        });
+
+    } catch (error) {
+        console.error('获取歌曲详情失败:', error);
+        res.status(500).json({
+            message: false,
+            error: '获取歌曲详情失败'
+        });
+    }
+});
 router.get('/songs', verifyToken, async (req, res) => {
   try {
     // 转换并验证参数
@@ -1105,6 +1259,294 @@ router.get('/artist/:id', async (req, res) => {
   }
 });
 //----------------------------------歌手----------------------------------
+
+
+
+
+
+//----------------------------------评论相关接口----------------------------------
+// 获取歌曲评论列表
+router.get('/comments/:songId', async (req, res) => {
+  try {
+    const songId = req.params.songId.toString(); // 转换为字符串
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
+    // 获取主评论
+    const query = `
+      SELECT 
+        c.*,
+        u.username,
+        u.avatar,
+        (SELECT COUNT(*) FROM comment_like WHERE comment_id = c.id) as like_count
+      FROM comment c
+      LEFT JOIN user u ON c.user_id = u.id
+      WHERE c.song_id = ? AND c.parent_id IS NULL
+      ORDER BY c.created_at DESC
+      LIMIT ?, ?
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM comment
+      WHERE song_id = ?
+    `;
+
+    // 使用数组传递参数，确保参数类型正确
+    const [comments] = await db.execute(query, [songId, offset.toString(), pageSize.toString()]);
+    const [totalResult] = await db.execute(countQuery, [songId]);
+
+    res.json({
+      message: true,
+      data: {
+        comments,
+        total: totalResult[0].total
+      }
+    });
+  } catch (error) {
+    console.error('获取评论失败:', error);
+    res.status(500).json({
+      message: false,
+      error: '获取评论失败'
+    });
+  }
+});
+
+// 获取评论的回复列表
+router.get('/comments/:commentId/replies', async (req, res) => {
+  try {
+    const commentId = req.params.commentId.toString(); // 转换为字符串
+    
+    const query = `
+      SELECT 
+        c.*,
+        u.username,
+        u.avatar,
+        ru.username as reply_to_username,
+        (SELECT COUNT(*) FROM comment_like WHERE comment_id = c.id) as like_count
+      FROM comment c
+      LEFT JOIN user u ON c.user_id = u.id
+      LEFT JOIN user ru ON c.reply_to_user_id = ru.id
+      WHERE c.parent_id = ?
+      ORDER BY c.created_at ASC
+    `;
+
+    const [replies] = await db.execute(query, [commentId]);
+
+    res.json({
+      message: true,
+      data: {
+        data: {
+          replies
+        }
+      }
+    });
+  } catch (error) {
+    console.error('获取回复失败:', error);
+    res.status(500).json({
+      message: false,
+      data: null,
+      error: '获取回复失败'
+    });
+  }
+});
+
+// 点赞评论
+router.post('/comments/:commentId/like', verifyToken, async (req, res) => {
+  try {
+    const commentId = req.params.commentId.toString(); // 确保 commentId 是字符串
+    const userId = req.user.id.toString(); // 确保 userId 是字符串
+
+    // 检查评论是否存在
+    const [comment] = await db.execute(
+      'SELECT id FROM comment WHERE id = ?',
+      [commentId]
+    );
+
+    if (comment.length === 0) {
+      return res.status(404).json({
+        message: false,
+        data: null,
+        error: '评论不存在'
+      });
+    }
+
+    // 检查是否已经点赞
+    const [existingLike] = await db.execute(
+      'SELECT * FROM comment_like WHERE comment_id = ? AND user_id = ?',
+      [commentId, userId]
+    );
+
+    if (existingLike.length > 0) {
+      // 如果已经点赞，则取消点赞
+      await db.execute(
+        'DELETE FROM comment_like WHERE comment_id = ? AND user_id = ?',
+        [commentId, userId]
+      );
+    } else {
+      // 如果未点赞，则添加点赞
+      await db.execute(
+        'INSERT INTO comment_like (comment_id, user_id) VALUES (?, ?)',
+        [commentId, userId]
+      );
+    }
+
+    // 获取最新点赞数
+    const [likeCount] = await db.execute(
+      'SELECT COUNT(*) as count FROM comment_like WHERE comment_id = ?',
+      [commentId]
+    );
+
+    res.json({
+      message: true,
+      data: {
+        data: {
+          likeCount: likeCount[0].count,
+          isLiked: existingLike.length === 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('点赞操作失败:', error);
+    res.status(500).json({
+      message: false,
+      data: null,
+      error: '点赞操作失败'
+    });
+  }
+});
+
+// 删除评论
+router.delete('/comments/:commentId', verifyToken, async (req, res) => {
+  try {
+    const commentId = req.params.commentId;
+    const userId = req.user.id;
+
+    // 检查是否是评论作者
+    const [comment] = await db.query(
+      'SELECT user_id FROM comment WHERE id = ?',
+      [commentId]
+    );
+
+    if (comment.length === 0) {
+      return res.status(404).json({
+        message: false,
+        error: '评论不存在'
+      });
+    }
+
+    if (comment[0].user_id !== userId) {
+      return res.status(403).json({
+        message: false,
+        error: '无权删除该评论'
+      });
+    }
+
+    // 删除评论及其所有回复
+    await db.execute('DELETE FROM comment WHERE id = ? OR parent_id = ?', [commentId, commentId]);
+
+    res.json({
+      message: true,
+      data: '删除成功'
+    });
+  } catch (error) {
+    console.error('删除评论失败:', error);
+    res.status(500).json({
+      message: false,
+      error: '删除评论失败'
+    });
+  }
+});
+
+// 发表评论
+router.post('/comments', verifyToken, async (req, res) => {
+  try {
+    const { songId, text, parentId, replyToUserId } = req.body;
+    const userId = req.user.id;
+
+    // 验证必要参数
+    if (!songId || !text) {
+      return res.status(400).json({
+        message: false,
+        data: null,
+        error: '缺少必要参数'
+      });
+    }
+
+    // 检查歌曲是否存在
+    const [song] = await db.execute('SELECT id FROM song WHERE id = ?', [songId]);
+    if (song.length === 0) {
+      return res.status(404).json({
+        message: false,
+        data: null,
+        error: '歌曲不存在'
+      });
+    }
+
+    // 如果是回复评论，检查父评论是否存在
+    if (parentId) {
+      const [parentComment] = await db.execute(
+        'SELECT id FROM comment WHERE id = ?',
+        [parentId]
+      );
+      if (parentComment.length === 0) {
+        return res.status(404).json({
+          message: false,
+          data: null,
+          error: '父评论不存在'
+        });
+      }
+    }
+
+    // 插入评论
+    const query = `
+      INSERT INTO comment 
+        (song_id, user_id, text, parent_id, reply_to_user_id, created_at) 
+      VALUES 
+        (?, ?, ?, ?, ?, NOW())
+    `;
+
+    const [result] = await db.execute(query, [
+      songId,
+      userId,
+      text,
+      parentId || null,
+      replyToUserId || null
+    ]);
+
+    // 获取新创建的评论详情
+    const [newComment] = await db.execute(`
+      SELECT 
+        c.*,
+        u.username,
+        u.avatar,
+        ru.username as reply_to_username
+      FROM comment c
+      LEFT JOIN user u ON c.user_id = u.id
+      LEFT JOIN user ru ON c.reply_to_user_id = ru.id
+      WHERE c.id = ?
+    `, [result.insertId]);
+
+    res.json({
+      message: true,
+      data: {
+        data: newComment[0]
+      }
+    });
+
+  } catch (error) {
+    console.error('发表评论失败:', error);
+    res.status(500).json({
+      message: false,
+      data: null,
+      error: '发表评论失败'
+    });
+  }
+});
+
+
+//----------------------------------评论相关接口----------------------------------
 
 
 

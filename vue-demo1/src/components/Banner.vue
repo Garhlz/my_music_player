@@ -38,7 +38,8 @@ export default {
   },
   methods: {
     goToProfile() {
-      this.$router.push('/profile');
+      const userId = localStorage.getItem('userId');
+      this.$router.push(`/profile/${userId}`);
     },
     logout() {
       localStorage.removeItem('token');

@@ -133,6 +133,36 @@ CREATE TABLE IF NOT EXISTS user_likes (
     UNIQUE KEY unique_user_song (user_id, song_id)
 );
 
+-- 评论点赞表
+CREATE TABLE `comment_like` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `comment_id` int NOT NULL COMMENT '评论ID',
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_comment_user` (`comment_id`, `user_id`) COMMENT '确保用户对同一评论只能点赞一次',
+  CONSTRAINT `fk_comment_like_comment` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_comment_like_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评论点赞表';
+
+-- 关注关系表
+CREATE TABLE follow (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    follower_id INT NOT NULL,  -- 关注者ID
+    following_id INT NOT NULL, -- 被关注者ID
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (follower_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (following_id) REFERENCES user(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_follow (follower_id, following_id) -- 防止重复关注
+);
+
+-- 修改用户表，添加新字段
+ALTER TABLE user
+ADD COLUMN bio TEXT AFTER avatar,           -- 个人简介
+ADD COLUMN gender TINYINT DEFAULT 0 AFTER bio,  -- 性别：0-保密，1-男，2-女
+ADD COLUMN birthday DATE AFTER gender,      -- 生日
+ADD COLUMN location VARCHAR(100) AFTER birthday; -- 地区
+
 -- 插入示例数据
 -- 插入用户数据
 INSERT INTO `user` (`username`, `password`, `name`, `phone`, `email`, `sex`) VALUES
@@ -187,3 +217,8 @@ INSERT INTO `comment` (`user_id`, `song_id`, `text`) VALUES
 (1, 1, '这首歌真好听！'),
 (2, 1, '经典之作'),
 (1, 2, '很有感觉的一首歌');
+
+-- 修改评论表，添加回复目标用户字段
+ALTER TABLE `comment` 
+ADD COLUMN `reply_to_user_id` int DEFAULT NULL COMMENT '回复目标用户ID' AFTER `parent_id`,
+ADD CONSTRAINT `fk_comment_reply_to_user` FOREIGN KEY (`reply_to_user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL; 

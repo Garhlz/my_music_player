@@ -3,14 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 const Login = () => import('@/pages/Login.vue');
 const Register = () => import('@/pages/Register.vue');
 const PublicPlaylist = () => import('@/pages/PublicPlaylist.vue');
-const Comments = () => import('@/pages/Comments.vue');
+// const Comments = () => import('@/pages/Comments.vue');
 const ManageSongs = () => import('@/pages/ManageSongs.vue');
-const Profile = () => import('@/pages/Profile.vue');
+
 const Player = () => import('@/pages/Player.vue');
 const ManageUsers = () => import('@/pages/ManageUsers.vue');
 const MyPlaylist = () => import('@/pages/MyPlaylist.vue');
 const MyLove = () => import('@/pages/MyLove.vue');
-const MyAlbum = () => import('@/pages/MyAlbum.vue');
+// const MyAlbum = () => import('@/pages/MyAlbum.vue');
 const Uploaded = () => import('@/pages/Uploaded.vue');
 
 const routes = [
@@ -39,11 +39,11 @@ const routes = [
     name: 'PublicPlaylist1',
     component: PublicPlaylist
   },
-  {
-    path: '/comments',
-    name: 'Comments',
-    component: Comments
-  },
+  // {
+  //   path: '/comments',
+  //   name: 'Comments',
+  //   component: Comments
+  // },
   {
     path: '/manage-songs',
     name: 'ManageSongs',
@@ -55,9 +55,10 @@ const routes = [
     component: ManageUsers
   },
   {
-    path: '/profile',
+    path: '/profile/:id',
     name: 'Profile',
-    component: Profile
+    component: () => import('@/pages/UserProfile.vue')
+    // component: () => import('@/pages/Profile.vue')
   },
   {
     path: '/player',
@@ -74,11 +75,11 @@ const routes = [
     name: 'MyLove',
     component: MyLove
   },
-  {
-    path: '/my-album',
-    name: 'MyAlbum',
-    component: MyAlbum
-  },
+  // {
+  //   path: '/my-album',
+  //   name: 'MyAlbum',
+  //   component: MyAlbum
+  // },
   {
     path: '/uploaded',
     name: 'Uploaded',
@@ -98,6 +99,11 @@ const routes = [
     path: '/artist/:id',
     name: 'ArtistDetail',
     component: () => import('@/pages/Artists.vue')
+  },
+  {
+    path: '/comment/:id',
+    name: 'CommentDetail',
+    component: () => import('@/pages/CommentOfSong.vue')
   },
 ];
 

@@ -87,7 +87,7 @@
                 </el-tooltip> -->
                 <!-- 暂时废弃这个功能不显示 -->
                 <el-tooltip content="评论" placement="top">
-                  <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
+                  <el-icon @click="goToComment(song)"><ChatDotRound /></el-icon>
                 </el-tooltip>
               </div>
             </div>
@@ -383,9 +383,8 @@ const addAlbum = (song) => {
   ElMessage.success(`已收藏专辑: ${song.album.name}`)
 }
 
-// 显示评论
-const showComments = (song) => {
-  router.push(`/song/${song.id}/comments`)
+const goToComment = (song) => {
+  router.push(`/comment/${song.id}`)
 }
 
 // 格式化时长

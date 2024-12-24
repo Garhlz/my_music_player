@@ -31,10 +31,10 @@
       <span>收藏的专辑</span>
     </el-menu-item> -->
     
-    <el-menu-item index="/comments" @click="navigateTo('/comments')">
+    <!-- <el-menu-item index="/comments" @click="navigateTo('/comments')">
       <el-icon><ChatDotRound /></el-icon>
       <span>所有评论</span>
-    </el-menu-item>
+    </el-menu-item> -->
 
     <el-menu-item index="/uploaded" @click="navigateTo('/uploaded')">
       <el-icon><Upload /></el-icon>

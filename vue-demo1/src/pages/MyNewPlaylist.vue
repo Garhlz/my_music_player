@@ -125,7 +125,7 @@
                     <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
                   </el-tooltip>
                   <el-tooltip content="评论" placement="top">
-                    <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
+                    <el-icon @click="goToComment(song)"><ChatDotRound /></el-icon>
                   </el-tooltip>
                   <el-tooltip content="下载" placement="top">
                     <el-icon @click="downloadSong(song)"><Download /></el-icon>
@@ -326,7 +326,7 @@ const loadData = async () => {
     if (!songsResponse.data.message) {
       throw new Error(songsResponse.data.error || '获取歌曲列表失败')
     }
-    
+
     const songsData = songsResponse.data.data;
     totalSongs.value = songsData.total;
     const songsList = songsData.songs || []
@@ -490,6 +490,11 @@ const goToAlbum = (albumId) => {
     ElMessage.error("专辑不存在!")
   }
 }
+
+const goToComment = (song) => {
+  router.push(`/comment/${song.id}`)
+}
+
 
 const removeSong = async (song) => {
   try {

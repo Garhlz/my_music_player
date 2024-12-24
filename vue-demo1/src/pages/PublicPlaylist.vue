@@ -83,7 +83,7 @@
                   <el-icon @click="addAlbum(song)"><FolderAdd /></el-icon>
                 </el-tooltip> -->
                 <el-tooltip content="评论" placement="top">
-                  <el-icon @click="showComments(song)"><ChatDotRound /></el-icon>
+                  <el-icon @click="goToComment(song)"><ChatDotRound /></el-icon>
                 </el-tooltip>
                 <el-tooltip content="下载" placement="top">
                   <el-icon @click="downloadSong(song)"><Download /></el-icon>
@@ -436,6 +436,10 @@ const goToAlbum = (albumId) => {
 const goToPlayer = (song) => {
   handlePlaySong(song) // 点击封面时同时开始播放
   router.push('/player')
+}
+
+const goToComment = (song) => {
+  router.push(`/comment/${song.id}`)
 }
 
 // 生命周期钩子
