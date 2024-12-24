@@ -5,7 +5,7 @@
 
 确保安装了nodejs 
 
-创建数据库，在/express-demo1/.env中修改数据库连接，数据库的数据可以自己生成，注意数据库中存储的是密文 
+通过/create_database.sql创建数据库，在/express-demo1/.env中修改数据库连接，数据库的数据可以自己（找ai）生成，注意password存储的是密文，建议手动添加一个管理员账号 
 
 后端使用了express-generator生成项目结构 
 切换到/express-demo1目录，终端输入npm install下载依赖 
