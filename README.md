@@ -16,6 +16,8 @@
 
 终端输入npm run dev启动前端服务 
 
+部分演示音乐和图片已经存放在/vue-demo1/assets/中
+
 # 重要信息
 后端接口全部定义在/express-demo1/routeFile.js中，前端则全部定义在/vue-demo1/src/api/axiosFile.js中 
 
