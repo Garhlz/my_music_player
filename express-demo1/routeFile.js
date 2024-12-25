@@ -375,7 +375,7 @@ router.get('/liked-songs/:id', verifyToken, async (req, res) => {
 // 获取用户喜欢的歌曲，分页查询
 router.get('/liked-songs', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.query.id;
     // 确保所有参数都被正确转换
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
@@ -540,7 +540,9 @@ router.delete('/like/:songId', verifyToken, async (req, res) => {
 // 获取用户歌单列表
 router.get('/my-playlists', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id.toString(); // 转为字符串
+    // const userId = req.user.id.toString(); // 转为字符串
+    //这里修改，不能从拦截器添加的当前用户id处获取，逻辑错误
+    const userId = req.query.id;
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const offset = (page - 1) * pageSize; // 保持为数字

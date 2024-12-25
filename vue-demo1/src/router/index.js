@@ -66,12 +66,12 @@ const routes = [
     component: Player
   },
   {
-    path: '/my-playlist',
+    path: '/my-playlist/:id',
     name: 'MyPlaylist',
     component: MyPlaylist
   },
   {
-    path: '/my-love',
+    path: '/my-love/:id',
     name: 'MyLove',
     component: MyLove
   },
@@ -105,11 +105,11 @@ const routes = [
     name: 'CommentDetail',
     component: () => import('@/pages/CommentOfSong.vue')
   },
-  {
-    path: '/test/:id',
-    name: 'Test',
-    component: () => import('@/pages/test.vue')
-  }
+  // {
+  //   path: '/test/:id',
+  //   name: 'Test',
+  //   component: () => import('@/pages/test.vue')
+  // }
 ];
 
 const router = createRouter({

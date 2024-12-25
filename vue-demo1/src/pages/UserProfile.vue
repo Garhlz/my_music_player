@@ -28,6 +28,25 @@
                 </div>
               </div>
               <div class="right-section">
+                <!-- 添加快捷操作按钮 -->
+                <div class="quick-actions">
+                  <el-button 
+                    type="primary" 
+                    class="action-btn"
+                    @click="router.push(`/my-love/${userInfo?.id}`)"
+                  >
+                    <el-icon><Star /></el-icon>
+                    喜欢的音乐
+                  </el-button>
+                  <el-button 
+                    type="primary" 
+                    class="action-btn"
+                    @click="router.push(`/my-playlist/${userInfo?.id}`)"
+                  >
+                    <el-icon><Menu /></el-icon>
+                    查看歌单
+                  </el-button>
+                </div>
                 <div class="user-stats">
                   <div class="stat-item" v-for="(stat, index) in userStats" :key="index">
                     <h3>{{ stat.value }}</h3>
@@ -161,14 +180,15 @@
 <script setup>
 import CommonLayout from '@/layouts/CommonLayout.vue'
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { getUserInfo, updateUserInfo } from '@/api/axiosFile'
 import { ElMessage } from 'element-plus'
-import { Plus, Edit } from '@element-plus/icons-vue'
+import { Plus, Edit, Star, Menu } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const userStore = useUserStore()
+const router = useRouter()
 
 // 状态变量
 const isLoading = ref(false)
@@ -226,7 +246,7 @@ const fetchUserInfo = async () => {
     }
   } catch (error) {
     console.error('获取用户信息失败:', error)
-    ElMessage.error('获取用户信息失败')
+    ElMessage.error('获取用户��息失败')
   } finally {
     isLoading.value = false
   }
@@ -353,7 +373,10 @@ onMounted(() => {
 }
 
 .right-section {
-  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
 }
 
 .user-stats {
@@ -458,6 +481,54 @@ onMounted(() => {
 
   .edit-btn {
     margin-top: 12px;
+  }
+}
+
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.2);
+}
+
+.action-btn .el-icon {
+  font-size: 18px;
+}
+
+.right-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .quick-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .right-section {
+    align-items: center;
   }
 }
 </style> 

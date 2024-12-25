@@ -159,8 +159,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -170,12 +170,12 @@ import {
   Delete,
   View
 } from '@element-plus/icons-vue'
-import { getMyPlaylists, createPlaylist, deletePlaylist, updatePlaylist } from '@/api/axiosFile'
+import { getMyPlaylists, createPlaylist, deletePlaylist, updatePlaylist, getUserInfo } from '@/api/axiosFile'
 import CommonLayout from '@/layouts/CommonLayout.vue'
 import { usePlayerStore } from '@/stores/player'
 
 // 响应式状态
-const currentName = ref('我的歌单')
+const currentName = ref('')
 const playlists = ref([])
 const page = ref(1)
 const pageSize = ref(12)
@@ -199,12 +199,37 @@ const sortBy = ref('latest')
 
 const router = useRouter()
 const playerStore = usePlayerStore()
+const route = useRoute()
+
+// 获取用户信息并设置标题
+const setPageTitle = async () => {
+  try {
+    const userId = route.params.id
+    const userStr = localStorage.getItem('userId')
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    
+    if (userId === currentUser?.id) {
+      currentName.value = '我的歌单'
+    } else {
+      // 获取目标用户信息
+      const response = await getUserInfo(userId)
+      if (response.data.message) {
+        const targetUser = response.data.data.data
+        currentName.value = `${targetUser.name || targetUser.username}的歌单`
+      }
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+    currentName.value = '歌单'
+  }
+}
 
 // 加载数据
 const loadData = async () => {
   isLoading.value = true
   try {
     const response = await getMyPlaylists({
+      id: route.params.id,
       page: page.value,
       pageSize: pageSize.value,
       search: searchQuery.value
@@ -339,7 +364,13 @@ const navigateToDetail = (id) => {
 
 // 生命周期钩子
 onMounted(() => {
+  setPageTitle()
   loadData()
+})
+
+// 监听路由变化，更新标题
+watch(() => route.params.id, () => {
+  setPageTitle()
 })
 
 onBeforeUnmount(() => {

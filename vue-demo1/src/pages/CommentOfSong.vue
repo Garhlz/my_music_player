@@ -55,10 +55,16 @@
             <div v-for="comment in comments" :key="comment.id" class="comment-item">
               <!-- 主评论 -->
               <div class="comment-main">
-                <el-avatar :src="comment.avatar" />
+                <el-avatar 
+                  :src="comment.avatar" 
+                  class="clickable-avatar"
+                  @click="goToUserProfile(comment.user_id)"
+                />
                 <div class="comment-content">
                   <div class="comment-header">
-                    <span class="username">{{ comment.username }}</span>
+                    <span class="username clickable" @click="goToUserProfile(comment.user_id)">
+                      {{ comment.name || comment.username }}
+                    </span>
                     <span class="time">{{ formatTime(comment.created_at) }}</span>
                   </div>
                   <p class="text">{{ comment.text }}</p>
@@ -83,16 +89,22 @@
                   <!-- 嵌套的回复列表 -->
                   <div v-if="comment.replies && comment.replies.length > 0" class="replies">
                     <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
-                      <el-avatar :size="30" :src="reply.avatar" />
+                      <el-avatar 
+                        :size="30" 
+                        :src="reply.avatar"
+                        class="clickable-avatar"
+                        @click="goToUserProfile(reply.user_id)"
+                      />
                       <div class="reply-content">
                         <div class="reply-header">
-                          <span class="username">{{ reply.username }}</span>
+                          <span class="username clickable" @click="goToUserProfile(reply.user_id)">
+                            {{ reply.name || reply.username }}
+                          </span>
                           <span class="time">{{ formatTime(reply.created_at) }}</span>
                         </div>
                         <p class="text">
                           <el-tag size="small" class="reply-tag" type="info">
-                            <el-icon><ChatDotRound /></el-icon>
-                            回复 @{{ reply.reply_to_username || comment.username }}
+                            回复 @{{ reply.reply_to_name || reply.reply_to_username || comment.name || comment.username }}
                           </el-tag>
                           {{ reply.text }}
                         </p>
@@ -140,7 +152,7 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowUpBold, ChatLineRound, ChatDotRound } from '@element-plus/icons-vue'
 import CommonLayout from '@/layouts/CommonLayout.vue'
@@ -156,6 +168,7 @@ import { useUserStore } from '@/stores/user'
 
 const currentName = ref('评论详情')
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 const currentUser = userStore.userInfo
 const isLoading = ref(false)
@@ -260,7 +273,8 @@ const showReplyInput = (comment, replyTo = null) => {
 activeReplyTarget.value = {
   id: replyTo ? replyTo.user_id : comment.user_id,
   username: replyTo ? replyTo.username : comment.username,
-  parentId: comment.id  // 保存父评论ID，确保回复正确关联
+  name: replyTo ? replyTo.name : comment.name,
+  parentId: comment.id
 }
 newComment.value = ''
 }
@@ -313,6 +327,13 @@ fetchComments()
 const handleCurrentChange = (page) => {
 currentPage.value = page
 fetchComments()
+}
+
+// 跳转到用户主页
+const goToUserProfile = (userId) => {
+  if (userId) {
+    router.push(`/profile/${userId}`)
+  }
 }
 
 // 页面加载时获取数据
@@ -513,5 +534,25 @@ gap: 4px;
 margin-top: 8px;
 display: flex;
 gap: 16px;
+}
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.clickable-avatar:hover {
+  transform: scale(1.05);
+}
+
+.username.clickable {
+  cursor: pointer;
+  color: var(--el-color-primary);
+  transition: color 0.2s;
+}
+
+.username.clickable:hover {
+  color: var(--el-color-primary-light-3);
+  text-decoration: underline;
 }
 </style> 

@@ -200,8 +200,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { 
   Search, 
@@ -219,13 +219,14 @@ import {
   removeLikedSong,
   getMyPlaylists, // 直接都采用相同的接口函数即可
   createPlaylist,
-  addSongToPlaylist 
+  addSongToPlaylist,
+  getUserInfo,
 } from '@/api/axiosFile'
 import { usePlayerStore } from '@/stores/player'
 import CommonLayout from '@/layouts/CommonLayout.vue'
 
 // 响应式状态
-const currentName = ref('我喜欢的音乐')
+const currentName = ref('')
 const songs = ref([])
 const page = ref(1)
 const pageSize = ref(10)
@@ -237,6 +238,7 @@ const hoveredSong = ref(null)
 
 const router = useRouter()
 const playerStore = usePlayerStore()
+const route = useRoute()
 
 // 歌单相关的响应式变量
 const playlistDialogVisible = ref(false)
@@ -252,12 +254,12 @@ const loadData = async () => {
   isLoading.value = true
   try {
     const response = await getLikedSongs({
+      id: route.params.id,
       page: page.value,
       pageSize: pageSize.value,
       search: searchQuery.value,
       sortBy: sortBy.value
     })
-    console.log(response);
     if (response.data.message) {
       songs.value = response.data.data.list
       totalSongs.value = response.data.data.total
@@ -314,7 +316,6 @@ const addToPlaylist = async (song) => {
   try {
     const response = await getMyPlaylists()
     if (response.data.message) {
-      // console.log(response.data.data);
       userPlaylists.value = response.data.data.playlists
     } else {
       throw new Error(response.data.error || '获取歌单失败')
@@ -377,11 +378,11 @@ const confirmAddToPlaylist = async () => {
   }
 }
 
-const addAlbum = (song) => {
-  console.log(song);
-  // playerStore.setPlaylist([song])
-  ElMessage.success(`已收藏专辑: ${song.album.name}`)
-}
+// const addAlbum = (song) => {
+//   console.log(song);
+//   // playerStore.setPlaylist([song])
+//   ElMessage.success(`已收藏专辑: ${song.album.name}`)
+// }
 
 const goToComment = (song) => {
   router.push(`/comment/${song.id}`)
@@ -417,9 +418,40 @@ const goToPlayer = (song) => {
   handlePlaySong(song) // 点击封面时同时开始播放
   router.push('/player')
 }
+
+// 获取用户信息并设置标题
+const setPageTitle = async () => {
+  try {
+    const userId = route.params.id
+    const userStr = localStorage.getItem('userId')
+    const currentUser = userStr ? JSON.parse(userStr) : null
+
+    if (userId === currentUser?.id) {
+      currentName.value = '我喜欢的音乐'
+    } else {
+      // 获取目标用户信息
+      const response = await getUserInfo(userId)
+      console.log(response)
+      if (response.data.message) {
+        const targetUser = response.data.data.data
+        currentName.value = `${targetUser.name || targetUser.username}喜欢的音乐`
+      }
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+    currentName.value = '喜欢的音乐'
+  }
+}
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadData()
+  setPageTitle()
+})
+
+// 监听路由变化，更新标题
+watch(() => route.params.id, () => {
+  setPageTitle()
 })
 </script>
 
