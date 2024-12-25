@@ -105,6 +105,11 @@ const routes = [
     name: 'CommentDetail',
     component: () => import('@/pages/CommentOfSong.vue')
   },
+  {
+    path: '/test/:id',
+    name: 'Test',
+    component: () => import('@/pages/test.vue')
+  }
 ];
 
 const router = createRouter({

@@ -123,13 +123,13 @@ router.get('/user/:id', async (req, res) => {
   }
 });
 
-// 更新用户信息（需要验证身份）
+// 更新用户信息
 router.put('/user/:id', verifyToken, async (req, res) => {
   try {
     const userId = req.params.id;
     
     // 验证是否是当前用户
-    if (userId !== req.user.id) {
+    if (userId.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         message: false,
         data: null,

@@ -178,6 +178,10 @@ export const deleteComment = async (commentId) => {
 };
 //----------------------------------评论相关接口----------------------------------
 
+
+
+
+//----------------------------------用户相关接口----------------------------------
 // 获取用户信息
 export const getUserInfo = async (userId) => {
   const resp = await api.get(`/user/${userId}`);
@@ -189,7 +193,7 @@ export const updateUserInfo = async (userId, data) => {
   const resp = await api.put(`/user/${userId}`, data);
   return resp;
 };
-
+//----------------------------------用户相关接口----------------------------------
 
 
 
