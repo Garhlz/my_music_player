@@ -294,7 +294,9 @@
     playlistDialogVisible.value = true
     
     try {
-      const response = await getMyPlaylists()
+      const response = await getMyPlaylists({
+      id: parseInt(localStorage.getItem('userId')),
+    })
       if (response.data.message) {
         userPlaylists.value = response.data.data.playlists
       } else {
@@ -446,9 +448,16 @@
   
   .playlist-info-card {
     padding: 24px;
-    background-color: #fff;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: 12px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+  
+  .playlist-info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   }
   
   .playlist-cover {
@@ -464,6 +473,11 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+  
+  .playlist-cover:hover .el-image {
+    transform: scale(1.1);
   }
   
   .playlist-info-card h2 {
@@ -471,6 +485,7 @@
     font-size: 24px;
     color: #303133;
     text-align: center;
+    transition: color 0.3s ease;
   }
   
   .playlist-info {
@@ -509,6 +524,12 @@
   
   .search-input {
     width: 300px;
+    transition: all 0.3s ease;
+  }
+  
+  .search-input:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
   
   .song-list {
@@ -561,8 +582,12 @@
   
   .play-icon {
     cursor: pointer;
-    color: #409EFF;
-    font-size: 16px;
+    color: var(--el-color-primary);
+    transition: transform 0.3s ease;
+  }
+  
+  .play-icon:hover {
+    transform: scale(1.2);
   }
   
   .col-actions .el-button {
@@ -583,17 +608,24 @@
   .action-buttons .el-icon {
     font-size: 16px;
     cursor: pointer;
-    color: #606266;
-    transition: all 0.3s;
+    color: var(--el-text-color-secondary);
+    transition: all 0.3s ease;
   }
   
   .action-buttons .el-icon:hover {
-    color: #409EFF;
+    color: var(--el-color-primary);
     transform: scale(1.2);
   }
   
   .action-buttons .liked {
-    color: #F56C6C;
+    color: #ff4757;
+    animation: heartBeat 0.3s ease-in-out;
+  }
+  
+  @keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
   }
   
   
@@ -741,6 +773,41 @@
       width: 48px;
       height: 48px;
     }
+  }
+  
+  /* 添加跳转提示动画 */
+  .col-artist,
+  .col-album {
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  
+  .col-artist:hover,
+  .col-album:hover {
+    color: var(--el-color-primary);
+  }
+  
+  .col-artist::after,
+  .col-album::after {
+    content: '→';
+    position: absolute;
+    right: -20px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+  }
+  
+  .col-artist:hover::after,
+  .col-album:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  /* 添加点击反馈动画 */
+  .col-artist:active,
+  .col-album:active {
+    transform: scale(0.98);
   }
   </style>
     

@@ -19,7 +19,7 @@
               <el-option label="最早" value="oldest" />
             </el-select>
           </div>
-          <el-button type="primary" @click="createDialogVisible = true">
+          <el-button  v-if="isCurrentUser" type="primary" @click="createDialogVisible = true">
             新建歌单
           </el-button>
         </div>
@@ -62,18 +62,20 @@
                       @click.stop="navigateToDetail(playlist.id)"
                       title="查看详情"
                     />
-                    <el-button 
-                      circle 
-                      :icon="Edit"
-                      @click.stop="handleEdit(playlist)"
-                      title="编辑歌单"
-                    />
-                    <el-button 
-                      circle 
-                      :icon="Delete"
-                      @click.stop="handleDelete(playlist)"
-                      title="删除歌单"
-                    />
+                    <template v-if="isCurrentUser">
+                      <el-button 
+                        circle 
+                        :icon="Edit"
+                        @click.stop="handleEdit(playlist)"
+                        title="编辑歌单"
+                      />
+                      <el-button 
+                        circle 
+                        :icon="Delete"
+                        @click.stop="handleDelete(playlist)"
+                        title="删除歌单"
+                      />
+                    </template>
                   </div>
                 </div>
               </div>
@@ -129,6 +131,7 @@
         <!-- 编辑歌单对话框 -->
         <el-dialog
           v-model="editDialogVisible"
+          v-if="isCurrentUser"
           title="编辑歌单"
           width="400px"
           @close="resetEditData"
@@ -159,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -173,6 +176,10 @@ import {
 import { getMyPlaylists, createPlaylist, deletePlaylist, updatePlaylist, getUserInfo } from '@/api/axiosFile'
 import CommonLayout from '@/layouts/CommonLayout.vue'
 import { usePlayerStore } from '@/stores/player'
+
+const isCurrentUser = computed(() => {
+  return (parseInt(localStorage.getItem('userId'))) === parseInt(route.params.id)
+})
 
 // 响应式状态
 const currentName = ref('')

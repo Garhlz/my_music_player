@@ -71,23 +71,33 @@
                 {{ formatDuration(song.duration) }}
               </template>
               <div v-else class="action-buttons">
-                <el-tooltip content="取消喜欢" placement="top">
-                  <el-icon 
-                    @click="unlikeSong(song)"
-                    :style="{ color: '#ffcc00' }"
-                  >
-                    <Star />
-                  </el-icon>
-                </el-tooltip>
+                <!-- 当前用户查看自己的喜欢列表时显示删除按钮 -->
+                <template v-if="isCurrentUser">
+                  <el-tooltip content="删除" placement="top">
+                    <el-icon 
+                      @click.stop="unlikeSong(song)"
+                      class="delete-icon"
+                    >
+                      <Delete />
+                    </el-icon>
+                  </el-tooltip>
+                </template>
+                <!-- 其他用户查看时显示喜欢按钮 -->
+                <template v-else>
+                  <el-tooltip content="喜欢" placement="top">
+                    <el-icon 
+                      @click.stop="likeSong(song)"
+                      :class="{ 'liked': likedSongs.includes(song.id) }"
+                    >
+                      <Star />
+                    </el-icon>
+                  </el-tooltip>
+                </template>
                 <el-tooltip content="添加到播放列表" placement="top">
-                  <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
+                  <el-icon @click.stop="addToPlaylist(song)"><Plus /></el-icon>
                 </el-tooltip>
-                <!-- <el-tooltip content="收藏专辑" placement="top">
-                  <el-icon @click="goToAlbum(song.album_id)"><FolderAdd /></el-icon>
-                </el-tooltip> -->
-                <!-- 暂时废弃这个功能不显示 -->
                 <el-tooltip content="评论" placement="top">
-                  <el-icon @click="goToComment(song)"><ChatDotRound /></el-icon>
+                  <el-icon @click.stop="goToComment(song)"><ChatDotRound /></el-icon>
                 </el-tooltip>
               </div>
             </div>
@@ -154,7 +164,7 @@
                       />
                       <div class="playlist-details">
                         <div class="playlist-name">{{ playlist.name }}</div>
-                        <div class="playlist-description">{{ playlist.description || '暂无描述' }}</div>
+                        <div class="playlist-description">{{ playlist.description || '暂无��述' }}</div>
                         <div class="playlist-count">{{ playlist.song_count || 0 }}首歌曲</div>
                       </div>
                     </div>
@@ -212,7 +222,8 @@ import {
   FolderAdd,
   ChatDotRound,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Delete
 } from '@element-plus/icons-vue'
 import { 
   getLikedSongs, 
@@ -221,6 +232,8 @@ import {
   createPlaylist,
   addSongToPlaylist,
   getUserInfo,
+  getLikedSongsById,
+  addLikedSong
 } from '@/api/axiosFile'
 import { usePlayerStore } from '@/stores/player'
 import CommonLayout from '@/layouts/CommonLayout.vue'
@@ -248,6 +261,10 @@ const newPlaylistName = ref('')
 const newPlaylistDescription = ref('')
 const userPlaylists = ref([])
 const selectedSong = ref(null)
+
+// 添加新的响应式变量
+const isCurrentUser = ref(false)
+const likedSongs = ref([])
 
 // 加载数据
 const loadData = async () => {
@@ -303,7 +320,7 @@ const unlikeSong = async (song) => {
   try {
     await removeLikedSong(song.id)
     ElMessage.success(`已取消喜欢: ${song.name}`)
-    await loadData() // 重新加载数据
+    await loadData() // 重��加载数据
   } catch (error) {
     console.error('取消喜欢失败:', error)
     ElMessage.error('操作失败，请稍后重试')
@@ -314,7 +331,10 @@ const addToPlaylist = async (song) => {
   playlistDialogVisible.value = true
   //在这里修改显示状态，然后弹出一个弹窗
   try {
-    const response = await getMyPlaylists()
+    const response = await getMyPlaylists({
+      id: parseInt(localStorage.getItem('userId')),
+    })
+    console.log(response)
     if (response.data.message) {
       userPlaylists.value = response.data.data.playlists
     } else {
@@ -425,21 +445,44 @@ const setPageTitle = async () => {
     const userId = route.params.id
     const userStr = localStorage.getItem('userId')
     const currentUser = userStr ? JSON.parse(userStr) : null
-
-    if (userId === currentUser?.id) {
+    
+    isCurrentUser.value = userId === currentUser?.id
+    
+    if (isCurrentUser.value) {
       currentName.value = '我喜欢的音乐'
     } else {
-      // 获取目标用户信息
       const response = await getUserInfo(userId)
-      console.log(response)
       if (response.data.message) {
         const targetUser = response.data.data.data
         currentName.value = `${targetUser.name || targetUser.username}喜欢的音乐`
+        // 获取当前用户的喜欢列表
+        const likedResponse = await getLikedSongsById(currentUser?.id)
+        if (likedResponse.data.message) {
+          likedSongs.value = likedResponse.data.data || []
+        }
       }
     }
   } catch (error) {
     console.error('获取用户信息失败:', error)
     currentName.value = '喜欢的音乐'
+  }
+}
+
+// 添加喜欢歌曲的方法
+const likeSong = async (song) => {
+  try {
+    if (likedSongs.value.includes(song.id)) {
+      await removeLikedSong(song.id)
+      likedSongs.value = likedSongs.value.filter(id => id !== song.id)
+      ElMessage.success(`已取消喜欢: ${song.name}`)
+    } else {
+      await addLikedSong(song.id)
+      likedSongs.value.push(song.id)
+      ElMessage.success(`已添加到我喜欢: ${song.name}`)
+    }
+  } catch (error) {
+    console.error('操作失败:', error)
+    ElMessage.error('操作失败，请稍后重试')
   }
 }
 
@@ -831,5 +874,27 @@ watch(() => route.params.id, () => {
     width: 48px;
     height: 48px;
   }
+}
+
+.delete-icon {
+  color: var(--el-color-danger);
+  transition: all 0.3s;
+}
+
+.delete-icon:hover {
+  transform: scale(1.1);
+  color: var(--el-color-danger-dark-2);
+}
+
+.liked {
+  color: #ffcc00 !important;
+  transform: scale(1.1);
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1.1); }
 }
 </style>

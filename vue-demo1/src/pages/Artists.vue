@@ -294,7 +294,9 @@
     playlistDialogVisible.value = true
     
     try {
-      const response = await getMyPlaylists()
+      const response = await getMyPlaylists({
+      id: parseInt(localStorage.getItem('userId')),
+    })
       if (response.data.message) {
         userPlaylists.value = response.data.data.playlists
       } else {
@@ -446,9 +448,15 @@
   
   .playlist-info-card {
     padding: 24px;
-    background-color: #fff;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: 12px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+  }
+  
+  .playlist-info-card:hover {
+    transform: translateY(-4px);
   }
   
   .playlist-cover {
@@ -464,6 +472,11 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+  
+  .playlist-cover:hover .el-image {
+    transform: scale(1.1);
   }
   
   .playlist-info-card h2 {
@@ -509,11 +522,17 @@
   
   .search-input {
     width: 300px;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .search-input:focus-within {
+    box-shadow: 0 0 8px rgba(var(--el-color-primary-rgb), 0.2);
   }
   
   .song-list {
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   }
   
   .song-header,
@@ -526,19 +545,17 @@
   }
   
   .song-header {
-    background-color: #F5F7FA;
-    color: #909399;
-    font-size: 14px;
+    background-color: var(--el-fill-color-light);
     font-weight: 500;
   }
   
   .song-item {
     border-bottom: 1px solid #EBEEF5;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease;
   }
   
   .song-item:hover {
-    background-color: #F5F7FA;
+    background-color: var(--el-fill-color-light);
   }
   
   .song-cover {
@@ -561,8 +578,12 @@
   
   .play-icon {
     cursor: pointer;
-    color: #409EFF;
-    font-size: 16px;
+    color: var(--el-color-primary);
+    transition: transform 0.3s ease;
+  }
+  
+  .play-icon:hover {
+    transform: scale(1.2);
   }
   
   .col-actions .el-button {
@@ -576,26 +597,38 @@
   .action-buttons {
     display: flex;
     gap: 16px;
-    justify-content: flex-start;
-    align-items: center;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.3s ease;
+  }
+  
+  .song-item:hover .action-buttons {
+    opacity: 1;
+    transform: translateY(0);
   }
   
   .action-buttons .el-icon {
     font-size: 16px;
     cursor: pointer;
-    color: #606266;
-    transition: all 0.3s;
+    color: var(--el-text-color-secondary);
+    transition: all 0.3s ease;
   }
   
   .action-buttons .el-icon:hover {
-    color: #409EFF;
+    color: var(--el-color-primary);
     transform: scale(1.2);
   }
   
   .action-buttons .liked {
-    color: #F56C6C;
+    color: #ff4757;
+    animation: heartBeat 0.3s ease-in-out;
   }
   
+  @keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+  }
   
   /* 添加滚动条样式 */
   .playlist-container::-webkit-scrollbar {
@@ -741,6 +774,25 @@
       width: 48px;
       height: 48px;
     }
+  }
+  
+  .col-artist,
+  .col-album {
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .col-artist:hover,
+  .col-album:hover {
+    color: var(--el-color-primary);
+  }
+  
+  /* 优化分页器 */
+  .pagination {
+    margin-top: 20px;
+    padding: 16px 0;
+    background-color: var(--el-bg-color);
+    border-radius: 8px;
   }
   </style>
     

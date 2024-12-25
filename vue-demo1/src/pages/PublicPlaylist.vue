@@ -323,9 +323,11 @@ const addToPlaylist = async (song) => {
   playlistDialogVisible.value = true
   //在这里修改显示状态，然后弹出一个弹窗
   try {
-    const response = await getMyPlaylists()
+    const response = await getMyPlaylists({
+      id: parseInt(localStorage.getItem('userId')),
+    })
     if (response.data.message) {
-      // console.log(response.data.data);
+      
       userPlaylists.value = response.data.data.playlists
     } else {
       throw new Error(response.data.error || '获取歌单失败')
