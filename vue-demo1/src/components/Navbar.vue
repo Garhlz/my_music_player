@@ -10,7 +10,7 @@
       <div class="logo">
         <el-icon :size="32"><Headset /></el-icon>
       </div>
-      <h1 class="site-title">音乐库</h1>
+      <h1 class="site-title">享受音乐</h1>
     </div>
 
     <div class="menu-section">
