@@ -44,7 +44,18 @@ router.post('/user/login', async (req, res) => {
 
 // 用户注册接口
 router.post('/user/register', async (req, res) => {
-    const { username, password, name, phone, email, sex } = req.body;
+    const { 
+        username, 
+        password, 
+        name, 
+        phone, 
+        email, 
+        sex,
+        bio,
+        gender,
+        birthday,
+        location 
+    } = req.body;
 
     if (!username || !password) {
         return res.status(400).json({ error: '用户名和密码不能为空' });
@@ -52,15 +63,32 @@ router.post('/user/register', async (req, res) => {
 
     try {
         const [result] = await db.execute('SELECT * FROM user WHERE username = ?', [username]);
-        const existingUser = result || []; // 确保 existingUser 是一个数组
+        const existingUser = result || [];
 
         if (existingUser.length > 0) {
             return res.status(409).json({ error: '用户名已存在' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10); // 加密密码
-        await db.execute('INSERT INTO user (username, password, name, phone, email, sex) VALUES (?, ?, ?, ?, ?, ?)', 
-            [username, hashedPassword, name, phone, email, sex]); // 存储加密后的密码
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await db.execute(`
+            INSERT INTO user (
+                username, password, name, phone, email, sex,
+                bio, gender, birthday, location, avatar, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            username, 
+            hashedPassword, 
+            name || null, 
+            phone || null, 
+            email || null, 
+            sex || null,
+            bio || null,
+            gender || 0,
+            birthday || null,
+            location || null,
+            '/assets/avatars/default-user.jpg',
+            1
+        ]);
 
         return res.status(201).json({ message: '注册成功' });
     } catch (error) {
@@ -1275,7 +1303,7 @@ router.get('/comments/:songId', async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const offset = (page - 1) * pageSize;
 
-    // 获取主评论
+    // 获取主��论
     const query = `
       SELECT 
         c.*,
