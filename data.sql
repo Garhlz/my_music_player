@@ -1,3 +1,4 @@
+SET FOREIGN_KEY_CHECKS = 0;
 INSERT INTO `artist` (`name`, `description`) VALUES
 ('The Beatles', '披头士是20世纪60年代最具影响力的英国摇滚乐队之一，他们的音乐风格对全球流行文化产生了深远影响。'),
 ('Bob Dylan', '鲍勃·迪伦是美国民谣歌手和词曲创作人，他的作品对现代音乐和社会运动有着重要的影响。');
@@ -101,3 +102,5 @@ INSERT INTO `playlist_info` (`id`, `name`, `user_id`, `cover`, `description`, `i
 INSERT INTO `playlist_songs` (`id`, `playlist_id`, `song_id`, `user_id`, `added_at`) VALUES (2,1,36,1,'2024-12-28 11:36:08'),(3,3,44,2,'2024-12-28 11:42:34'),(4,4,1,1,'2024-12-28 15:46:28');
 
 INSERT INTO `user` (`id`, `username`, `password`, `name`, `phone`, `email`, `sex`, `avatar`, `bio`, `gender`, `birthday`, `location`, `status`, `created_time`, `updated_time`) VALUES (1,'admin','$2a$10$XQ3lTxi12672s7o401OCRe8X/uvhXPZMPPtf08fQgYs48wR1dyx2S','管理员','18971548334','111@111.com',NULL,'/assets/avatars/default-user.jpg','11',1,NULL,'111',1,'2024-12-28 11:22:31','2024-12-28 15:47:57'),(2,'user1','$2a$10$VsmbRSJ041kGQ4fbhzmjvO7YM2sLWDUTSUEgo0OrY1XSM.BhYxqi2','doomer no.1','18971548334','111@111.com',NULL,'/assets/avatars/default-user.jpg','I like music, you too?',1,NULL,'111',1,'2024-12-28 11:37:01','2024-12-28 11:41:24'),(3,'user2','$2a$10$wTp8u5h5iWLE2m5ezAqgnuyovh35yseaezWjGhLM8OSToxLuOcelm','user2','18971548334','111@111.com',NULL,'/assets/avatars/default-user.jpg',NULL,2,'2024-11-24','111',1,'2024-12-28 11:38:18','2024-12-28 11:38:18');
+
+SET FOREIGN_KEY_CHECKS = 1;
