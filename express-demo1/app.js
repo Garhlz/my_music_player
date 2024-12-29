@@ -5,17 +5,12 @@ const logger = require('morgan');             // 用于记录日志
 const cors = require('cors');                // 用于解决跨域问题
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-
 dotenv.config();
 // 创建 Express 应用实例
 const app = express();
-
 app.use(bodyParser.json());
-
 // 使用 CORS 中间件来支持跨域请求
 app.use(cors());
-
-
 // 使用中间件来记录请求日志
 app.use(logger('dev'));  // 记录日志
 
@@ -23,7 +18,6 @@ app.use(logger('dev'));  // 记录日志
 app.use(express.json());  // 解析 JSON 格式的请求体
 app.use(express.urlencoded({ extended: false }));  // 解析 URL 编码格式的请求体
 app.use(cookieParser());  // 解析 cookie
-
 // Serve static files from the "public" directory
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
