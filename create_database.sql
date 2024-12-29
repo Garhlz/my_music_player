@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS `music_player`;
+
 CREATE DATABASE IF NOT EXISTS `music_player`
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
