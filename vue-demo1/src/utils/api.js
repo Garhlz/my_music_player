@@ -2,7 +2,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000', // 后端 API 根地址
+  baseURL: 'http://localhost:8080', // 后端 API 根地址
   timeout: 10000, // 超时时间
   headers: {
     'Content-Type': 'application/json',  // 设置请求头中的 Content-Type 为 JSON

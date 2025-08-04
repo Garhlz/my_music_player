@@ -1,0 +1,25 @@
+# .air.toml (修改后 - Windows 专用优化版)
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# 1. 在输出文件名后添加 .exe 后缀
+cmd = "go build -o ./tmp/main.exe ./cmd/server/main.go"
+
+# 2. 告诉 air 编译后的二进制文件现在叫 main.exe
+bin = "./tmp/main.exe"
+
+# 3. 我们不再使用 full_bin，让 air 直接运行 bin 指定的文件。
+#    可以直接删除 full_bin 这一行，或者把它注释掉。
+# full_bin = "air-proxy" 
+
+include_ext = ["go", "tpl", "tmpl", "html"]
+exclude_dir = ["assets", "tmp", "vendor"]
+log = "air.log"
+delay = 1000
+
+[log]
+time = true
+
+[misc]
+clean_on_exit = true

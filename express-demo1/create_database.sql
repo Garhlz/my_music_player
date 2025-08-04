@@ -229,20 +229,4 @@ CREATE INDEX idx_comment_song_id ON comment(song_id);
 CREATE INDEX idx_comment_user_id ON comment(user_id);
 CREATE INDEX idx_comment_parent_id ON comment(parent_id);
 
--- 展示表
-# SHOW TABLES;
 
--- 删除表，注意顺序要先删除有外键依赖的表
-# DROP TABLE IF EXISTS comment_like;
-# DROP TABLE IF EXISTS playlist_songs;
-# DROP TABLE IF EXISTS playlist_info;
-# DROP TABLE IF EXISTS `like`;
-# DROP TABLE IF EXISTS comment;
-# DROP TABLE IF EXISTS user_likes;
-# DROP TABLE IF EXISTS song;
-# DROP TABLE IF EXISTS artist_album;
-# DROP TABLE IF EXISTS album;
-# DROP TABLE IF EXISTS artist;
-# DROP TABLE IF EXISTS manager;
-# DROP TABLE IF EXISTS user;
-# DROP TABLE IF EXISTS follow;
