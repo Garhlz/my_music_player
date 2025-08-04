@@ -5,4 +5,6 @@ vue-demo1/.idea
 vue-demo1/.vscode
 
 my-music-go/tmp
-*/digest.txt
+**/digest.txt
+**/tmp.md
+**/tmp.txt
