@@ -17,11 +17,12 @@ func SetupRouter(
 	userHandler *handlers.UserHandler,
 	songHandler *handlers.SongHandler,
 	artistHandler *handlers.ArtistHandler,
+	albumHandler *handlers.AlbumHandler,
 ) *gin.Engine {
 
 	router := gin.Default()
 
-	// --- 基础路由：这些路由通常位于所有分组之外 ---
+	// --- 基础路由, 位于所有分组之外 ---
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
@@ -29,7 +30,7 @@ func SetupRouter(
 
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
-	// 创建一个 API v1 路由组
+	// API v1 路由组
 	apiV1 := router.Group("/api/v1")
 	{
 		// --- 公共路由组 (Public Routes) ---
@@ -45,7 +46,6 @@ func SetupRouter(
 		protected := apiV1.Group("/")
 		protected.Use(authMiddleware) // 使用闭包传递回的函数
 		{
-			// 受保护的用户接口
 			userRoutes := protected.Group("/users")
 			{
 				userRoutes.GET("/:id", userHandler.GetUserProfile)
@@ -53,7 +53,6 @@ func SetupRouter(
 				userRoutes.PUT("/:id", userHandler.UpdateUserProfile)
 			}
 
-			// 受保护的歌曲接口
 			songRoutes := protected.Group("/songs")
 			{
 				songRoutes.GET("", songHandler.ListSongs)
@@ -63,6 +62,12 @@ func SetupRouter(
 			artistRoutes := protected.Group("/artists")
 			{
 				artistRoutes.GET("/:id", artistHandler.GetArtistDetail)
+			}
+
+			albumRoutes := protected.Group("/albums")
+			{
+				albumRoutes.GET("", albumHandler.ListAlbums)
+				albumRoutes.GET("/:id", albumHandler.GetAlbumDetail)
 			}
 		}
 	}

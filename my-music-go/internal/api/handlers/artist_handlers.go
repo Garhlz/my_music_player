@@ -29,7 +29,7 @@ func NewArtistHandler(artistService *services.ArtistService) *ArtistHandler {
 // @Param        page      query     int     false  "歌曲列表的页码" default(1)
 // @Param        pageSize  query     int     false  "每页的歌曲数量" default(10)
 // @Param        search    query     string  false  "在歌曲中搜索的关键词 (匹配歌曲名或专辑名)"
-// @Param        sortBy    query     string  false  "歌曲列表的排序字段" Enums(latest, play_count, like_count)
+// @Param        sortBy    query     string  false  "歌曲列表的排序字段" Enums(oldest, latest, play_count, like_count)
 // @Success      200       {object}  models.ArtistDetailResponseDTO
 // @Failure      400       {object}  map[string]string "{"error": "无效的ID或查询参数"}"
 // @Failure      401       {object}  map[string]string "{"error": "需要认证"}"

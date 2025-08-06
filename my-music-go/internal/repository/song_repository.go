@@ -87,6 +87,7 @@ func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.Song
 	allowedSorts := map[string]string{
 		// todo 依照前端信息, 还有其他支持的排序语句, 之后修改
 		"latest":     "s.create_time DESC",
+		"oldest":     "s.create_time ASC",
 		"play_count": "s.play_count DESC",
 		"like_count": "s.like_count DESC",
 	}

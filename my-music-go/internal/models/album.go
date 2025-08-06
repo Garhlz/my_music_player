@@ -17,3 +17,22 @@ type ArtistAlbum struct {
 	ArtistID int64 `db:"artist_id" json:"artist_id"`
 	AlbumID  int64 `db:"album_id" json:"album_id"`
 }
+
+type ListAlbumsRequestDTO struct {
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+	Search   string `form:"search"`
+	SortBy   string `form:"sortBy"`
+}
+
+type AlbumListDTO struct {
+	Album
+	ArtistsNames string `db:"artist_names" json:"artist_names"`
+	SongCount    int    `db:"song_count" json:"song_count"`
+}
+
+type AlbumDetailDTO struct { // 参考artist.go中的实现
+	Album
+	Artists []Artist              `json:"artists"` // 包含完整的艺术家对象列表
+	Songs   *PaginatedResponseDTO `json:"songs"`
+}

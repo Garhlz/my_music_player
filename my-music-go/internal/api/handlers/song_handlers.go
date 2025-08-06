@@ -63,7 +63,7 @@ func (h *SongHandler) GetSongDetail(c *gin.Context) {
 // @Param        page      query     int     false  "页码" default(1)
 // @Param        pageSize  query     int     false  "每页数量" default(10)
 // @Param        search    query     string  false  "搜索关键词 (匹配歌曲名或艺术家)"
-// @Param        sortBy    query     string  false  "排序字段 (latest, play_count, like_count)" Enums(latest, play_count, like_count)
+// @Param        sortBy    query     string  false  "排序字段 (oldest, latest, play_count, like_count)" Enums(oldest,latest, play_count, like_count)
 // @Success      200       {object}  models.PaginatedResponseDTO{List=[]models.SongDetailDTO}
 // @Failure      400       {object}  map[string]string "{"error": "无效的查询参数"}"
 // @Failure      401       {object}  map[string]string "{"error": "需要认证"}"

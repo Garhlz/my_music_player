@@ -1,5 +1,46 @@
 basePath: /api/v1
 definitions:
+  models.AlbumDetailDTO:
+    properties:
+      artists:
+        description: 包含完整的艺术家对象列表
+        items:
+          $ref: '#/definitions/models.Artist'
+        type: array
+      cover:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      release_date:
+        type: string
+      songs:
+        $ref: '#/definitions/models.PaginatedResponseDTO'
+    type: object
+  models.AlbumListDTO:
+    properties:
+      artist_names:
+        type: string
+      cover:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      release_date:
+        type: string
+      song_count:
+        type: integer
+    type: object
   models.Artist:
     properties:
       avatar:
@@ -166,6 +207,135 @@ info:
   title: Elaine 的音乐播放器 API
   version: "1.0"
 paths:
+  /albums:
+    get:
+      description: 获取专辑的分页列表，支持按专辑名或艺术家名进行搜索，并可按指定字段排序。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 搜索关键词 (匹配专辑名或艺术家名)
+        in: query
+        name: search
+        type: string
+      - description: 排序字段 (latest, release_date)
+        enum:
+        - latest
+        - release_date
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.AlbumListDTO'
+                  type: array
+              type: object
+        "400":
+          description: '{"error": "无效的查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取专辑列表失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取专辑列表
+      tags:
+      - 专辑 (Album)
+  /albums/{id}:
+    get:
+      description: 根据专辑ID获取其详细信息（包括艺术家），并返回该专辑包含的歌曲分页列表。
+      parameters:
+      - description: 专辑 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: 歌曲列表的页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页的歌曲数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 在歌曲中搜索的关键词 (匹配歌曲名或艺术家名)
+        in: query
+        name: search
+        type: string
+      - description: 歌曲列表的排序字段 (latest, play_count, like_count)
+        enum:
+        - latest
+        - play_count
+        - like_count
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AlbumDetailDTO'
+        "400":
+          description: '{"error": "无效的ID或查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "专辑未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取专辑详情失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取专辑详情及歌曲列表
+      tags:
+      - 专辑 (Album)
   /artists/{id}:
     get:
       description: 根据艺术家ID获取其详细信息，并返回该艺术家的歌曲分页列表。歌曲列表支持搜索和排序。
@@ -191,6 +361,7 @@ paths:
         type: string
       - description: 歌曲列表的排序字段
         enum:
+        - oldest
         - latest
         - play_count
         - like_count
@@ -340,8 +511,9 @@ paths:
         in: query
         name: search
         type: string
-      - description: 排序字段 (latest, play_count, like_count)
+      - description: 排序字段 (oldest, latest, play_count, like_count)
         enum:
+        - oldest
         - latest
         - play_count
         - like_count

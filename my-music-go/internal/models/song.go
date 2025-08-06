@@ -38,6 +38,7 @@ type ListSongsRequestDTO struct {
 	SortBy   string `form:"sortBy"`
 
 	ArtistID *int64 `form:"artistId"`
+	AlbumID  *int64 `form:"albumId"`
 }
 
 // PaginatedResponseDTO 是一个通用的分页响应结构体

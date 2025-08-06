@@ -17,4 +17,6 @@ var (
 
 	// 歌手
 	ErrArtistNotFound = errors.New("artist not found")
+
+	ErrAlbumNotFound = errors.New("album not found")
 )
