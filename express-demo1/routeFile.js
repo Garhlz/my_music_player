@@ -29,7 +29,7 @@ router.post('/user/login', async (req, res) => {
             const isMatch = await bcrypt.compare(password, rows[0].password);
             if (isMatch) {
                 const token = jwt.sign({ id: rows[0].id, username }, JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: '登录成功', token, userId:rows[0].id });
+                return res.status(200).json({ message: '登录成功', token, user_id:rows[0].id });
             } else {
                 return res.status(401).json({ error: '密码错误' });
             }
@@ -103,7 +103,7 @@ router.post('/user/register', async (req, res) => {
 
 
 //----------------------------------用户信息----------------------------------
-// 获取用户信息接口
+// 获取用户档案信息的接口, 其功能应该分离, 并且也加入verifyToken的内容
 router.get('/user/:id', async (req, res) => {
   try {
     const userId = req.params.id;
@@ -351,43 +351,7 @@ router.get('/songs', verifyToken, async (req, res) => {
     });
   }
 });
-// 获取歌手信息
-router.get('/artists', verifyToken, async (req, res) => {
-  try {
-    const { ids } = req.query;
-    if (!ids) {
-      return res.status(400).json({ message: false, error: '缺少歌手ID' });
-    }
 
-    // 处理数组格式的参数
-    let artistIds = Array.isArray(ids) ? ids : [ids];
-    
-    // 确保所有ID都是数字
-    artistIds = artistIds.map(id => parseInt(id)).filter(id => !isNaN(id));
-    
-    if (artistIds.length === 0) {
-      return res.status(400).json({ message: false, error: '无效的歌手ID' });
-    }
-
-    // 构建查询语句
-    const placeholders = artistIds.map(() => '?').join(',');
-    const query = `
-      SELECT id, name, sex, avatar, description
-      FROM artist
-      WHERE id IN (${placeholders})
-    `;
-    
-    const [artists] = await db.execute(query, artistIds);
-    
-    res.json({
-      message: true,
-      data: artists
-    });
-  } catch (error) {
-    console.error('获取歌手信息失败:', error);
-    res.status(500).json({ message: false, error: '获取歌手信息失败' });
-  }
-});
 //----------------------------------歌曲----------------------------------
 
 
@@ -1178,6 +1142,46 @@ router.get('/album/:id', async (req, res) => {
 
 
 //----------------------------------歌手----------------------------------
+// 获取歌手信息
+router.get('/artists', verifyToken, async (req, res) => {
+  try {
+    const { ids } = req.query;
+    if (!ids) {
+      return res.status(400).json({ message: false, error: '缺少歌手ID' });
+    }
+
+    // 处理数组格式的参数
+    let artistIds = Array.isArray(ids) ? ids : [ids];
+    
+    // 确保所有ID都是数字
+    artistIds = artistIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+    
+    if (artistIds.length === 0) {
+      return res.status(400).json({ message: false, error: '无效的歌手ID' });
+    }
+
+    // 构建查询语句
+    const placeholders = artistIds.map(() => '?').join(',');
+    const query = `
+      SELECT id, name, sex, avatar, description
+      FROM artist
+      WHERE id IN (${placeholders})
+    `;
+    
+    const [artists] = await db.execute(query, artistIds);
+    
+    res.json({
+      message: true,
+      data: artists
+    });
+  } catch (error) {
+    console.error('获取歌手信息失败:', error);
+    res.status(500).json({ message: false, error: '获取歌手信息失败' });
+  }
+});
+
+
+
 // 获取艺术家详情及其歌曲
 router.get('/artist/:id', async (req, res) => {
   try {

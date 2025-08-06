@@ -1,58 +1,67 @@
-// internal/api/router.go
 package api
 
 import (
-	"my-music-go/internal/api/handlers" // 假设未来会有中间件
+	"my-music-go/internal/api/handlers"
+	"my-music-go/internal/api/middleware"
+	"my-music-go/internal/config"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	// "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// SetupRouter 负责初始化和注册所有路由
+// SetupRouter 接收所有需要的 handler
 func SetupRouter(
+	cfg config.Config,
 	userHandler *handlers.UserHandler,
-	// 未来会有 songHandler, artistHandler 等等，都在这里加
+	songHandler *handlers.SongHandler,
 ) *gin.Engine {
 
-	// 1. 创建 Gin 引擎
 	router := gin.Default()
 
-	// 2. 在这里注册所有路由
-	// 健康检查接口
+	// --- 基础路由：这些路由通常位于所有分组之外 ---
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Swagger 文档路由
-	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
-	// 使用路由分组来更好地组织 API
-	// 比如，所有 V1 版本的 API 都在 /api/v1 路径下
-	apiV1 := router.Group("/mmp-go/api/dev")
+	// 创建一个 API v1 路由组
+	apiV1 := router.Group("/api/v1")
 	{
-		// 用户认证相关的路由组
+		// --- 公共路由组 (Public Routes) ---
+		// 只有登录和注册是真正公开的
 		authRoutes := apiV1.Group("/auth")
 		{
 			authRoutes.POST("/register", userHandler.Register)
-			authRoutes.POST("/login", userHandler.Login) // 登录接口
+			authRoutes.POST("/login", userHandler.Login)
 		}
 
-		// 用户信息相关的路由组 (假设需要 JWT 认证)
-		// userRoutes := apiV1.Group("/users")
-		// userRoutes.Use(middleware.AuthMiddleware()) // 对整个组应用认证中间件
-		// {
-		// 	// userRoutes.GET("/:id", userHandler.GetProfile)
-		// }
+		// --- 认证保护路由组 (Protected Routes) ---
+		// 这个分组下的所有接口都需要通过 JWT 中间件认证
+		protected := apiV1.Group("/")
+		protected.Use(authMiddleware) // 使用闭包传递回的函数
+		{
+			// 受保护的用户接口
+			userRoutes := protected.Group("/users")
+			{
+				userRoutes.GET("/:id", userHandler.GetUserProfile)
+				userRoutes.GET("/:id/name", userHandler.GetUsernameAndName)
+				userRoutes.PUT("/:id", userHandler.UpdateUserProfile)
+			}
 
-		// // 歌曲相关的路由组
-		// songRoutes := apiV1.Group("/songs")
-		// {
-		// 	// songRoutes.GET("/", songHandler.ListSongs)
-		// 	// songRoutes.GET("/:id", songHandler.GetSong)
-		// }
+			// 受保护的歌曲接口
+			songRoutes := protected.Group("/songs")
+			{
+				songRoutes.GET("", songHandler.ListSongs)
+				songRoutes.GET("/:id", songHandler.GetSongDetail)
+			}
+
+			// 未来所有需要登录才能访问的接口，都注册到这个 protected 分组下
+		}
 	}
 
-	// 3. 返回配置好的 router 实例
 	return router
 }

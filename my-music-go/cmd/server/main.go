@@ -3,41 +3,66 @@ package main
 
 import (
 	"log"
+	_ "my-music-go/docs" // 导入 swag 生成的 docs 包
 	"my-music-go/internal/api"
 	"my-music-go/internal/api/handlers"
-	"my-music-go/internal/database" // 现在我们只用它来 Init
+	"my-music-go/internal/config" // 引入 config 包
+	"my-music-go/internal/database"
 	"my-music-go/internal/repository"
 	services "my-music-go/internal/services"
-	// "net/http"
-	// "github.com/gin-gonic/gin"
+	"os"
 )
 
+// @title        Elaine 的音乐播放器 API
+// @version      1.0
+// @description  这是一个使用 Go 语言和 Gin 框架开发的音乐播放器后端 API.
+// @termsOfService https://github.com/Garhlz
+
+// @contact.name   Elaine
+// @contact.url    https://github.com/Garhlz
+// @contact.email  your.email@example.com
+
+// @license.name  MIT License
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
-	// todo log
-	// logger := log.New(os.Stdout, "MUSIC_API: ", log.LstdFlags)
-	// 初始化数据库连接，得到 *sqlx.DB 实例
-	db := database.Init()
+	logger := log.New(os.Stdout, "MUSIC_API: ", log.LstdFlags|log.Lshortfile)
+
+	cfg, err := config.LoadConfig(".") // 从当前目录加载 .env
+	if err != nil {
+		logger.Fatalf("无法加载配置: %v", err)
+	}
+
+	db := database.Init(cfg)
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Printf("关闭数据库连接失败: %v", err)
 		}
 	}()
 
-	// --- 依赖注入流程 ---
-	// 使用手动依赖注入, 而不是控制反转的思路
-	// 将 db 实例注入到 NewUserRepository 中，创建 repo
-	userRepo := repository.NewUserRepository(db)
+	var userRepo repository.IUserRepository = repository.NewUserRepository(db)
+	var songRepo repository.ISongRepository = repository.NewSongRepository(db)
 
-	// 将 repo 实例注入到 NewUserService 中，创建 service
-	userService := services.NewUserService(userRepo)
+	// 将 repo 和 config 实例注入到 Service 中
+	userService := services.NewUserService(userRepo, cfg)
+	songService := services.NewSongService(songRepo)
 
-	// 将 service 实例注入到 NewUserHandler 中，创建 handler
+	// 将 service 实例注入到 Handler 中
 	userHandler := handlers.NewUserHandler(userService)
+	songHandler := handlers.NewSongHandler(songService)
 
-	router := api.SetupRouter(userHandler)
+	// 将所有 handler 注入到 router 设置函数中
+	router := api.SetupRouter(cfg, userHandler, songHandler)
 
-	log.Println("服务器启动于 :8080")
-	if err := router.Run(":8080"); err != nil {
-		log.Fatalf("服务器启动失败: %v", err)
+	logger.Printf("服务器启动于 %s", cfg.ServerAddress)
+	if err := router.Run(cfg.ServerAddress); err != nil {
+		logger.Fatalf("服务器启动失败: %v", err)
 	}
 }

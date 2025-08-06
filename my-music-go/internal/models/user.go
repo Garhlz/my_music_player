@@ -61,3 +61,27 @@ type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type UserProfile struct {
+	User
+	Followings int `db:"followings" json:"followings"`
+	Followers  int `db:"followers" json:"followers"`
+}
+
+// UpdateUserRequest 用于绑定更新用户信息的JSON请求 (DTO)
+type UpdateUserRequest struct {
+	Name     *string    `json:"name,omitempty"`
+	Avatar   *string    `json:"avatar,omitempty"`
+	Email    *string    `json:"email,omitempty"`
+	Phone    *string    `json:"phone,omitempty"`
+	Gender   *int8      `json:"gender,omitempty"`
+	Birthday *time.Time `json:"birthday,omitempty"`
+	Location *string    `json:"location,omitempty"`
+	Bio      *string    `json:"bio,omitempty"`
+}
+
+// UsernameResponse 用于专门返回用户名的API (DTO)
+type UsernameResponse struct {
+	Username string  `json:"username"`
+	Name     *string `json:"name,omitempty"` // 可以顺便带上昵称
+}

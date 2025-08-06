@@ -125,6 +125,21 @@ export const register = async (userData) => {
 
 
 
+//----------------------------------用户相关接口----------------------------------
+// 获取用户信息
+export const getUserInfo = async (userId) => {
+  const resp = await api.get(`/user/${userId}`);
+  return resp;
+};
+
+// 更新用户信息
+export const updateUserInfo = async (userId, data) => {
+  const resp = await api.put(`/user/${userId}`, data);
+  return resp;
+};
+//----------------------------------用户相关接口----------------------------------
+
+
 
 //----------------------------------歌曲相关接口----------------------------------
 export const getSongs = async (params) => {
@@ -285,21 +300,6 @@ export const deleteComment = async (commentId) => {
 //----------------------------------评论相关接口----------------------------------
 
 
-
-
-//----------------------------------用户相关接口----------------------------------
-// 获取用户信息
-export const getUserInfo = async (userId) => {
-  const resp = await api.get(`/user/${userId}`);
-  return resp;
-};
-
-// 更新用户信息
-export const updateUserInfo = async (userId, data) => {
-  const resp = await api.put(`/user/${userId}`, data);
-  return resp;
-};
-//----------------------------------用户相关接口----------------------------------
 
 
 
@@ -3570,8 +3570,8 @@ FILE: pages/Login.vue
             <p class="subtitle">请登录您的账号</p>
           </div>
 
-          <el-form 
-            :model="loginForm" 
+          <el-form
+            :model="loginForm"
             :rules="rules"
             ref="loginFormRef"
             class="login-form"
@@ -3585,7 +3585,7 @@ FILE: pages/Login.vue
                 @keyup.enter="handleLogin"
               />
             </el-form-item>
-            
+
             <el-form-item prop="password">
               <el-input
                 v-model="loginForm.password"
@@ -3614,7 +3614,7 @@ FILE: pages/Login.vue
               class="login-button"
               size="large"
             >
-              {{ loading ? '登录中...' : '登录' }}
+              {{ loading ? "登录中..." : "登录" }}
             </el-button>
 
             <div class="register-link">
@@ -3631,102 +3631,100 @@ FILE: pages/Login.vue
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { User, Lock } from '@element-plus/icons-vue'
-import { login } from '@/api/axiosFile'
+import { login } from "@/api/axiosFile";
+import { Lock, User } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
-const loginFormRef = ref(null)
-const loading = ref(false)
-const rememberMe = ref(false)
+const router = useRouter();
+const loginFormRef = ref(null);
+const loading = ref(false);
+const rememberMe = ref(false);
 
 // 表单数据
 const loginForm = ref({
-  username: '',
-  password: ''
-})
+  username: "",
+  password: "",
+});
 
 // 表单验证规则
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur" },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 5, message: '密码长度不能少于5位', trigger: 'blur' }
-  ]
-}
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 5, message: "密码长度不能少于5位", trigger: "blur" },
+  ],
+};
 
 // 处理忘记密码
 const handleForgotPassword = () => {
-  ElMessageBox.alert(
-    '请联系管理员重置密码',
-    '忘记密码',
-    {
-      confirmButtonText: '确定',
-      type: 'info',
-    }
-  )
-}
+  ElMessageBox.alert("请联系管理员重置密码", "忘记密码", {
+    confirmButtonText: "确定",
+    type: "info",
+  });
+};
 
 // 登录处理
 const handleLogin = async () => {
-  if (!loginFormRef.value) return
+  if (!loginFormRef.value) return;
 
   try {
     // 表单验证
-    await loginFormRef.value.validate()
-    
-    loading.value = true
-    const result = await login(loginForm.value.username, loginForm.value.password)
-    
+    await loginFormRef.value.validate();
+
+    loading.value = true;
+    const result = await login(
+      loginForm.value.username,
+      loginForm.value.password
+    );
+
     if (result.data.message) {
-      localStorage.setItem('token', result.data.token);
-      localStorage.setItem('userId', result.data.userId);
-      
-      
+      localStorage.setItem("token", result.data.token);
+      localStorage.setItem("userId", result.data.user_id);
+
       if (rememberMe.value) {
-        localStorage.setItem('remembered_username', loginForm.value.username)
+        localStorage.setItem("remembered_username", loginForm.value.username);
       } else {
-        localStorage.removeItem('remembered_username')
+        localStorage.removeItem("remembered_username");
       }
 
       ElMessage({
-        type: 'success',
-        message: '登录成功，欢迎回来！',
-        duration: 2000
-      })
-      
-      router.push('/pub')
+        type: "success",
+        message: "登录成功，欢迎回来！",
+        duration: 2000,
+      });
+
+      router.push("/pub");
     } else {
-      throw new Error(result.data.error || '登录失败')
+      throw new Error(result.data.error || "登录失败");
     }
   } catch (error) {
-    console.error('登录失败:', error)
+    console.error("登录失败:", error);
     ElMessageBox.alert(
-      error.message || '登录失败，请检查用户名和密码',
-      '登录失败',
+      error.message || "登录失败，请检查用户名和密码",
+      "登录失败",
       {
-        confirmButtonText: '确定',
-        type: 'error',
+        confirmButtonText: "确定",
+        type: "error",
       }
-    )
+    );
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 生命周期钩子
 onMounted(() => {
-  const rememberedUsername = localStorage.getItem('remembered_username')
+  const rememberedUsername = localStorage.getItem("remembered_username");
   if (rememberedUsername) {
-    loginForm.value.username = rememberedUsername
-    rememberMe.value = true
+    loginForm.value.username = rememberedUsername;
+    rememberMe.value = true;
   }
-})
+});
 </script>
 
 <style scoped>
@@ -3772,13 +3770,17 @@ onMounted(() => {
 }
 
 .login-decoration::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
   transform: translateX(-100%);
   animation: shimmer 3s infinite;
 }
@@ -3931,14 +3933,24 @@ onMounted(() => {
 
 /* 动画关键帧 */
 @keyframes gradientBG {
-  0% { background-position: 0% 50% }
-  50% { background-position: 100% 50% }
-  100% { background-position: 0% 50% }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%) }
-  100% { transform: translateX(100%) }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes slideInLeft {
@@ -3983,6 +3995,7 @@ onMounted(() => {
   }
 }
 </style>
+
 
 
 ================================================
@@ -9747,7 +9760,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000', // 后端 API 根地址
+  baseURL: 'http://localhost:8080', // 后端 API 根地址
   timeout: 10000, // 超时时间
   headers: {
     'Content-Type': 'application/json',  // 设置请求头中的 Content-Type 为 JSON

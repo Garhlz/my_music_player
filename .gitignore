@@ -8,3 +8,6 @@ my-music-go/tmp
 **/digest.txt
 **/tmp.md
 **/tmp.txt
+my-music-go/.env
+my-music-go/error_code.md
+my-music-go/go_learning.md

@@ -1,0 +1,499 @@
+basePath: /api/v1
+definitions:
+  models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.PaginatedResponseDTO:
+    properties:
+      list:
+        description: 使用 interface{} 来适应任何类型的列表数据
+      total:
+        type: integer
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.SongDetailDTO:
+    properties:
+      album_cover:
+        type: string
+      album_id:
+        type: integer
+      album_name:
+        type: string
+      artist_id:
+        type: integer
+      artist_name:
+        description: 使用指针以防 JOIN 结果为 NULL
+        type: string
+      author_id:
+        type: integer
+      cover:
+        type: string
+      create_time:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: integer
+      is_public:
+        type: boolean
+      like_count:
+        type: integer
+      name:
+        type: string
+      play_count:
+        type: integer
+      url:
+        type: string
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  models.UserProfile:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      birthday:
+        type: string
+      created_time:
+        type: string
+      email:
+        type: string
+      followers:
+        type: integer
+      followings:
+        type: integer
+      gender:
+        type: integer
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      password:
+        description: 这里可能要返回比对, 而且反正是密文
+        type: string
+      phone:
+        type: string
+      sex:
+        type: string
+      status:
+        type: integer
+      updated_time:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UsernameResponse:
+    properties:
+      name:
+        description: 可以顺便带上昵称
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: your.email@example.com
+    name: Elaine
+    url: https://github.com/Garhlz
+  description: 这是一个使用 Go 语言和 Gin 框架开发的音乐播放器后端 API.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://github.com/Garhlz
+  title: Elaine 的音乐播放器 API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户使用用户名和密码登录，成功后返回 JWT Token 和用户信息。
+      parameters:
+      - description: 用户登录凭证
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "登录成功", "token": "...", "user_id": 1}'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: '{"error": "用户名和密码不能为空"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "密码不正确"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "用户不存在"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "登录时发生未知错误"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 用户登录
+      tags:
+      - 用户认证 (Auth)
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 根据提供的用户名和密码等信息，创建一个新的用户账户。
+      parameters:
+      - description: 用户注册信息
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{"message": "注册成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "无效的请求参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: '{"error": "该用户名已被注册"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "注册失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 用户注册
+      tags:
+      - 用户认证 (Auth)
+  /songs:
+    get:
+      description: 获取公开的歌曲列表，支持分页、按歌曲名或艺术家名搜索、以及排序。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 搜索关键词 (匹配歌曲名或艺术家)
+        in: query
+        name: search
+        type: string
+      - description: 排序字段 (latest, play_count, like_count)
+        enum:
+        - latest
+        - play_count
+        - like_count
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.SongDetailDTO'
+                  type: array
+              type: object
+        "400":
+          description: '{"error": "无效的查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取歌曲列表失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取歌曲列表
+      tags:
+      - 歌曲 (Song)
+  /songs/{id}:
+    get:
+      description: 根据歌曲ID获取单曲的详细信息，包括艺术家和专辑数据。
+      parameters:
+      - description: 歌曲 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SongDetailDTO'
+        "400":
+          description: '{"error": "无效的歌曲ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "歌曲未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取歌曲详情失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取单曲详情
+      tags:
+      - 歌曲 (Song)
+  /users/{id}:
+    get:
+      description: 根据用户ID获取用户的完整公开信息，包括关注数和粉丝数。
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+        "400":
+          description: '{"error": "无效的用户ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "用户未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取用户信息失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取用户个人资料
+      tags:
+      - 用户信息 (User)
+    put:
+      consumes:
+      - application/json
+      description: 更新当前认证用户（通过JWT Token识别）的个人资料。用户只能更新自己的信息。
+      parameters:
+      - description: 要更新的用户ID (必须是当前登录用户的ID)
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 要更新的用户信息
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "用户信息更新成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "无效的用户ID格式 或 请求参数格式错误"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: '{"error": "无权修改其他用户的信息"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "尝试更新的用户不存在"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "更新用户信息失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 更新当前登录用户信息
+      tags:
+      - 用户信息 (User)
+  /users/{id}/name:
+    get:
+      description: 根据用户ID获取用户的公开用户名和昵称。
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UsernameResponse'
+        "400":
+          description: '{"error": "无效的用户ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "用户未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取用户名失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取用户名和昵称
+      tags:
+      - 用户信息 (User)
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

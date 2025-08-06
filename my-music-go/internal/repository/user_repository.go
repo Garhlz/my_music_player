@@ -1,12 +1,25 @@
 // internal/repository/user_repository.go
 package repository
 
+// todo
+// IUserRepository 定义了用户仓库需要实现的所有方法
+// 这使得我们的 Service 层可以依赖这个接口，而不是具体的实现
 import (
 	"database/sql"
 	"my-music-go/internal/models"
 
 	"github.com/jmoiron/sqlx"
 )
+
+type IUserRepository interface {
+	FindByUsername(username string) (*models.User, error)
+	FindByID(userID int64) (*models.User, error)
+	Create(user *models.User) error
+	ListAllUsers() ([]models.User, error)
+	FindUsernameAndNameByID(userID int64) (*models.UsernameResponse, error)
+	FindProfileByID(userID int64) (*models.UserProfile, error)
+	Update(user *models.User) error
+}
 
 // UserRepository 提供了访问用户数据的方法
 type UserRepository struct {
@@ -27,6 +40,23 @@ func (r *UserRepository) FindByUsername(username string) (*models.User, error) {
 
 	// 3. 使用 db.Get 替代 QueryRow 和 Scan
 	err := r.db.Get(&user, query, username)
+	if err != nil {
+		// 如果错误是 sql.ErrNoRows，说明用户不存在，这不是一个程序错误
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		// 其他错误（如数据库断开）则是一个需要处理的程序错误
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) FindByID(userID int64) (*models.User, error) {
+	var user models.User
+	query := "SELECT * FROM user WHERE id = ? LIMIT 1"
+
+	// 3. 使用 db.Get 替代 QueryRow 和 Scan
+	err := r.db.Get(&user, query, userID)
 	if err != nil {
 		// 如果错误是 sql.ErrNoRows，说明用户不存在，这不是一个程序错误
 		if err == sql.ErrNoRows {
@@ -60,4 +90,52 @@ func (r *UserRepository) ListAllUsers() ([]models.User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (r *UserRepository) FindUsernameAndNameByID(userID int64) (*models.UsernameResponse, error) {
+	var resp models.UsernameResponse
+	query := `SELECT username, name FROM user WHERE id = ?`
+	err := r.db.Get(&resp, query, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (r *UserRepository) FindProfileByID(userID int64) (*models.UserProfile, error) {
+	var profile models.UserProfile
+	query := `
+		SELECT 
+			u.*,
+			(SELECT COUNT(*) FROM follow WHERE follower_id = u.id) as followings,
+			(SELECT COUNT(*) FROM follow WHERE following_id = u.id) as followers
+		FROM user u
+		WHERE u.id = ?`
+
+	err := r.db.Get(&profile, query, userID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // 使用 nil, nil 来表示未找到
+		}
+		return nil, err
+	}
+	profile.Password = ""
+	return &profile, nil
+}
+
+// Update 更新用户信息
+func (r *UserRepository) Update(user *models.User) error {
+	// 更新了部分字段, 其中 name 相当于 nickname
+	query := `
+		UPDATE user SET
+			name = :name, avatar = :avatar, email = :email, phone = :phone, 
+			gender = :gender, birthday = :birthday, location = :location, bio = :bio
+		WHERE id = :id`
+
+	_, err := r.db.NamedExec(query, user)
+	return err
 }
