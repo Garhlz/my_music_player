@@ -24,6 +24,107 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/artists/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据艺术家ID获取其详细信息，并返回该艺术家的歌曲分页列表。歌曲列表支持搜索和排序。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "艺术家 (Artist)"
+                ],
+                "summary": "获取艺术家详情及歌曲列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "艺术家 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "歌曲列表的页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页的歌曲数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "在歌曲中搜索的关键词 (匹配歌曲名或专辑名)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "latest",
+                            "play_count",
+                            "like_count"
+                        ],
+                        "type": "string",
+                        "description": "歌曲列表的排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ArtistDetailResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的ID或查询参数\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"艺术家未找到\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取艺术家详情失败\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "用户使用用户名和密码登录，成功后返回 JWT Token 和用户信息。",
@@ -563,6 +664,40 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Artist": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sex": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ArtistDetailResponseDTO": {
+            "type": "object",
+            "properties": {
+                "artist": {
+                    "$ref": "#/definitions/models.Artist"
+                },
+                "songs": {
+                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
             "required": [

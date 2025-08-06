@@ -21,7 +21,7 @@ type Song struct {
 
 // SongDetailDTO 用于获取单曲详情接口的返回，包含了关联的艺术家和专辑信息
 type SongDetailDTO struct {
-	Song                  // 结构体嵌入, 因为没有字段名, 相当于直接展开, 体现了组合的思想
+	Song               // 结构体嵌入, 因为没有字段名, 相当于直接展开, 体现了组合的思想
 	ArtistName *string `db:"artist_name" json:"artist_name"` // 使用指针以防 JOIN 结果为 NULL
 	ArtistID   *int64  `db:"artist_id" json:"artist_id"`
 	AlbumName  *string `db:"album_name" json:"album_name"`
@@ -32,10 +32,12 @@ type SongDetailDTO struct {
 // ListSongsRequestDTO 用于绑定获取歌曲列表接口的查询参数
 // `form` 标签用于 Gin 绑定GET请求的路径查询参数, 而json标签用于绑定POST请求的JSON请求体
 type ListSongsRequestDTO struct {
-	Page     int    `form:"page"`      
+	Page     int    `form:"page"`
 	PageSize int    `form:"pageSize"`
 	Search   string `form:"search"`
 	SortBy   string `form:"sortBy"`
+
+	ArtistID *int64 `form:"artistId"`
 }
 
 // PaginatedResponseDTO 是一个通用的分页响应结构体

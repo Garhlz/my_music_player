@@ -11,3 +11,8 @@ type Artist struct {
 	Description *string   `db:"description" json:"description,omitempty"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 }
+
+type ArtistDetailResponseDTO struct {
+	ArtistInfo *Artist               `json:"artist"`
+	Songs      *PaginatedResponseDTO `json:"songs"`
+}

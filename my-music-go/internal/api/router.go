@@ -16,6 +16,7 @@ func SetupRouter(
 	cfg config.Config,
 	userHandler *handlers.UserHandler,
 	songHandler *handlers.SongHandler,
+	artistHandler *handlers.ArtistHandler,
 ) *gin.Engine {
 
 	router := gin.Default()
@@ -59,7 +60,10 @@ func SetupRouter(
 				songRoutes.GET("/:id", songHandler.GetSongDetail)
 			}
 
-			// 未来所有需要登录才能访问的接口，都注册到这个 protected 分组下
+			artistRoutes := protected.Group("/artists")
+			{
+				artistRoutes.GET("/:id", artistHandler.GetArtistDetail)
+			}
 		}
 	}
 

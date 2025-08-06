@@ -74,8 +74,6 @@ func (s *UserService) LoginUser(req *models.LoginRequest) (int64, string, error)
 		return 0, "", ErrInvalidCredentials
 	}
 
-	// todo  从注入的 config 中获取密钥，而不是直接读环境变量
-	// 需要相应地修改 main.go，在创建 UserService 时将 config 实例注入进去。并且让 UserService 依赖 IUserRepository 接口，而不是具体的 *UserRepository，这在单元测试时会非常有用。
 	jwtSecret := s.cfg.JWTSecret
 	token, err := utils.GenerateToken(user.ID, jwtSecret)
 	if err != nil {

@@ -71,6 +71,11 @@ func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.Song
 		args = append(args, likePattern, likePattern)
 	}
 
+	if params.ArtistID != nil {
+		conditions = append(conditions, "s.author_id = ?")
+		args = append(args, *params.ArtistID)
+	}
+
 	// 组合最终的查询语句
 	query := baseQuery
 	if len(conditions) > 0 {
@@ -80,6 +85,7 @@ func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.Song
 	// 添加排序
 	orderBy := "ORDER BY s.create_time DESC" // 默认排序
 	allowedSorts := map[string]string{
+		// todo 依照前端信息, 还有其他支持的排序语句, 之后修改
 		"latest":     "s.create_time DESC",
 		"play_count": "s.play_count DESC",
 		"like_count": "s.like_count DESC",
@@ -111,6 +117,11 @@ func (r *SongRepository) Count(params *models.ListSongsRequestDTO) (int, error) 
 		conditions = append(conditions, "(s.name LIKE ? OR a.name LIKE ?)")
 		likePattern := fmt.Sprintf("%%%s%%", params.Search)
 		args = append(args, likePattern, likePattern)
+	}
+
+	if params.ArtistID != nil {
+		conditions = append(conditions, "s.author_id = ?")
+		args = append(args, *params.ArtistID)
 	}
 
 	query := baseQuery

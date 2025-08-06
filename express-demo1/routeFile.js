@@ -1143,6 +1143,7 @@ router.get('/album/:id', async (req, res) => {
 
 //----------------------------------歌手----------------------------------
 // 获取歌手信息
+// 这个接口暂时没有用
 router.get('/artists', verifyToken, async (req, res) => {
   try {
     const { ids } = req.query;
