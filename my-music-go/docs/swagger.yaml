@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  models.AddSongToPlaylistRequestDTO:
+    properties:
+      song_id:
+        type: integer
+    required:
+    - song_id
+    type: object
   models.AlbumDetailDTO:
     properties:
       artists:
@@ -63,6 +70,17 @@ definitions:
       songs:
         $ref: '#/definitions/models.PaginatedResponseDTO'
     type: object
+  models.CreatePlaylistRequestDTO:
+    properties:
+      description:
+        type: string
+      is_public:
+        type: boolean
+      name:
+        type: string
+    required:
+    - name
+    type: object
   models.LoginRequest:
     properties:
       password:
@@ -78,6 +96,56 @@ definitions:
       list:
         description: 使用 interface{} 来适应任何类型的列表数据
       total:
+        type: integer
+    type: object
+  models.PlaylistDetailDTO:
+    properties:
+      cover:
+        type: string
+      created_at:
+        type: string
+      creator_name:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_public:
+        type: boolean
+      name:
+        type: string
+      song_count:
+        type: integer
+      songs:
+        allOf:
+        - $ref: '#/definitions/models.PaginatedResponseDTO'
+        description: 复用分页结构
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.PlaylistInfoDTO:
+    properties:
+      cover:
+        type: string
+      created_at:
+        type: string
+      creator_name:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_public:
+        type: boolean
+      name:
+        type: string
+      song_count:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
         type: integer
     type: object
   models.RegisterRequest:
@@ -126,6 +194,17 @@ definitions:
       play_count:
         type: integer
       url:
+        type: string
+    type: object
+  models.UpdatePlaylistRequestDTO:
+    properties:
+      cover:
+        type: string
+      description:
+        type: string
+      is_public:
+        type: boolean
+      name:
         type: string
     type: object
   models.UpdateUserRequest:
@@ -656,6 +735,195 @@ paths:
       summary: 添加歌曲到我喜欢列表
       tags:
       - 喜欢 (Like)
+  /me/playlists:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.PlaylistInfoDTO'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取我的歌单列表
+      tags:
+      - 歌单 (Playlist)
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建歌单请求
+        in: body
+        name: createRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePlaylistRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{"id": 1, "message": "创建成功"}'
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 创建我的新歌单
+      tags:
+      - 歌单 (Playlist)
+  /me/playlists/{playlistId}:
+    delete:
+      parameters:
+      - description: 歌单 ID
+        in: path
+        name: playlistId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "删除成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 删除我的歌单
+      tags:
+      - 歌单 (Playlist)
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 歌单 ID
+        in: path
+        name: playlistId
+        required: true
+        type: integer
+      - description: 更新歌单请求
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePlaylistRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "更新成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 更新我的歌单信息
+      tags:
+      - 歌单 (Playlist)
+  /me/playlists/{playlistId}/songs:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 歌单 ID
+        in: path
+        name: playlistId
+        required: true
+        type: integer
+      - description: 添加歌曲请求
+        in: body
+        name: addSongRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddSongToPlaylistRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{"message": "添加成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 向我的歌单添加歌曲
+      tags:
+      - 歌单 (Playlist)
+  /me/playlists/{playlistId}/songs/{songId}:
+    delete:
+      parameters:
+      - description: 歌单 ID
+        in: path
+        name: playlistId
+        required: true
+        type: integer
+      - description: 歌曲 ID
+        in: path
+        name: songId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "移除成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 从我的歌单移除歌曲
+      tags:
+      - 歌单 (Playlist)
+  /playlists/{playlistId}:
+    get:
+      parameters:
+      - description: 歌单 ID
+        in: path
+        name: playlistId
+        required: true
+        type: integer
+      - description: 歌曲列表页码
+        in: query
+        name: page
+        type: integer
+      - description: 歌曲列表每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PlaylistDetailDTO'
+      security:
+      - BearerAuth: []
+      summary: 获取歌单详情
+      tags:
+      - 歌单 (Playlist)
   /songs:
     get:
       description: 获取公开的歌曲列表，支持分页、按歌曲名或艺术家名搜索、以及排序。
@@ -973,6 +1241,41 @@ paths:
       summary: 获取用户名和昵称
       tags:
       - 用户信息 (User)
+  /users/{userId}/playlists:
+    get:
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.PlaylistInfoDTO'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取指定用户的歌单列表
+      tags:
+      - 歌单 (Playlist)
 securityDefinitions:
   BearerAuth:
     in: header

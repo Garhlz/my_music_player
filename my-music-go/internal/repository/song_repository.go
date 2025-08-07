@@ -76,6 +76,11 @@ func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.Song
 		args = append(args, *params.ArtistID)
 	}
 
+	if params.PlaylistID != nil {
+		conditions = append(conditions, "s.id in (SELECT song_id FROM playlist_songs WHERE playlist_id = ?)")
+		args = append(args, *params.PlaylistID)
+	}
+
 	// 组合最终的查询语句
 	query := baseQuery
 	if len(conditions) > 0 {
@@ -123,6 +128,11 @@ func (r *SongRepository) Count(params *models.ListSongsRequestDTO) (int, error) 
 	if params.ArtistID != nil {
 		conditions = append(conditions, "s.author_id = ?")
 		args = append(args, *params.ArtistID)
+	}
+
+	if params.PlaylistID != nil {
+		conditions = append(conditions, "s.id in (SELECT song_id FROM playlist_songs WHERE playlist_id = ?)")
+		args = append(args, *params.PlaylistID)
 	}
 
 	query := baseQuery

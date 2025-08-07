@@ -3,23 +3,27 @@ package services
 import "errors"
 
 // 定义已知的业务逻辑错误
-// 注意, 如果是"来自第三方库或标准库的非预期错误", 不用设置哨兵错误, 而是使用 fmt.Errorf("简短描述: %w", err) 来包装它，然后返回
+// 注意, 如果是"来自第三方库或标准库的非预期错误",而非业务逻辑错误, 不用设置哨兵错误, 而是使用 fmt.Errorf("简短描述: %w", err) 来包装它，然后返回
 var (
-	// 注册
-	ErrUserNotFound = errors.New("user not found")
-
-	// 登录
-	ErrInvalidCredentials = errors.New("invalid credentials") // 凭证无效（通常指密码错误）
+	// User related
+	ErrUserNotFound       = errors.New("user not found")
+	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrUserAlreadyExists  = errors.New("username already exists")
 
-	// 歌曲
-	ErrSongNotFound = errors.New("song not found")
-
-	// 歌手
-	ErrArtistNotFound = errors.New("artist not found")
-
-	ErrAlbumNotFound = errors.New("album not found")
-
+	// Song related
+	ErrSongNotFound     = errors.New("song not found")
 	ErrSongAlreadyLiked = errors.New("song already liked")
 	ErrLikeNotFound     = errors.New("like record not found")
+
+	// Artist/Album related
+	ErrArtistNotFound = errors.New("artist not found")
+	ErrAlbumNotFound  = errors.New("album not found")
+
+	// Playlist related (新增)
+	ErrPlaylistNotFound      = errors.New("playlist not found")
+	ErrSongAlreadyInPlaylist = errors.New("song already in playlist")
+	ErrSongNotInPlaylist     = errors.New("song not in playlist")
+
+	// General
+	ErrForbidden = errors.New("operation not permitted")
 )

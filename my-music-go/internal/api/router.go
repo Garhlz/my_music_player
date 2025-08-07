@@ -19,6 +19,7 @@ func SetupRouter(
 	artistHandler *handlers.ArtistHandler,
 	albumHandler *handlers.AlbumHandler,
 	likeHandler *handlers.LikeHandler,
+	playlistHandler *handlers.PlaylistHandler,
 ) *gin.Engine {
 
 	router := gin.Default()
@@ -52,9 +53,23 @@ func SetupRouter(
 				meRoutes := protected.Group("/me")
 				{
 					meRoutes.PUT("/profile", userHandler.UpdateMyProfile)
-					meRoutes.GET("/liked-songs", likeHandler.ListMyLikedSongs)
-					meRoutes.POST("/liked-songs/:songId", likeHandler.LikeSong)
-					meRoutes.DELETE("/liked-songs/:songId", likeHandler.UnlikeSong)
+
+					likedSongsRoutes := meRoutes.Group("/liked-songs")
+					{
+						likedSongsRoutes.GET("", likeHandler.ListMyLikedSongs)
+						likedSongsRoutes.POST("/:songId", likeHandler.LikeSong)
+						likedSongsRoutes.DELETE("/:songId", likeHandler.UnlikeSong)
+					}
+
+					playlistRoutes := meRoutes.Group("/playlists")
+					{
+						playlistRoutes.GET("", playlistHandler.ListMyPlaylists)
+						playlistRoutes.POST("", playlistHandler.CreatePlaylist)
+						playlistRoutes.PUT("/:playlistId", playlistHandler.UpdatePlaylist)
+						playlistRoutes.DELETE("/:playlistId", playlistHandler.DeletePlaylist)
+						playlistRoutes.POST("/:playlistId/songs", playlistHandler.AddSongToPlaylist)
+						playlistRoutes.DELETE("/:playlistId/songs/:songId", playlistHandler.RemoveSongFromPlaylist)
+					}
 				}
 
 				// 对其他用户或通用资源的查询与操作
@@ -63,6 +78,7 @@ func SetupRouter(
 					userRoutes.GET("/:id", userHandler.GetUserProfile)
 					userRoutes.GET("/:id/name", userHandler.GetUsernameAndName)
 					userRoutes.GET("/:id/liked-songs", likeHandler.ListUserLikedSongs)
+					userRoutes.GET("/:id/playlists", playlistHandler.ListUserPlaylists)
 				}
 
 				songRoutes := protected.Group("/songs")
@@ -81,6 +97,8 @@ func SetupRouter(
 					albumRoutes.GET("", albumHandler.ListAlbums)
 					albumRoutes.GET("/:id", albumHandler.GetAlbumDetail)
 				}
+
+				protected.GET("/playlists/:playlistId", playlistHandler.GetPlaylistDetail)
 			}
 		}
 	}

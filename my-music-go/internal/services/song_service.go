@@ -27,7 +27,7 @@ func (s *SongService) GetSongDetail(songID int64) (*models.SongDetailDTO, error)
 	return song, nil
 }
 
-// ListSongs 使用并发来提升性能
+// ListSongs 使用并发来提升性能, 经典的分页查询...
 func (s *SongService) ListSongs(params *models.ListSongsRequestDTO) (*models.PaginatedResponseDTO, error) {
 	// 设置分页默认值
 	if params.Page <= 0 {

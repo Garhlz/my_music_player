@@ -52,6 +52,7 @@ func main() {
 	var artistRepo repository.IArtistRepository = repository.NewArtistRepository(db) // 新增
 	var albumRepo repository.IAlbumRepository = repository.NewAlbumRepository(db)
 	var likeRepo repository.ILikeRepository = repository.NewLikeRepository(db)
+	var playlistRepo repository.IPlaylistRepository = repository.NewPlaylistRepository(db)
 
 	// 将 repo 和 config 实例注入到 Service 中
 	userService := services.NewUserService(userRepo, cfg)
@@ -59,6 +60,7 @@ func main() {
 	artistService := services.NewArtistService(artistRepo, songService)
 	albumService := services.NewAlbumService(albumRepo, songService)
 	likeService := services.NewLikeService(likeRepo, songRepo)
+	playlistService := services.NewPlaylistService(playlistRepo, songService)
 
 	// 将 service 实例注入到 Handler 中
 	userHandler := handlers.NewUserHandler(userService)
@@ -66,9 +68,10 @@ func main() {
 	artistHandler := handlers.NewArtistHandler(artistService)
 	albumHandler := handlers.NewAlbumHandler(albumService)
 	likeHandler := handlers.NewLikeHandler(likeService)
+	playlistHandler := handlers.NewPlaylistHandler(playlistService)
 
 	// 将所有 handler 注入到 router 设置函数中
-	router := api.SetupRouter(cfg, userHandler, songHandler, artistHandler, albumHandler, likeHandler)
+	router := api.SetupRouter(cfg, userHandler, songHandler, artistHandler, albumHandler, likeHandler, playlistHandler)
 
 	logger.Printf("服务器启动于 %s", cfg.ServerAddress)
 	if err := router.Run(cfg.ServerAddress); err != nil {
