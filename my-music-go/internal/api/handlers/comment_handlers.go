@@ -27,7 +27,7 @@ func NewCommentHandler(commentService *services.CommentService) *CommentHandler 
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(10)
 // @Success 200 {object} models.PaginatedResponseDTO{List=[]models.CommentDTO}
-// @Router /songs/{songId}/comments [get]
+// @Router /songs/{id}/comments [get]
 func (h *CommentHandler) ListSongComments(c *gin.Context) {
 	songID, err := GetIDFromParam(c, "id")
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *CommentHandler) ListCommentReplies(c *gin.Context) {
 // @Param id path int true "歌曲 ID"
 // @Param createRequest body models.CreateCommentRequestDTO true "评论内容"
 // @Success 201 {object} models.CommentDTO
-// @Router /songs/{songId}/comments [post]
+// @Router /songs/{id}/comments [post]
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	authUserID := c.MustGet("userID").(int64)
 	songID, err := GetIDFromParam(c, "id")

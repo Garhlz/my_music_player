@@ -52,7 +52,7 @@ func (h *PlaylistHandler) ListMyPlaylists(c *gin.Context) {
 // @Param page query int false "页码"
 // @Param pageSize query int false "每页数量"
 // @Success 200 {object} models.PaginatedResponseDTO{List=[]models.PlaylistInfoDTO}
-// @Router /users/{userId}/playlists [get]
+// @Router /users/{id}/playlists [get]
 func (h *PlaylistHandler) ListUserPlaylists(c *gin.Context) {
 	userID, err := GetIDFromParam(c, "id")
 	if err != nil {

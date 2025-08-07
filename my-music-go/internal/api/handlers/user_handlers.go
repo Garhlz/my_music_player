@@ -169,7 +169,7 @@ func (h *UserHandler) GetUsernameAndName(c *gin.Context) {
 // @Failure      401  {object}  map[string]string "{"error": "需要认证"}"
 // @Failure      404  {object}  map[string]string "{"error": "尝试更新的用户不存在"}"
 // @Failure      500  {object}  map[string]string "{"error": "更新用户信息失败，请稍后重试"}"
-// @Router       /users/{id} [put]
+// @Router       /me/profile [put]
 func (h *UserHandler) UpdateMyProfile(c *gin.Context) {
 	// 从 JWT context 获取 userID
 	authUserID := c.MustGet("userID").(int64)

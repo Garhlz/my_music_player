@@ -1057,6 +1057,56 @@ paths:
       summary: 从我的歌单移除歌曲
       tags:
       - 歌单 (Playlist)
+  /me/profile:
+    put:
+      consumes:
+      - application/json
+      description: 更新当前认证用户（通过JWT Token识别）的个人资料。
+      parameters:
+      - description: 要更新的用户信息
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "用户信息更新成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "请求参数格式错误"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "尝试更新的用户不存在"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "更新用户信息失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 更新当前登录用户信息
+      tags:
+      - 用户信息 (User)
   /playlists/{playlistId}:
     get:
       parameters:
@@ -1194,7 +1244,7 @@ paths:
       summary: 获取单曲详情
       tags:
       - 歌曲 (Song)
-  /songs/{songId}/comments:
+  /songs/{id}/comments:
     get:
       description: 获取一首歌的根评论（非回复）的分页列表。
       parameters:
@@ -1301,55 +1351,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取用户个人资料
-      tags:
-      - 用户信息 (User)
-    put:
-      consumes:
-      - application/json
-      description: 更新当前认证用户（通过JWT Token识别）的个人资料。
-      parameters:
-      - description: 要更新的用户信息
-        in: body
-        name: updateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"message": "用户信息更新成功"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: '{"error": "请求参数格式错误"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: '{"error": "需要认证"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: '{"error": "尝试更新的用户不存在"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: '{"error": "更新用户信息失败，请稍后重试"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: 更新当前登录用户信息
       tags:
       - 用户信息 (User)
   /users/{id}/liked-songs:
@@ -1466,7 +1467,7 @@ paths:
       summary: 获取用户名和昵称
       tags:
       - 用户信息 (User)
-  /users/{userId}/playlists:
+  /users/{id}/playlists:
     get:
       parameters:
       - description: 用户 ID

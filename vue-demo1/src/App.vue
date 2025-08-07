@@ -1,14 +1,14 @@
 <template>
   <div class="app-container">
-    <router-view></router-view>
-    <Player v-if="currentSong" />
+	<router-view></router-view>
+	<Player v-if="currentSong"/>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import Player from '@/components/Player.vue'
-import { usePlayerStore } from '@/stores/player'
+import {computed} from 'vue'
+import Player from 'src/components/Player.vue'
+import {usePlayerStore} from 'src/stores/player'
 
 const playerStore = usePlayerStore()
 const currentSong = computed(() => playerStore.getCurrentSong)

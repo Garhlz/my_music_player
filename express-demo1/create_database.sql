@@ -135,20 +135,6 @@ CREATE TABLE `playlist_songs`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci COMMENT ='播放列表歌曲关联表,存储播放列表与歌曲的关系';
 
--- 创建点赞表
-CREATE TABLE `like`
-(
-    `id`         INT PRIMARY KEY AUTO_INCREMENT COMMENT '点赞ID,主键,自动递增',
-    `user_id`    INT NOT NULL COMMENT '用户ID,关联用户表的ID',
-    `song_id`    INT NOT NULL COMMENT '歌曲ID,关联歌曲表的ID',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间,默认为当前时间',
-    FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
-    FOREIGN KEY (`song_id`) REFERENCES `song` (`id`),
-    UNIQUE KEY `unique_user_song` (`user_id`, `song_id`)
-) ENGINE = InnoDB
-  row_format = Compact
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci COMMENT ='点赞表,存储用户对歌曲的点赞记录';
 
 -- 创建评论表
 CREATE TABLE `comment`
@@ -158,10 +144,11 @@ CREATE TABLE `comment`
     `song_id`          INT  NOT NULL COMMENT '歌曲ID,关联歌曲表的ID',
     `text`             TEXT NOT NULL COMMENT '评论内容,不能为空',
     `created_at`       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP COMMENT '评论创建时间,默认为当前时间',
-    `parent_id`        INT           DEFAULT NULL COMMENT '父评论ID,允许为空',
-    `reply_to_user_id` int           DEFAULT NULL COMMENT '回复目标用户ID',
+    `parent_id`        INT           DEFAULT NULL COMMENT '父评论ID,允许为空', -- 保持为 NULLABLE
+    `reply_to_user_id` INT           DEFAULT NULL COMMENT '回复目标用户ID',
     `like_count`       INT  NOT NULL DEFAULT 0 COMMENT '点赞数,默认为0',
     `updated_at`       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '评论更新时间,默认为当前时间',
+    `is_root`          BOOLEAN       NOT NULL DEFAULT FALSE COMMENT '是否为根评论 (TRUE: 根评论, FALSE: 回复评论)', -- 新增字段
     FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
     FOREIGN KEY (`song_id`) REFERENCES `song` (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL,
@@ -171,6 +158,7 @@ CREATE TABLE `comment`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci COMMENT ='评论表,存储用户对歌曲的评论';
 
+-- 用户点赞表
 CREATE TABLE IF NOT EXISTS user_likes
 (
     id         INT PRIMARY KEY AUTO_INCREMENT,
@@ -180,6 +168,7 @@ CREATE TABLE IF NOT EXISTS user_likes
     FOREIGN KEY (user_id) REFERENCES user (id),
     FOREIGN KEY (song_id) REFERENCES song (id),
     UNIQUE KEY unique_user_song (user_id, song_id)
+    COLLATE utf8mb4_unicode_ci COMMENT ='点赞表,存储用户对歌曲的点赞记录';
 ) ENGINE = InnoDB
   row_format = Compact
   CHARACTER SET utf8mb4

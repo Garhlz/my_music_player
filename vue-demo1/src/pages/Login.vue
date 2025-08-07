@@ -1,88 +1,88 @@
 <template>
   <div class="login-container">
-    <div class="login-wrapper">
-      <!-- 左侧装饰区域 -->
-      <div class="login-decoration">
-        <div class="decoration-content">
-          <h1>音乐，让生活更美好</h1>
-          <p>享受无限音乐，尽在于此</p>
-        </div>
-      </div>
+	<div class="login-wrapper">
+	  <!-- 左侧装饰区域 -->
+	  <div class="login-decoration">
+		<div class="decoration-content">
+		  <h1>音乐，让生活更美好</h1>
+		  <p>享受无限音乐，尽在于此</p>
+		</div>
+	  </div>
 
-      <!-- 右侧登录表单 -->
-      <div class="login-form-container">
-        <el-card class="login-card" :body-style="{ padding: '40px' }">
-          <div class="login-header">
-            <h2>欢迎回来</h2>
-            <p class="subtitle">请登录您的账号</p>
-          </div>
+	  <!-- 右侧登录表单 -->
+	  <div class="login-form-container">
+		<el-card class="login-card" :body-style="{ padding: '40px' }">
+		  <div class="login-header">
+			<h2>欢迎回来</h2>
+			<p class="subtitle">请登录您的账号</p>
+		  </div>
 
-          <el-form
-            :model="loginForm"
-            :rules="rules"
-            ref="loginFormRef"
-            class="login-form"
-          >
-            <el-form-item prop="username">
-              <el-input
-                v-model="loginForm.username"
-                placeholder="请输入用户名"
-                :prefix-icon="User"
-                size="large"
-                @keyup.enter="handleLogin"
-              />
-            </el-form-item>
+		  <el-form
+			  :model="loginForm"
+			  :rules="rules"
+			  ref="loginFormRef"
+			  class="login-form"
+		  >
+			<el-form-item prop="username">
+			  <el-input
+				  v-model="loginForm.username"
+				  placeholder="请输入用户名"
+				  :prefix-icon="User"
+				  size="large"
+				  @keyup.enter="handleLogin"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="password">
-              <el-input
-                v-model="loginForm.password"
-                type="password"
-                placeholder="请输入密码"
-                :prefix-icon="Lock"
-                size="large"
-                show-password
-                @keyup.enter="handleLogin"
-              />
-            </el-form-item>
+			<el-form-item prop="password">
+			  <el-input
+				  v-model="loginForm.password"
+				  type="password"
+				  placeholder="请输入密码"
+				  :prefix-icon="Lock"
+				  size="large"
+				  show-password
+				  @keyup.enter="handleLogin"
+			  />
+			</el-form-item>
 
-            <div class="login-options">
-              <el-checkbox v-model="rememberMe">
-                <span class="remember-text">记住我</span>
-              </el-checkbox>
-              <el-button link type="primary" @click="handleForgotPassword">
-                忘记密码？
-              </el-button>
-            </div>
+			<div class="login-options">
+			  <el-checkbox v-model="rememberMe">
+				<span class="remember-text">记住我</span>
+			  </el-checkbox>
+			  <el-button link type="primary" @click="handleForgotPassword">
+				忘记密码？
+			  </el-button>
+			</div>
 
-            <el-button
-              type="primary"
-              :loading="loading"
-              @click="handleLogin"
-              class="login-button"
-              size="large"
-            >
-              {{ loading ? "登录中..." : "登录" }}
-            </el-button>
+			<el-button
+				type="primary"
+				:loading="loading"
+				@click="handleLogin"
+				class="login-button"
+				size="large"
+			>
+			  {{ loading ? "登录中..." : "登录" }}
+			</el-button>
 
-            <div class="register-link">
-              还没有账号？
-              <router-link to="/register" class="register-button">
-                立即注册
-              </router-link>
-            </div>
-          </el-form>
-        </el-card>
-      </div>
-    </div>
+			<div class="register-link">
+			  还没有账号？
+			  <router-link to="/register" class="register-button">
+				立即注册
+			  </router-link>
+			</div>
+		  </el-form>
+		</el-card>
+	  </div>
+	</div>
   </div>
 </template>
 
 <script setup>
-import { login } from "@/api/axiosFile";
-import { Lock, User } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import {login} from "src/api/axiosFile";
+import {Lock, User} from "@element-plus/icons-vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {onMounted, ref} from "vue";
+import {useRouter} from "vue-router";
 
 const router = useRouter();
 const loginFormRef = ref(null);
@@ -98,20 +98,20 @@ const loginForm = ref({
 // 表单验证规则
 const rules = {
   username: [
-    { required: true, message: "请输入用户名", trigger: "blur" },
-    { min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur" },
+	{required: true, message: "请输入用户名", trigger: "blur"},
+	{min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur"},
   ],
   password: [
-    { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 5, message: "密码长度不能少于5位", trigger: "blur" },
+	{required: true, message: "请输入密码", trigger: "blur"},
+	{min: 5, message: "密码长度不能少于5位", trigger: "blur"},
   ],
 };
 
 // 处理忘记密码
 const handleForgotPassword = () => {
   ElMessageBox.alert("请联系管理员重置密码", "忘记密码", {
-    confirmButtonText: "确定",
-    type: "info",
+	confirmButtonText: "确定",
+	type: "info",
   });
 };
 
@@ -120,47 +120,47 @@ const handleLogin = async () => {
   if (!loginFormRef.value) return;
 
   try {
-    // 表单验证
-    await loginFormRef.value.validate();
+	// 表单验证
+	await loginFormRef.value.validate();
+	console.log("fuck you !")
+	loading.value = true;
+	const result = await login(
+		loginForm.value.username,
+		loginForm.value.password
+	);
 
-    loading.value = true;
-    const result = await login(
-      loginForm.value.username,
-      loginForm.value.password
-    );
+	if (result.data.message) {
+	  localStorage.setItem("token", result.data.token);
+	  localStorage.setItem("userId", result.data.user_id);
 
-    if (result.data.message) {
-      localStorage.setItem("token", result.data.token);
-      localStorage.setItem("userId", result.data.user_id);
+	  if (rememberMe.value) {
+		localStorage.setItem("remembered_username", loginForm.value.username);
+	  } else {
+		localStorage.removeItem("remembered_username");
+	  }
 
-      if (rememberMe.value) {
-        localStorage.setItem("remembered_username", loginForm.value.username);
-      } else {
-        localStorage.removeItem("remembered_username");
-      }
+	  ElMessage({
+		type: "success",
+		message: "登录成功，欢迎回来！",
+		duration: 2000,
+	  });
 
-      ElMessage({
-        type: "success",
-        message: "登录成功，欢迎回来！",
-        duration: 2000,
-      });
-
-      router.push("/pub");
-    } else {
-      throw new Error(result.data.error || "登录失败");
-    }
-  } catch (error) {
-    console.error("登录失败:", error);
-    ElMessageBox.alert(
-      error.message || "登录失败，请检查用户名和密码",
-      "登录失败",
-      {
-        confirmButtonText: "确定",
-        type: "error",
-      }
-    );
+	  router.push("/pub");
+	} else {
+	  throw new Error(result.data.error || "登录失败");
+	}
+  } catch (error) { // 注意, 我的后端现在有比较完善的错误处理机制, 因此这里也要修改
+	console.error("登录失败:", error);
+	ElMessageBox.alert(
+		error.message || "登录失败，请检查用户名和密码",
+		"登录失败",
+		{
+		  confirmButtonText: "确定",
+		  type: "error",
+		}
+	);
   } finally {
-    loading.value = false;
+	loading.value = false;
   }
 };
 
@@ -168,8 +168,8 @@ const handleLogin = async () => {
 onMounted(() => {
   const rememberedUsername = localStorage.getItem("remembered_username");
   if (rememberedUsername) {
-    loginForm.value.username = rememberedUsername;
-    rememberMe.value = true;
+	loginForm.value.username = rememberedUsername;
+	rememberMe.value = true;
   }
 });
 </script>
@@ -224,9 +224,9 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   background: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0) 100%
+	  45deg,
+	  rgba(255, 255, 255, 0.1) 0%,
+	  rgba(255, 255, 255, 0) 100%
   );
   transform: translateX(-100%);
   animation: shimmer 3s infinite;
@@ -361,84 +361,84 @@ onMounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .login-wrapper {
-    flex-direction: column;
+	flex-direction: column;
   }
 
   .login-decoration {
-    padding: 30px 20px;
-    min-height: 180px;
+	padding: 30px 20px;
+	min-height: 180px;
   }
 
   .decoration-content h1 {
-    font-size: 2.2em;
+	font-size: 2.2em;
   }
 
   .decoration-content p {
-    font-size: 1.1em;
+	font-size: 1.1em;
   }
 }
 
 /* 动画关键帧 */
 @keyframes gradientBG {
   0% {
-    background-position: 0% 50%;
+	background-position: 0% 50%;
   }
   50% {
-    background-position: 100% 50%;
+	background-position: 100% 50%;
   }
   100% {
-    background-position: 0% 50%;
+	background-position: 0% 50%;
   }
 }
 
 @keyframes shimmer {
   0% {
-    transform: translateX(-100%);
+	transform: translateX(-100%);
   }
   100% {
-    transform: translateX(100%);
+	transform: translateX(100%);
   }
 }
 
 @keyframes slideInLeft {
   from {
-    opacity: 0;
-    transform: translateX(-30px);
+	opacity: 0;
+	transform: translateX(-30px);
   }
   to {
-    opacity: 1;
-    transform: translateX(0);
+	opacity: 1;
+	transform: translateX(0);
   }
 }
 
 @keyframes slideInDown {
   from {
-    opacity: 0;
-    transform: translateY(-20px);
+	opacity: 0;
+	transform: translateY(-20px);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+	opacity: 1;
+	transform: translateY(0);
   }
 }
 
 @keyframes slideInUp {
   from {
-    opacity: 0;
-    transform: translateY(20px);
+	opacity: 0;
+	transform: translateY(20px);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+	opacity: 1;
+	transform: translateY(0);
   }
 }
 
 @keyframes fadeIn {
   from {
-    opacity: 0;
+	opacity: 0;
   }
   to {
-    opacity: 1;
+	opacity: 1;
   }
 }
 </style>

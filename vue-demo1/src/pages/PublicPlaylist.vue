@@ -1,232 +1,240 @@
 <template>
   <CommonLayout :page-name="currentName">
-    <template #main>
-      <div class="playlist-container" v-loading="isLoading">
-        <!-- 搜索和筛选区域 -->
-        <div class="filter-section">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索歌曲、歌手、专辑"
-            class="search-input"
-            :prefix-icon="Search"
-            clearable
-            @clear="handleSearch"
-            @keyup.enter="handleSearch"
-          />
-          <el-select v-model="sortBy" placeholder="排序方式" @change="handleSearch">
-            <el-option label="最新" value="latest" />
-            <el-option label="最热" value="popular" />
-          </el-select>
-        </div>
+	<template #main>
+	  <div class="playlist-container" v-loading="isLoading">
+		<!-- 搜索和筛选区域 -->
+		<div class="filter-section">
+		  <el-input
+			  v-model="searchQuery"
+			  placeholder="搜索歌曲、歌手、专辑"
+			  class="search-input"
+			  :prefix-icon="Search"
+			  clearable
+			  @clear="handleSearch"
+			  @keyup.enter="handleSearch"
+		  />
+		  <el-select v-model="sortBy" placeholder="排序方式" @change="handleSearch">
+			<el-option label="最新" value="latest"/>
+			<el-option label="最热" value="popular"/>
+		  </el-select>
+		</div>
 
-        <!-- 当没有数据时显示空状态 -->
-        <el-empty
-          v-if="!isLoading && songs.length === 0"
-          description="暂无歌曲"
-        />
+		<!-- 当没有数据时显示空状态 -->
+		<el-empty
+			v-if="!isLoading && songs.length === 0"
+			description="暂无歌曲"
+		/>
 
-        <!-- 歌曲列表 -->
-        <div class="song-list">
-          <!-- 表头 -->
-          <div class="song-header">
-            <div class="col-index">#</div>
-            <div class="col-title">标题</div>
-            <div class="col-duration">时长</div>
-            <div class="col-artist">歌手</div>
-            <div class="col-album">专辑</div>
-          </div>
+		<!-- 歌曲列表 -->
+		<div class="song-list">
+		  <!-- 表头 -->
+		  <div class="song-header">
+			<div class="col-index">#</div>
+			<div class="col-title">标题</div>
+			<div class="col-duration">时长</div>
+			<div class="col-artist">歌手</div>
+			<div class="col-album">专辑</div>
+		  </div>
 
-          <!-- 歌曲列表项 -->
-          <div 
-            v-for="(song, index) in songs" 
-            :key="song.id" 
-            class="song-item"
-            @mouseenter="hoveredSong = song.id"
-            @mouseleave="hoveredSong = null"
-            @click="handlePlaySong(song)"
-          >
-            <!-- 序号/播放按钮 -->
-            <div class="col-index">
-              <span v-if="hoveredSong !== song.id">{{ (page - 1) * pageSize + index + 1 }}</span>
-              <el-icon v-else class="play-icon" @click="handlePlaySong(song)"><VideoPlay /></el-icon>
-            </div>
+		  <!-- 歌曲列表项 -->
+		  <div
+			  v-for="(song, index) in songs"
+			  :key="song.id"
+			  class="song-item"
+			  @mouseenter="hoveredSong = song.id"
+			  @mouseleave="hoveredSong = null"
+			  @click="handlePlaySong(song)"
+		  >
+			<!-- 序号/播放按钮 -->
+			<div class="col-index">
+			  <span v-if="hoveredSong !== song.id">{{ (page - 1) * pageSize + index + 1 }}</span>
+			  <el-icon v-else class="play-icon" @click="handlePlaySong(song)">
+				<VideoPlay/>
+			  </el-icon>
+			</div>
 
-            <!-- 歌曲信息 -->
-            <div class="col-title">
-              <div class="song-cover" @click="goToPlayer(song)">
-                <el-image 
-                  :src="song.cover || '/assets/default-cover.jpg'"
-                  fit="cover"
-                />
-              </div>
-              <span class="song-name">{{ song.name }}</span>
-            </div>
+			<!-- 歌曲信息 -->
+			<div class="col-title">
+			  <div class="song-cover" @click="goToPlayer(song)">
+				<el-image
+					:src="song.cover || '/assets/default-cover.jpg'"
+					fit="cover"
+				/>
+			  </div>
+			  <span class="song-name">{{ song.name }}</span>
+			</div>
 
-            <!-- 时长/操作按钮 -->
-            <div class="col-duration">
-              <template v-if="hoveredSong !== song.id">
-                {{ formatDuration(song.duration) }}
-              </template>
-              <div v-else class="action-buttons">
-                <el-tooltip content="喜欢" placement="top">
-                  <el-icon 
-                    @click="likeSong(song)" 
-                    :class="{ 'liked': likedSongs.includes(song.id) }" 
-                  >
-                    <Star />
-                  </el-icon>
-                </el-tooltip>
-                <el-tooltip content="添加到播放列表" placement="top">
-                  <el-icon @click="addToPlaylist(song)"><Plus /></el-icon>
-                </el-tooltip>
-                <!-- <el-tooltip content="收藏专辑" placement="top">
-                  <el-icon @click="addAlbum(song)"><FolderAdd /></el-icon>
-                </el-tooltip> -->
-                <el-tooltip content="评论" placement="top">
-                  <el-icon @click="goToComment(song)"><ChatDotRound /></el-icon>
-                </el-tooltip>
-                <el-tooltip content="下载" placement="top">
-                  <el-icon @click="downloadSong(song)"><Download /></el-icon>
-                </el-tooltip>
-              </div>
-            </div>
+			<!-- 时长/操作按钮 -->
+			<div class="col-duration">
+			  <template v-if="hoveredSong !== song.id">
+				{{ formatDuration(song.duration) }}
+			  </template>
+			  <div v-else class="action-buttons">
+				<el-tooltip content="喜欢" placement="top">
+				  <el-icon
+					  @click="likeSong(song)"
+					  :class="{ 'liked': likedSongs.includes(song.id) }"
+				  >
+					<Star/>
+				  </el-icon>
+				</el-tooltip>
+				<el-tooltip content="添加到播放列表" placement="top">
+				  <el-icon @click="addToPlaylist(song)">
+					<Plus/>
+				  </el-icon>
+				</el-tooltip>
+				<!-- <el-tooltip content="收藏专辑" placement="top">
+				  <el-icon @click="addAlbum(song)"><FolderAdd /></el-icon>
+				</el-tooltip> -->
+				<el-tooltip content="评论" placement="top">
+				  <el-icon @click="goToComment(song)">
+					<ChatDotRound/>
+				  </el-icon>
+				</el-tooltip>
+				<el-tooltip content="下载" placement="top">
+				  <el-icon @click="downloadSong(song)">
+					<Download/>
+				  </el-icon>
+				</el-tooltip>
+			  </div>
+			</div>
 
 
-            <!-- 歌手 -->
-            <div class="col-artist" @click="goToArtist(song.author_id)">
-              {{ song.artist }}
-            </div>
+			<!-- 歌手 -->
+			<div class="col-artist" @click="goToArtist(song.author_id)">
+			  {{ song.artist }}
+			</div>
 
-            <!-- 专辑 -->
-            <div class="col-album" @click="goToAlbum(song.album_id)">
-              {{ song.album }}
-            </div>
-          </div>
-        </div>
+			<!-- 专辑 -->
+			<div class="col-album" @click="goToAlbum(song.album_id)">
+			  {{ song.album }}
+			</div>
+		  </div>
+		</div>
 
-        <!-- 分页器 -->
-        <el-pagination
-          v-model:current-page="page"
-          v-model:page-size="pageSize"
-          :total="totalSongs"
-          :page-sizes="[10, 20, 30, 50]"
-          layout="total, sizes, prev, pager, next"
-          class="pagination"
-          @size-change="handlePageSizeChange"
-          @current-change="handlePageChange"
-        />
-      </div>
+		<!-- 分页器 -->
+		<el-pagination
+			v-model:current-page="page"
+			v-model:page-size="pageSize"
+			:total="totalSongs"
+			:page-sizes="[10, 20, 30, 50]"
+			layout="total, sizes, prev, pager, next"
+			class="pagination"
+			@size-change="handlePageSizeChange"
+			@current-change="handlePageChange"
+		/>
+	  </div>
 
-      <!-- 封面预览弹窗 -->
-      <el-dialog
-        v-model="coverDialogVisible"
-        :title="selectedSong?.name"
-        width="400px"
-        align-center
-      >
-        <div class="cover-preview">
-          <el-image
-            :src="selectedSong?.cover || '/assets/default-cover.jpg'"
-            fit="cover"
-          />
-        </div>
-      </el-dialog>
+	  <!-- 封面预览弹窗 -->
+	  <el-dialog
+		  v-model="coverDialogVisible"
+		  :title="selectedSong?.name"
+		  width="400px"
+		  align-center
+	  >
+		<div class="cover-preview">
+		  <el-image
+			  :src="selectedSong?.cover || '/assets/default-cover.jpg'"
+			  fit="cover"
+		  />
+		</div>
+	  </el-dialog>
 
-      <!-- 添加到播放列表弹窗 -->
-      <el-dialog
-        v-model="playlistDialogVisible"
-        title="添加到歌单"
-        width="600px"
-        @close="selectedPlaylist = null"
-      >
-        <div class="playlist-dialog-content">
-          <!-- 现有歌单列表，设置为可见之后弹出 -->
-          <div class="existing-playlists">
-            <el-scrollbar height="400px">
-              <div class="playlist-list">
-                <div 
-                  v-for="playlist in userPlaylists" 
-                  :key="playlist.id" 
-                  class="playlist-item"
-                  :class="{ 'playlist-item-selected': selectedPlaylist === playlist.id }"
-                  @click="selectedPlaylist = playlist.id"
-                >
-                  <div class="playlist-info-row">
-                    <el-image 
-                      :src="playlist.cover || '/assets/default-cover.jpg'" 
-                      class="playlist-cover-img"
-                    />
-                    <div class="playlist-details">
-                      <div class="playlist-name">{{ playlist.name }}</div>
-                      <div class="playlist-description">{{ playlist.description || '暂无描述' }}</div>
-                      <div class="playlist-count">{{ playlist.song_count || 0 }}首歌曲</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </el-scrollbar>
-          </div>
+	  <!-- 添加到播放列表弹窗 -->
+	  <el-dialog
+		  v-model="playlistDialogVisible"
+		  title="添加到歌单"
+		  width="600px"
+		  @close="selectedPlaylist = null"
+	  >
+		<div class="playlist-dialog-content">
+		  <!-- 现有歌单列表，设置为可见之后弹出 -->
+		  <div class="existing-playlists">
+			<el-scrollbar height="400px">
+			  <div class="playlist-list">
+				<div
+					v-for="playlist in userPlaylists"
+					:key="playlist.id"
+					class="playlist-item"
+					:class="{ 'playlist-item-selected': selectedPlaylist === playlist.id }"
+					@click="selectedPlaylist = playlist.id"
+				>
+				  <div class="playlist-info-row">
+					<el-image
+						:src="playlist.cover || '/assets/default-cover.jpg'"
+						class="playlist-cover-img"
+					/>
+					<div class="playlist-details">
+					  <div class="playlist-name">{{ playlist.name }}</div>
+					  <div class="playlist-description">{{ playlist.description || '暂无描述' }}</div>
+					  <div class="playlist-count">{{ playlist.song_count || 0 }}首歌曲</div>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</el-scrollbar>
+		  </div>
 
-          <!-- 创建新歌单 -->
-          <div class="create-playlist">
-            <el-divider>创建新歌单</el-divider>
-            <div class="create-playlist-form">
-              <el-input
-                v-model="newPlaylistName"
-                placeholder="请输入歌单名称"
-                clearable
-              />
-              <el-input
-                v-model="newPlaylistDescription"
-                type="textarea"
-                :rows="2"
-                placeholder="添加歌单描述（选填）"
-                class="mt-3"
-              />
-              <el-button type="primary" @click="createNewPlaylist" class="mt-3">
-                创建
-              </el-button>
-            </div>
-          </div>
-        </div>
-        <template #footer>
+		  <!-- 创建新歌单 -->
+		  <div class="create-playlist">
+			<el-divider>创建新歌单</el-divider>
+			<div class="create-playlist-form">
+			  <el-input
+				  v-model="newPlaylistName"
+				  placeholder="请输入歌单名称"
+				  clearable
+			  />
+			  <el-input
+				  v-model="newPlaylistDescription"
+				  type="textarea"
+				  :rows="2"
+				  placeholder="添加歌单描述（选填）"
+				  class="mt-3"
+			  />
+			  <el-button type="primary" @click="createNewPlaylist" class="mt-3">
+				创建
+			  </el-button>
+			</div>
+		  </div>
+		</div>
+		<template #footer>
           <span class="dialog-footer">
             <el-button @click="playlistDialogVisible = false">取消</el-button>
             <el-button type="primary" @click="confirmAddToPlaylist">
               确定
             </el-button>
           </span>
-        </template>
-      </el-dialog>
+		</template>
+	  </el-dialog>
 
-    </template>
+	</template>
   </CommonLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { 
-  Search, 
-  VideoPlay, 
-  Star, 
-  Plus, 
-  FolderAdd, 
-  ChatDotRound, 
-  Download 
+import {ref, onMounted} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {
+  Search,
+  VideoPlay,
+  Star,
+  Plus,
+  FolderAdd,
+  ChatDotRound,
+  Download
 } from '@element-plus/icons-vue'
-import { 
-  getSongs, 
-  getLikedSongsById, 
-  addLikedSong, 
+import {
+  getSongs,
+  getLikedSongsById,
+  addLikedSong,
   removeLikedSong,
-  getMyPlaylists, 
-  createPlaylist, 
-  addSongToPlaylist 
-} from '@/api/axiosFile'
-import { usePlayerStore } from '@/stores/player'
-import CommonLayout from '@/layouts/CommonLayout.vue'
+  getMyPlaylists,
+  createPlaylist,
+  addSongToPlaylist
+} from 'src/api/axiosFile'
+import {usePlayerStore} from 'src/stores/player'
+import CommonLayout from 'src/layouts/CommonLayout.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
@@ -254,45 +262,45 @@ const userPlaylists = ref([])
 const loadData = async () => {
   isLoading.value = true
   try {
-    // 1. 获取歌曲列表
-    const songsResponse = await getSongs({
-      page: page.value,
-      pageSize: pageSize.value,
-      search: searchQuery.value,
-      sortBy: sortBy.value
-    })
-    //此处已经在后端处理了多表查询了，所以这里不需要再处理
-    if (!songsResponse.data.message) {
-      throw new Error(songsResponse.data.error || '获取歌曲列表失败')
-    }
-    
-    const songsData = songsResponse.data.data
-    totalSongs.value = songsData.total
-    const songsList = songsData.list || []
+	// 1. 获取歌曲列表
+	const songsResponse = await getSongs({
+	  page: page.value,
+	  pageSize: pageSize.value,
+	  search: searchQuery.value,
+	  sortBy: sortBy.value
+	})
+	//此处已经在后端处理了多表查询了，所以这里不需要再处理
+	if (!songsResponse.data.message) {
+	  throw new Error(songsResponse.data.error || '获取歌曲列表失败')
+	}
 
-    // 2. 获取喜欢列表
-    const userId = localStorage.getItem('userId')
-    const likedResponse = await getLikedSongsById(userId)
-    if (likedResponse.data.message) {
-      likedSongs.value = likedResponse.data.data || []
-    }
+	const songsData = songsResponse.data.data
+	totalSongs.value = songsData.total
+	const songsList = songsData.list || []
 
-    
-    // 3. 组装完整的歌曲信息,只是重新处理罢了
-    songs.value = songsList.map(song => {
-      return {
-        ...song,
-        artist: song.artist_name ? song.artist_name : '未知歌手',
-        album: song.album_name ? song.album_name : '未知专辑',
-        cover: song.album_cover ? song.album_cover : '/assets/default-cover.jpg',
-        duration: song.duration || 0
-      }
-    })
+	// 2. 获取喜欢列表
+	const userId = localStorage.getItem('userId')
+	const likedResponse = await getLikedSongsById(userId)
+	if (likedResponse.data.message) {
+	  likedSongs.value = likedResponse.data.data || []
+	}
+
+
+	// 3. 组装完整的歌曲信息,只是重新处理罢了
+	songs.value = songsList.map(song => {
+	  return {
+		...song,
+		artist: song.artist_name ? song.artist_name : '未知歌手',
+		album: song.album_name ? song.album_name : '未知专辑',
+		cover: song.album_cover ? song.album_cover : '/assets/default-cover.jpg',
+		duration: song.duration || 0
+	  }
+	})
   } catch (error) {
-    console.error('加载数据失败:', error)
-    ElMessage.error(error.message || '加载数据失败，请稍后重试')
+	console.error('加载数据失败:', error)
+	ElMessage.error(error.message || '加载数据失败，请稍后重试')
   } finally {
-    isLoading.value = false
+	isLoading.value = false
   }
 }
 
@@ -303,18 +311,18 @@ const handlePlaySong = (song) => {
 
 const likeSong = async (song) => {
   try {
-    if (likedSongs.value.includes(song.id)) {
-      await removeLikedSong(song.id)
-      likedSongs.value = likedSongs.value.filter(id => id !== song.id)
-      ElMessage.success(`已取消喜欢: ${song.name}`)
-    } else {
-      await addLikedSong(song.id)
-      likedSongs.value.push(song.id)
-      ElMessage.success(`已添加到我喜欢: ${song.name}`)
-    }
+	if (likedSongs.value.includes(song.id)) {
+	  await removeLikedSong(song.id)
+	  likedSongs.value = likedSongs.value.filter(id => id !== song.id)
+	  ElMessage.success(`已取消喜欢: ${song.name}`)
+	} else {
+	  await addLikedSong(song.id)
+	  likedSongs.value.push(song.id)
+	  ElMessage.success(`已添加到我喜欢: ${song.name}`)
+	}
   } catch (error) {
-    console.error('操作失败:', error)
-    ElMessage.error('操作失败，请稍后重试')
+	console.error('操作失败:', error)
+	ElMessage.error('操作失败，请稍后重试')
   }
 }
 
@@ -323,70 +331,70 @@ const addToPlaylist = async (song) => {
   playlistDialogVisible.value = true
   //在这里修改显示状态，然后弹出一个弹窗
   try {
-    const response = await getMyPlaylists({
-      id: parseInt(localStorage.getItem('userId')),
-    })
-    if (response.data.message) {
-      
-      userPlaylists.value = response.data.data.playlists
-    } else {
-      throw new Error(response.data.error || '获取歌单失败')
-    }
+	const response = await getMyPlaylists({
+	  id: parseInt(localStorage.getItem('userId')),
+	})
+	if (response.data.message) {
+
+	  userPlaylists.value = response.data.data.playlists
+	} else {
+	  throw new Error(response.data.error || '获取歌单失败')
+	}
   } catch (error) {
-    console.error('获取歌单失败:', error)
-    ElMessage.error(error.message || '获取歌单失败，请稍后重试')
+	console.error('获取歌单失败:', error)
+	ElMessage.error(error.message || '获取歌单失败，请稍后重试')
   }
 }
 
 const createNewPlaylist = async () => {
   if (!newPlaylistName.value.trim()) {
-    ElMessage.warning('请输入歌单名称')
-    return
+	ElMessage.warning('请输入歌单名称')
+	return
   }
 
   try {
-    const response = await createPlaylist({
-      name: newPlaylistName.value,
-      description: newPlaylistDescription.value,
-      isPublic: false
-    })
+	const response = await createPlaylist({
+	  name: newPlaylistName.value,
+	  description: newPlaylistDescription.value,
+	  isPublic: false
+	})
 
-    if (response.data.message) {
-      userPlaylists.value.unshift({
-        ...response.data.data,
-        songCount: 0
-      })
-      selectedPlaylist.value = response.data.data.id
-      newPlaylistName.value = ''
-      newPlaylistDescription.value = ''
-      ElMessage.success('歌单创建成功')
-    } else {
-      throw new Error(response.data.error || '创建歌单失败')
-    }
+	if (response.data.message) {
+	  userPlaylists.value.unshift({
+		...response.data.data,
+		songCount: 0
+	  })
+	  selectedPlaylist.value = response.data.data.id
+	  newPlaylistName.value = ''
+	  newPlaylistDescription.value = ''
+	  ElMessage.success('歌单创建成功')
+	} else {
+	  throw new Error(response.data.error || '创建歌单失败')
+	}
   } catch (error) {
-    console.error('创建歌单失败:', error)
-    ElMessage.error(error.message || '创建歌单失败，请稍后重试')
+	console.error('创建歌单失败:', error)
+	ElMessage.error(error.message || '创建歌单失败，请稍后重试')
   }
 }
 
 const confirmAddToPlaylist = async () => {
   if (!selectedPlaylist.value) {
-    ElMessage.warning('请选择歌单')
-    return
+	ElMessage.warning('请选择歌单')
+	return
   }
 
   try {
-    const response = await addSongToPlaylist(selectedPlaylist.value, selectedSong.value.id)
-    if (response.data.message) {
-      ElMessage.success('添加成功')
-      playlistDialogVisible.value = false
-      selectedPlaylist.value = null
-    } else {
-      throw new Error(response.data.error || '添加失败')
-    }
+	const response = await addSongToPlaylist(selectedPlaylist.value, selectedSong.value.id)
+	if (response.data.message) {
+	  ElMessage.success('添加成功')
+	  playlistDialogVisible.value = false
+	  selectedPlaylist.value = null
+	} else {
+	  throw new Error(response.data.error || '添加失败')
+	}
   } catch (error) {
-    console.error('添加失败:', error)
-    ElMessage.error(error.message || '添加失败，请稍后重试')
+	console.error('添加失败:', error)
+	ElMessage.error(error.message || '添加失败，请稍后重试')
   }
 }
 
@@ -419,19 +427,17 @@ const showCover = (song) => {
 
 const goToArtist = (artistId) => {
   if (artistId) {
-    router.push(`/artist/${artistId}`)
-  }
-  else{
-    ElMessage.error("歌手不存在!")
+	router.push(`/artist/${artistId}`)
+  } else {
+	ElMessage.error("歌手不存在!")
   }
 }
 
 const goToAlbum = (albumId) => {
   if (albumId) {
-    router.push(`/album/${albumId}`)
-  }
-  else{
-    ElMessage.error("专辑不存在!")
+	router.push(`/album/${albumId}`)
+  } else {
+	ElMessage.error("专辑不存在!")
   }
 }
 
@@ -633,40 +639,52 @@ defineExpose({
 
 /* 动画效果 */
 @keyframes heartBeat {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1.1); }
+  0% {
+	transform: scale(1);
+  }
+  50% {
+	transform: scale(1.3);
+  }
+  100% {
+	transform: scale(1.1);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+	transform: scale(1);
+  }
+  50% {
+	transform: scale(1.1);
+  }
+  100% {
+	transform: scale(1);
+  }
 }
 
 /* 响应式设计 */
 @media screen and (max-width: 1200px) {
   .song-header, .song-item {
-    grid-template-columns: 60px 2.5fr 100px 1.2fr 1.2fr 120px;
+	grid-template-columns: 60px 2.5fr 100px 1.2fr 1.2fr 120px;
   }
 }
 
 @media screen and (max-width: 768px) {
   .song-header, .song-item {
-    grid-template-columns: 50px 3fr 1.5fr 100px;
+	grid-template-columns: 50px 3fr 1.5fr 100px;
   }
-  
+
   .col-album, .col-duration {
-    display: none;
+	display: none;
   }
-  
+
   .filter-section {
-    flex-direction: column;
-    align-items: stretch;
+	flex-direction: column;
+	align-items: stretch;
   }
-  
+
   .search-input {
-    width: 100%;
+	width: 100%;
   }
 }
 
@@ -807,12 +825,12 @@ defineExpose({
 /* 响应式设计 */
 @media screen and (max-width: 768px) {
   .playlist-item {
-    padding: 12px 16px;
+	padding: 12px 16px;
   }
 
   .playlist-cover-img {
-    width: 48px;
-    height: 48px;
+	width: 48px;
+	height: 48px;
   }
 }
 </style>

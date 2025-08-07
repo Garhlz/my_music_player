@@ -1,45 +1,45 @@
 <template>
   <div class="player-container" v-if="currentSong">
-    <div class="player-info">
-      <el-image 
-        :src="currentSong.cover || '/assets/default-cover.jpg'"
-        class="song-cover"
-        fit="cover"
-      />
-      <div class="song-info">
-        <div class="song-name">{{ currentSong.name }}</div>
-        <div class="song-artist">{{ currentSong.artist }}</div>
-      </div>
-    </div>
+	<div class="player-info">
+	  <el-image
+		  :src="currentSong.cover || '/assets/default-cover.jpg'"
+		  class="song-cover"
+		  fit="cover"
+	  />
+	  <div class="song-info">
+		<div class="song-name">{{ currentSong.name }}</div>
+		<div class="song-artist">{{ currentSong.artist }}</div>
+	  </div>
+	</div>
 
-    <div class="player-controls">
-      <el-button 
-        circle 
-        :icon="ArrowLeft"
-        @click="previousSong"
-      />
-      <el-button 
-        circle 
-        :icon="isPlaying ? VideoPause : VideoPlay"
-        @click="togglePlay"
-      />
-      <el-button 
-        circle 
-        :icon="ArrowRight"
-        @click="nextSong"
-      />
-    </div>
+	<div class="player-controls">
+	  <el-button
+		  circle
+		  :icon="ArrowLeft"
+		  @click="previousSong"
+	  />
+	  <el-button
+		  circle
+		  :icon="isPlaying ? VideoPause : VideoPlay"
+		  @click="togglePlay"
+	  />
+	  <el-button
+		  circle
+		  :icon="ArrowRight"
+		  @click="nextSong"
+	  />
+	</div>
 
-    <div class="player-volume">
-      <el-slider v-model="volume" :max="100" :min="0" />
-    </div>
+	<div class="player-volume">
+	  <el-slider v-model="volume" :max="100" :min="0"/>
+	</div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { ArrowLeft, ArrowRight, VideoPlay, VideoPause } from '@element-plus/icons-vue'
-import { usePlayerStore } from '@/stores/player'
+import {ref, computed} from 'vue'
+import {ArrowLeft, ArrowRight, VideoPlay, VideoPause} from '@element-plus/icons-vue'
+import {usePlayerStore} from 'src/stores/player'
 
 const playerStore = usePlayerStore()
 
@@ -53,9 +53,9 @@ const isPlaying = computed(() => playerStore.getIsPlaying)
 // 方法
 const togglePlay = () => {
   if (isPlaying.value) {
-    playerStore.pause()
+	playerStore.pause()
   } else {
-    playerStore.resume()
+	playerStore.resume()
   }
 }
 
@@ -127,19 +127,19 @@ const nextSong = () => {
 /* 响应式设计 */
 @media screen and (max-width: 768px) {
   .player-container {
-    padding: 0 16px;
+	padding: 0 16px;
   }
 
   .player-info {
-    width: auto;
+	width: auto;
   }
 
   .song-info {
-    display: none;
+	display: none;
   }
 
   .player-volume {
-    display: none;
+	display: none;
   }
 }
 </style> 

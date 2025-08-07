@@ -1,156 +1,156 @@
 <template>
   <div class="register-container">
-    <div class="register-wrapper">
-      <!-- 左侧装饰区域 -->
-      <div class="register-decoration">
-        <div class="decoration-content">
-          <h1>开启音乐之旅</h1>
-          <p>注册账号，探索更多精彩</p>
-        </div>
-      </div>
+	<div class="register-wrapper">
+	  <!-- 左侧装饰区域 -->
+	  <div class="register-decoration">
+		<div class="decoration-content">
+		  <h1>开启音乐之旅</h1>
+		  <p>注册账号，探索更多精彩</p>
+		</div>
+	  </div>
 
-      <!-- 右侧注册表单 -->
-      <div class="register-form-container">
-        <el-card class="register-card" :body-style="{ padding: '40px' }">
-          <div class="register-header">
-            <h2>创建账号</h2>
-            <p class="subtitle">请填写以下信息完成注册</p>
-          </div>
+	  <!-- 右侧注册表单 -->
+	  <div class="register-form-container">
+		<el-card class="register-card" :body-style="{ padding: '40px' }">
+		  <div class="register-header">
+			<h2>创建账号</h2>
+			<p class="subtitle">请填写以下信息完成注册</p>
+		  </div>
 
-          <el-form 
-            :model="registerForm" 
-            :rules="rules"
-            ref="registerFormRef"
-            class="register-form"
-          >
-            <el-form-item prop="username">
-              <el-input
-                v-model="registerForm.username"
-                placeholder="用户名"
-                :prefix-icon="User"
-                size="large"
-              />
-            </el-form-item>
+		  <el-form
+			  :model="registerForm"
+			  :rules="rules"
+			  ref="registerFormRef"
+			  class="register-form"
+		  >
+			<el-form-item prop="username">
+			  <el-input
+				  v-model="registerForm.username"
+				  placeholder="用户名"
+				  :prefix-icon="User"
+				  size="large"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="password">
-              <el-input
-                v-model="registerForm.password"
-                type="password"
-                placeholder="密码"
-                :prefix-icon="Lock"
-                size="large"
-                show-password
-              />
-            </el-form-item>
+			<el-form-item prop="password">
+			  <el-input
+				  v-model="registerForm.password"
+				  type="password"
+				  placeholder="密码"
+				  :prefix-icon="Lock"
+				  size="large"
+				  show-password
+			  />
+			</el-form-item>
 
-            <el-form-item prop="confirmPassword">
-              <el-input
-                v-model="registerForm.confirmPassword"
-                type="password"
-                placeholder="确认密码"
-                :prefix-icon="Lock"
-                size="large"
-                show-password
-              />
-            </el-form-item>
+			<el-form-item prop="confirmPassword">
+			  <el-input
+				  v-model="registerForm.confirmPassword"
+				  type="password"
+				  placeholder="确认密码"
+				  :prefix-icon="Lock"
+				  size="large"
+				  show-password
+			  />
+			</el-form-item>
 
-            <el-form-item prop="name">
-              <el-input
-                v-model="registerForm.name"
-                placeholder="昵称"
-                :prefix-icon="User"
-                size="large"
-              />
-            </el-form-item>
+			<el-form-item prop="name">
+			  <el-input
+				  v-model="registerForm.name"
+				  placeholder="昵称"
+				  :prefix-icon="User"
+				  size="large"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="email">
-              <el-input
-                v-model="registerForm.email"
-                placeholder="邮箱"
-                :prefix-icon="Message"
-                size="large"
-              />
-            </el-form-item>
+			<el-form-item prop="email">
+			  <el-input
+				  v-model="registerForm.email"
+				  placeholder="邮箱"
+				  :prefix-icon="Message"
+				  size="large"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="phone">
-              <el-input
-                v-model="registerForm.phone"
-                placeholder="手机号码"
-                :prefix-icon="Phone"
-                size="large"
-              />
-            </el-form-item>
+			<el-form-item prop="phone">
+			  <el-input
+				  v-model="registerForm.phone"
+				  placeholder="手机号码"
+				  :prefix-icon="Phone"
+				  size="large"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="gender">
-              <el-select
-                v-model="registerForm.gender"
-                placeholder="性别"
-                size="large"
-                style="width: 100%"
-              >
-                <el-option label="保密" :value="0" />
-                <el-option label="男" :value="1" />
-                <el-option label="女" :value="2" />
-              </el-select>
-            </el-form-item>
+			<el-form-item prop="gender">
+			  <el-select
+				  v-model="registerForm.gender"
+				  placeholder="性别"
+				  size="large"
+				  style="width: 100%"
+			  >
+				<el-option label="保密" :value="0"/>
+				<el-option label="男" :value="1"/>
+				<el-option label="女" :value="2"/>
+			  </el-select>
+			</el-form-item>
 
-            <el-form-item prop="birthday">
-              <el-date-picker
-                v-model="registerForm.birthday"
-                type="date"
-                placeholder="选择生日"
-                size="large"
-                style="width: 100%"
-              />
-            </el-form-item>
+			<el-form-item prop="birthday">
+			  <el-date-picker
+				  v-model="registerForm.birthday"
+				  type="date"
+				  placeholder="选择生日"
+				  size="large"
+				  style="width: 100%"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="location">
-              <el-input
-                v-model="registerForm.location"
-                placeholder="所在地"
-                :prefix-icon="Location"
-                size="large"
-              />
-            </el-form-item>
+			<el-form-item prop="location">
+			  <el-input
+				  v-model="registerForm.location"
+				  placeholder="所在地"
+				  :prefix-icon="Location"
+				  size="large"
+			  />
+			</el-form-item>
 
-            <el-form-item prop="bio">
-              <el-input
-                v-model="registerForm.bio"
-                type="textarea"
-                placeholder="个人简介"
-                :rows="3"
-              />
-            </el-form-item>
+			<el-form-item prop="bio">
+			  <el-input
+				  v-model="registerForm.bio"
+				  type="textarea"
+				  placeholder="个人简介"
+				  :rows="3"
+			  />
+			</el-form-item>
 
-            <el-button
-              type="primary"
-              :loading="loading"
-              @click="handleRegister"
-              class="register-button"
-              size="large"
-            >
-              {{ loading ? '注册中...' : '立即注册' }}
-            </el-button>
+			<el-button
+				type="primary"
+				:loading="loading"
+				@click="handleRegister"
+				class="register-button"
+				size="large"
+			>
+			  {{ loading ? '注册中...' : '立即注册' }}
+			</el-button>
 
-            <div class="login-link">
-              已有账号？
-              <router-link to="/login" class="login-button">
-                立即登录
-              </router-link>
-            </div>
-          </el-form>
-        </el-card>
-      </div>
-    </div>
+			<div class="login-link">
+			  已有账号？
+			  <router-link to="/login" class="login-button">
+				立即登录
+			  </router-link>
+			</div>
+		  </el-form>
+		</el-card>
+	  </div>
+	</div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { User, Lock, Message, Phone, Location } from '@element-plus/icons-vue'
-import { register } from '@/api/axiosFile'
+import {ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {User, Lock, Message, Phone, Location} from '@element-plus/icons-vue'
+import {register} from 'src/api/axiosFile'
 
 const router = useRouter()
 const registerFormRef = ref(null)
@@ -172,40 +172,40 @@ const registerForm = ref({
 
 const validatePass2 = (rule, value, callback) => {
   if (value === '') {
-    callback(new Error('请再次输入密码'))
+	callback(new Error('请再次输入密码'))
   } else if (value !== registerForm.value.password) {
-    callback(new Error('两次输入密码不一致!'))
+	callback(new Error('两次输入密码不一致!'))
   } else {
-    callback()
+	callback()
   }
 }
 
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+	{required: true, message: '请输入用户名', trigger: 'blur'},
+	{min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur'}
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+	{required: true, message: '请输入密码', trigger: 'blur'},
+	{min: 6, message: '密码长度不能少于6位', trigger: 'blur'}
   ],
   confirmPassword: [
-    { required: true, validator: validatePass2, trigger: 'blur' }
+	{required: true, validator: validatePass2, trigger: 'blur'}
   ],
   email: [
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+	{type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur'}
   ],
   phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+	{pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur'}
   ],
   name: [
-    { max: 50, message: '姓名长度不能超过50个字符', trigger: 'blur' }
+	{max: 50, message: '姓名长度不能超过50个字符', trigger: 'blur'}
   ],
   bio: [
-    { max: 500, message: '个人简介不能超过500个字符', trigger: 'blur' }
+	{max: 500, message: '个人简介不能超过500个字符', trigger: 'blur'}
   ],
   location: [
-    { max: 100, message: '地址长度不能超过100个字符', trigger: 'blur' }
+	{max: 100, message: '地址长度不能超过100个字符', trigger: 'blur'}
   ]
 }
 
@@ -213,30 +213,30 @@ const loading = ref(false)
 
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
+
   try {
-    await registerFormRef.value.validate()
-    
-    loading.value = true
-    const { confirmPassword, ...registerData } = registerForm.value
-    
-    // 转换日期格式
-    if (registerData.birthday) {
-      registerData.birthday = registerData.birthday.toISOString().split('T')[0]
-    }
-    
-    const result = await register(registerData)
-    if (result.data.message) {
-      ElMessage.success('注册成功')
-      router.push('/login')
-    } else {
-      throw new Error(result.data.error || '注册失败')
-    }
+	await registerFormRef.value.validate()
+
+	loading.value = true
+	const {confirmPassword, ...registerData} = registerForm.value
+
+	// 转换日期格式
+	if (registerData.birthday) {
+	  registerData.birthday = registerData.birthday.toISOString().split('T')[0]
+	}
+
+	const result = await register(registerData)
+	if (result.data.message) {
+	  ElMessage.success('注册成功')
+	  router.push('/login')
+	} else {
+	  throw new Error(result.data.error || '注册失败')
+	}
   } catch (error) {
-    console.error('注册失败:', error)
-    ElMessage.error(error.message || '注册失败，请稍后重试')
+	console.error('注册失败:', error)
+	ElMessage.error(error.message || '注册失败，请稍后重试')
   } finally {
-    loading.value = false
+	loading.value = false
   }
 }
 </script>
@@ -290,7 +290,7 @@ const handleRegister = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
   transform: translateX(-100%);
   animation: shimmer 3s infinite;
 }
@@ -434,81 +434,91 @@ const handleRegister = async () => {
 /* 响应式设计 */
 @media (max-width: 992px) {
   .register-wrapper {
-    flex-direction: column;
+	flex-direction: column;
   }
 
   .register-decoration {
-    padding: 40px 20px;
-    min-height: 200px;
+	padding: 40px 20px;
+	min-height: 200px;
   }
 
   .register-form-container {
-    padding: 30px 20px;
+	padding: 30px 20px;
   }
 }
 
 /* 动画关键帧 */
 @keyframes gradientBG {
-  0% { background-position: 0% 50% }
-  50% { background-position: 100% 50% }
-  100% { background-position: 0% 50% }
+  0% {
+	background-position: 0% 50%
+  }
+  50% {
+	background-position: 100% 50%
+  }
+  100% {
+	background-position: 0% 50%
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%) }
-  100% { transform: translateX(100%) }
+  0% {
+	transform: translateX(-100%)
+  }
+  100% {
+	transform: translateX(100%)
+  }
 }
 
 @keyframes slideInLeft {
   from {
-    opacity: 0;
-    transform: translateX(-30px);
+	opacity: 0;
+	transform: translateX(-30px);
   }
   to {
-    opacity: 1;
-    transform: translateX(0);
+	opacity: 1;
+	transform: translateX(0);
   }
 }
 
 @keyframes slideInRight {
   from {
-    opacity: 0;
-    transform: translateX(30px);
+	opacity: 0;
+	transform: translateX(30px);
   }
   to {
-    opacity: 1;
-    transform: translateX(0);
+	opacity: 1;
+	transform: translateX(0);
   }
 }
 
 @keyframes slideInDown {
   from {
-    opacity: 0;
-    transform: translateY(-20px);
+	opacity: 0;
+	transform: translateY(-20px);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+	opacity: 1;
+	transform: translateY(0);
   }
 }
 
 @keyframes slideInUp {
   from {
-    opacity: 0;
-    transform: translateY(20px);
+	opacity: 0;
+	transform: translateY(20px);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+	opacity: 1;
+	transform: translateY(0);
   }
 }
 
 @keyframes fadeIn {
   from {
-    opacity: 0;
+	opacity: 0;
   }
   to {
-    opacity: 1;
+	opacity: 1;
   }
 }
 </style> 

@@ -1128,6 +1128,84 @@ const docTemplate = `{
                 }
             }
         },
+        "/me/profile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新当前认证用户（通过JWT Token识别）的个人资料。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户信息 (User)"
+                ],
+                "summary": "更新当前登录用户信息",
+                "parameters": [
+                    {
+                        "description": "要更新的用户信息",
+                        "name": "updateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"message\": \"用户信息更新成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"请求参数格式错误\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"尝试更新的用户不存在\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"更新用户信息失败，请稍后重试\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/playlists/{playlistId}": {
             "get": {
                 "security": [
@@ -1344,7 +1422,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/songs/{songId}/comments": {
+        "/songs/{id}/comments": {
             "get": {
                 "description": "获取一首歌的根评论（非回复）的分页列表。",
                 "produces": [
@@ -1506,82 +1584,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "{\"error\": \"获取用户信息失败，请稍后重试\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "更新当前认证用户（通过JWT Token识别）的个人资料。",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户信息 (User)"
-                ],
-                "summary": "更新当前登录用户信息",
-                "parameters": [
-                    {
-                        "description": "要更新的用户信息",
-                        "name": "updateRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UpdateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"message\": \"用户信息更新成功\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "{\"error\": \"请求参数格式错误\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "{\"error\": \"需要认证\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "{\"error\": \"尝试更新的用户不存在\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "{\"error\": \"更新用户信息失败，请稍后重试\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1770,7 +1772,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{userId}/playlists": {
+        "/users/{id}/playlists": {
             "get": {
                 "security": [
                     {

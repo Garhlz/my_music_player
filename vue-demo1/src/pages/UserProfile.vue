@@ -1,190 +1,198 @@
 <template>
   <common-layout>
-    <template #main>
-      <div class="profile-container" v-loading="isLoading">
-        <!-- 顶部个人信息区域 -->
-        <div class="profile-header" :class="{ 'header-loaded': !isLoading }">
-          <div class="profile-cover">
-            <div class="profile-info">
-              <div class="left-section">
-                <el-avatar 
-                  :size="90" 
-                  :src="userInfo?.avatar"
-                  class="profile-avatar"
-                />
-                <div class="user-meta">
-                  <h1>{{ userInfo?.name || userInfo?.username }}</h1>
-                  <p class="bio">{{ userInfo?.bio || '这个人很懒，什么都没写~' }}</p>
-                  <el-button 
-                    v-if="isCurrentUser" 
-                    type="primary" 
-                    class="edit-btn"
-                    size="small"
-                    @click="showEditDialog = true"
-                  >
-                    <el-icon><Edit /></el-icon>
-                    编辑资料
-                  </el-button>
-                </div>
-              </div>
-              <div class="right-section">
-                <!-- 添加快捷操作按钮 -->
-                <div class="quick-actions">
-                  <el-button 
-                    type="primary" 
-                    class="action-btn"
-                    @click="router.push(`/my-love/${userInfo?.id}`)"
-                  >
-                    <el-icon><Star /></el-icon>
-                    喜欢的音乐
-                  </el-button>
-                  <el-button 
-                    type="primary" 
-                    class="action-btn"
-                    @click="router.push(`/my-playlist/${userInfo?.id}`)"
-                  >
-                    <el-icon><Menu /></el-icon>
-                    查看歌单
-                  </el-button>
-                </div>
-                <div class="user-stats">
-                  <div class="stat-item" v-for="(stat, index) in userStats" :key="index">
-                    <h3>{{ stat.value }}</h3>
-                    <p>{{ stat.label }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+	<template #main>
+	  <div class="profile-container" v-loading="isLoading">
+		<!-- 顶部个人信息区域 -->
+		<div class="profile-header" :class="{ 'header-loaded': !isLoading }">
+		  <div class="profile-cover">
+			<div class="profile-info">
+			  <div class="left-section">
+				<el-avatar
+					:size="90"
+					:src="userInfo?.avatar"
+					class="profile-avatar"
+				/>
+				<div class="user-meta">
+				  <h1>{{ userInfo?.name || userInfo?.username }}</h1>
+				  <p class="bio">{{ userInfo?.bio || '这个人很懒，什么都没写~' }}</p>
+				  <el-button
+					  v-if="isCurrentUser"
+					  type="primary"
+					  class="edit-btn"
+					  size="small"
+					  @click="showEditDialog = true"
+				  >
+					<el-icon>
+					  <Edit/>
+					</el-icon>
+					编辑资料
+				  </el-button>
+				</div>
+			  </div>
+			  <div class="right-section">
+				<!-- 添加快捷操作按钮 -->
+				<div class="quick-actions">
+				  <el-button
+					  type="primary"
+					  class="action-btn"
+					  @click="router.push(`/my-love/${userInfo?.id}`)"
+				  >
+					<el-icon>
+					  <Star/>
+					</el-icon>
+					喜欢的音乐
+				  </el-button>
+				  <el-button
+					  type="primary"
+					  class="action-btn"
+					  @click="router.push(`/my-playlist/${userInfo?.id}`)"
+				  >
+					<el-icon>
+					  <Menu/>
+					</el-icon>
+					查看歌单
+				  </el-button>
+				</div>
+				<div class="user-stats">
+				  <div class="stat-item" v-for="(stat, index) in userStats" :key="index">
+					<h3>{{ stat.value }}</h3>
+					<p>{{ stat.label }}</p>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</div>
 
-        <!-- 主要内容区域 -->
-        <div class="profile-content">
-          <el-tabs v-model="activeTab" class="profile-tabs">
-            <el-tab-pane label="个人信息" name="info">
-              <el-descriptions :column="2" border>
-                <el-descriptions-item label="用户名">
-                  {{ userInfo?.username }}
-                </el-descriptions-item>
-                <el-descriptions-item label="性别">
-                  {{ formatGender(userInfo?.gender) }}
-                </el-descriptions-item>
-                <el-descriptions-item label="生日">
-                  {{ formatDate(userInfo?.birthday) }}
-                </el-descriptions-item>
-                <el-descriptions-item label="地区">
-                  {{ userInfo?.location || '未设置' }}
-                </el-descriptions-item>
-                <el-descriptions-item label="邮箱">
-                  {{ userInfo?.email || '未设置' }}
-                </el-descriptions-item>
-                <el-descriptions-item label="手机">
-                  {{ formatPhone(userInfo?.phone) }}
-                </el-descriptions-item>
-              </el-descriptions>
-            </el-tab-pane>
-          </el-tabs>
-        </div>
+		<!-- 主要内容区域 -->
+		<div class="profile-content">
+		  <el-tabs v-model="activeTab" class="profile-tabs">
+			<el-tab-pane label="个人信息" name="info">
+			  <el-descriptions :column="2" border>
+				<el-descriptions-item label="用户名">
+				  {{ userInfo?.username }}
+				</el-descriptions-item>
+				<el-descriptions-item label="性别">
+				  {{ formatGender(userInfo?.gender) }}
+				</el-descriptions-item>
+				<el-descriptions-item label="生日">
+				  {{ formatDate(userInfo?.birthday) }}
+				</el-descriptions-item>
+				<el-descriptions-item label="地区">
+				  {{ userInfo?.location || '未设置' }}
+				</el-descriptions-item>
+				<el-descriptions-item label="邮箱">
+				  {{ userInfo?.email || '未设置' }}
+				</el-descriptions-item>
+				<el-descriptions-item label="手机">
+				  {{ formatPhone(userInfo?.phone) }}
+				</el-descriptions-item>
+			  </el-descriptions>
+			</el-tab-pane>
+		  </el-tabs>
+		</div>
 
-        <!-- 编辑资料对话框 -->
-        <el-dialog
-          v-model="showEditDialog"
-          title="编辑个人资料"
-          width="500px"
-          class="edit-dialog"
-        >
-          <el-form :model="editForm" label-width="80px">
-            <el-form-item label="头像">
-              <el-upload
-                class="avatar-uploader"
-                :action="uploadUrl"
-                :show-file-list="false"
-                :on-success="handleAvatarSuccess"
-                :before-upload="beforeAvatarUpload"
-              >
-                <img v-if="editForm.avatar" :src="editForm.avatar" class="avatar" />
-                <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-              </el-upload>
-            </el-form-item>
-            <el-form-item label="昵称">
-              <el-input v-model="editForm.name" />
-            </el-form-item>
-            <el-form-item label="个人简介">
-              <el-input v-model="editForm.bio" type="textarea" :rows="3" />
-            </el-form-item>
-            <el-form-item label="性别">
-              <el-radio-group v-model="editForm.gender">
-                <el-radio :label="1">男</el-radio>
-                <el-radio :label="2">女</el-radio>
-                <el-radio :label="0">保密</el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="生日">
-              <el-date-picker
-                v-model="editForm.birthday"
-                type="date"
-                placeholder="选择日期"
-                format="YYYY-MM-DD"
-              />
-            </el-form-item>
-            <el-form-item label="地区">
-              <el-input v-model="editForm.location" />
-            </el-form-item>
-            <el-form-item label="邮箱">
-              <el-input v-model="editForm.email" />
-            </el-form-item>
-            <el-form-item label="手机">
-              <el-input v-model="editForm.phone" />
-            </el-form-item>
-          </el-form>
-          <template #footer>
+		<!-- 编辑资料对话框 -->
+		<el-dialog
+			v-model="showEditDialog"
+			title="编辑个人资料"
+			width="500px"
+			class="edit-dialog"
+		>
+		  <el-form :model="editForm" label-width="80px">
+			<el-form-item label="头像">
+			  <el-upload
+				  class="avatar-uploader"
+				  :action="uploadUrl"
+				  :show-file-list="false"
+				  :on-success="handleAvatarSuccess"
+				  :before-upload="beforeAvatarUpload"
+			  >
+				<img v-if="editForm.avatar" :src="editForm.avatar" class="avatar"/>
+				<el-icon v-else class="avatar-uploader-icon">
+				  <Plus/>
+				</el-icon>
+			  </el-upload>
+			</el-form-item>
+			<el-form-item label="昵称">
+			  <el-input v-model="editForm.name"/>
+			</el-form-item>
+			<el-form-item label="个人简介">
+			  <el-input v-model="editForm.bio" type="textarea" :rows="3"/>
+			</el-form-item>
+			<el-form-item label="性别">
+			  <el-radio-group v-model="editForm.gender">
+				<el-radio :label="1">男</el-radio>
+				<el-radio :label="2">女</el-radio>
+				<el-radio :label="0">保密</el-radio>
+			  </el-radio-group>
+			</el-form-item>
+			<el-form-item label="生日">
+			  <el-date-picker
+				  v-model="editForm.birthday"
+				  type="date"
+				  placeholder="选择日期"
+				  format="YYYY-MM-DD"
+			  />
+			</el-form-item>
+			<el-form-item label="地区">
+			  <el-input v-model="editForm.location"/>
+			</el-form-item>
+			<el-form-item label="邮箱">
+			  <el-input v-model="editForm.email"/>
+			</el-form-item>
+			<el-form-item label="手机">
+			  <el-input v-model="editForm.phone"/>
+			</el-form-item>
+		  </el-form>
+		  <template #footer>
             <span class="dialog-footer">
               <el-button @click="showEditDialog = false">取消</el-button>
               <el-button type="primary" @click="handleUpdateProfile">
                 保存
               </el-button>
             </span>
-          </template>
-        </el-dialog>
-      </div>
-    </template>
+		  </template>
+		</el-dialog>
+	  </div>
+	</template>
 
-    <template #aside>
-      <transition-group name="card-fade">
-        <el-card class="side-card" key="activity">
-          <template #header>
-            <div class="card-header">
-              <span>个人动态</span>
-            </div>
-          </template>
-          <div class="activity-list">
-            <el-empty description="暂无动态" />
-          </div>
-        </el-card>
+	<template #aside>
+	  <transition-group name="card-fade">
+		<el-card class="side-card" key="activity">
+		  <template #header>
+			<div class="card-header">
+			  <span>个人动态</span>
+			</div>
+		  </template>
+		  <div class="activity-list">
+			<el-empty description="暂无动态"/>
+		  </div>
+		</el-card>
 
-        <el-card class="side-card" key="visitors">
-          <template #header>
-            <div class="card-header">
-              <span>最近访客</span>
-            </div>
-          </template>
-          <div class="visitors-list">
-            <el-empty description="暂无访客" />
-          </div>
-        </el-card>
-      </transition-group>
-    </template>
+		<el-card class="side-card" key="visitors">
+		  <template #header>
+			<div class="card-header">
+			  <span>最近访客</span>
+			</div>
+		  </template>
+		  <div class="visitors-list">
+			<el-empty description="暂无访客"/>
+		  </div>
+		</el-card>
+	  </transition-group>
+	</template>
   </common-layout>
 </template>
 
 <script setup>
-import CommonLayout from '@/layouts/CommonLayout.vue'
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { getUserInfo, updateUserInfo } from '@/api/axiosFile'
-import { ElMessage } from 'element-plus'
-import { Plus, Edit, Star, Menu } from '@element-plus/icons-vue'
+import CommonLayout from 'src/layouts/CommonLayout.vue'
+import {ref, computed, onMounted} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {useUserStore} from 'src/stores/user'
+import {getUserInfo, updateUserInfo} from 'src/api/axiosFile'
+import {ElMessage} from 'element-plus'
+import {Plus, Edit, Star, Menu} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -214,9 +222,9 @@ const isCurrentUser = computed(() => {
 // 格式化函数
 const formatGender = (gender) => {
   const genderMap = {
-    0: '保密',
-    1: '男',
-    2: '女'
+	0: '保密',
+	1: '男',
+	2: '女'
   }
   return genderMap[gender] || '保密'
 }
@@ -234,21 +242,21 @@ const formatPhone = (phone) => {
 // 获取用户信息
 const fetchUserInfo = async () => {
   try {
-    isLoading.value = true
-    console.log(route)
-    const resp = await getUserInfo(route.params.id)
-    if (resp.data.message) {
-      userInfo.value = resp.data.data.data
-      // 如果是当前用户，初始化编辑表单
-      if (isCurrentUser.value) {
-        initEditForm()
-      }
-    }
+	isLoading.value = true
+	console.log(route)
+	const resp = await getUserInfo(route.params.id)
+	if (resp.data.message) {
+	  userInfo.value = resp.data.data.data
+	  // 如果是当前用户，初始化编辑表单
+	  if (isCurrentUser.value) {
+		initEditForm()
+	  }
+	}
   } catch (error) {
-    console.error('获取用户信息失败:', error)
-    ElMessage.error('获取用户��息失败')
+	console.error('获取用户信息失败:', error)
+	ElMessage.error('获取用户��息失败')
   } finally {
-    isLoading.value = false
+	isLoading.value = false
   }
 }
 
@@ -256,29 +264,29 @@ const fetchUserInfo = async () => {
 const initEditForm = () => {
   const info = userInfo.value
   editForm.value = {
-    avatar: info.avatar,
-    name: info.name,
-    bio: info.bio,
-    gender: info.gender,
-    birthday: info.birthday,
-    location: info.location,
-    email: info.email,
-    phone: info.phone
+	avatar: info.avatar,
+	name: info.name,
+	bio: info.bio,
+	gender: info.gender,
+	birthday: info.birthday,
+	location: info.location,
+	email: info.email,
+	phone: info.phone
   }
 }
 
 // 更新用户信息
 const handleUpdateProfile = async () => {
   try {
-    const resp = await updateUserInfo(route.params.id, editForm.value)
-    if (resp.data.message) {
-      ElMessage.success('更新成功')
-      showEditDialog.value = false
-      await fetchUserInfo()
-    }
+	const resp = await updateUserInfo(route.params.id, editForm.value)
+	if (resp.data.message) {
+	  ElMessage.success('更新成功')
+	  showEditDialog.value = false
+	  await fetchUserInfo()
+	}
   } catch (error) {
-    console.error('更新用户信息失败:', error)
-    ElMessage.error('更新用户信息失败')
+	console.error('更新用户信息失败:', error)
+	ElMessage.error('更新用户信息失败')
   }
 }
 
@@ -292,20 +300,20 @@ const beforeAvatarUpload = (file) => {
   const isLt2M = file.size / 1024 / 1024 < 2
 
   if (!isImage) {
-    ElMessage.error('只能上传图片文件!')
-    return false
+	ElMessage.error('只能上传图片文件!')
+	return false
   }
   if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB!')
-    return false
+	ElMessage.error('图片大小不能超过 2MB!')
+	return false
   }
   return true
 }
 
 // 用户统计数据
 const userStats = computed(() => [
-  { label: '粉丝', value: userInfo.value?.followers || 0 },
-  { label: '关注', value: userInfo.value?.followings || 0 }
+  {label: '粉丝', value: userInfo.value?.followers || 0},
+  {label: '关注', value: userInfo.value?.followings || 0}
 ])
 
 // 生命周期钩子
@@ -424,63 +432,63 @@ onMounted(() => {
 /* 编辑对话框样式 */
 .edit-dialog {
   :deep(.el-dialog__body) {
-    padding: 30px;
+	padding: 30px;
   }
 }
 
 .avatar-uploader {
   text-align: center;
-  
+
   .avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
   }
 
   .avatar-uploader-icon {
-    font-size: 20px;
-    color: #8c939d;
-    width: 60px;
-    height: 60px;
-    line-height: 60px;
-    text-align: center;
-    border: 1px dashed var(--el-border-color);
-    border-radius: 50%;
+	font-size: 20px;
+	color: #8c939d;
+	width: 60px;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	border: 1px dashed var(--el-border-color);
+	border-radius: 50%;
   }
 }
 
 /* 响应式调整 */
 @media (max-width: 768px) {
   .profile-info {
-    flex-direction: column;
-    gap: 24px;
+	flex-direction: column;
+	gap: 24px;
   }
 
   .right-section {
-    padding-left: 0;
-    width: 100%;
+	padding-left: 0;
+	width: 100%;
   }
 
   .user-stats {
-    justify-content: center;
+	justify-content: center;
   }
 
   .profile-cover {
-    padding: 20px;
+	padding: 20px;
   }
 
   .left-section {
-    flex-direction: column;
-    text-align: center;
-    gap: 16px;
+	flex-direction: column;
+	text-align: center;
+	gap: 16px;
   }
 
   .user-meta {
-    align-items: center;
+	align-items: center;
   }
 
   .edit-btn {
-    margin-top: 12px;
+	margin-top: 12px;
   }
 }
 
@@ -518,17 +526,17 @@ onMounted(() => {
 /* 响应式调整 */
 @media (max-width: 768px) {
   .quick-actions {
-    flex-direction: column;
-    width: 100%;
+	flex-direction: column;
+	width: 100%;
   }
 
   .action-btn {
-    width: 100%;
-    justify-content: center;
+	width: 100%;
+	justify-content: center;
   }
 
   .right-section {
-    align-items: center;
+	align-items: center;
   }
 }
 </style> 

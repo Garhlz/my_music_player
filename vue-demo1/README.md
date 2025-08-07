@@ -1,13 +1,22 @@
-##  12.20
+## 12.20
+
 前端使用vue,后端使用express
 
+java -jar ./tools/openapi-generator-cli-7.9.0.jar generate -i C:
+\code_in_laptop\music_player1.0\my-music-go\docs\swagger.json -g typescript-axios -o ./src/api-client -c
+./api-generator-config.json
+
 ### 前端项目
+
 #### vite
+
 npm create vite@latest
 如果不是vite 就是npm init
 npm install {依赖名称} 注意下载之后也同时将其加入了依赖列表
 npm run dev
+
 #### cli
+
 npm install eslint@latest --save-dev
 npm run serve
 
@@ -16,18 +25,19 @@ App.vue是主要组件，挂载在入口main.js上
 语法糖script setup，不用显式导出变量
 ref用来跟踪单值数据,reactive用来跟踪组合的数据类型
 
-特性	var	      let	        const
-作用域	函数作用域	块级作用域	块级作用域
-提升	会提升，但赋值时初始化	会提升，且有暂时性死区	会提升，且有暂时性死区
-可变性	可以重新赋值	可以重新赋值	不可重新赋值
-初始化	可以不初始化，默认 undefined	可以不初始化	必须初始化
-重复声明	允许在同一作用域内重复声明	不允许重复声明	不允许重复声明
+特性 var let const
+作用域 函数作用域 块级作用域 块级作用域
+提升 会提升，但赋值时初始化 会提升，且有暂时性死区 会提升，且有暂时性死区
+可变性 可以重新赋值 可以重新赋值 不可重新赋值
+初始化 可以不初始化，默认 undefined 可以不初始化 必须初始化
+重复声明 允许在同一作用域内重复声明 不允许重复声明 不允许重复声明
 
 ### step1
+
 目前目标是先做出登录验证功能，成功进行前后端联调。axios的用法和文件结构，直接参考苍穹外卖
 所以先在自己的前端项目中完成登录功能，然后完成数据库和后端
 
-需要加入vue-router和 axios 
+需要加入vue-router和 axios
 
 然后配置好后端，响应axios的请求
 
@@ -36,7 +46,7 @@ js异步操作有三套api:回调函数，promise，async-await，这里使用�
 express项目创建：
 
 npx express-generator
-npm i 
+npm i
 SET DEBUG=express-demo1:* & npm start
 
 后端设置跨域共享
@@ -44,17 +54,18 @@ SET DEBUG=express-demo1:* & npm start
 后端端口号是3000，最好使用参数化查询，那现在问题主要是数据库如何设计，前端怎么做
 参数化查询不一定完全支持，还是手动拼接吧...
 
-
 ### step2
-页面： 
+
+页面：
+
 - 登录界面，一个按钮导向管理员入口
 - 个人主页(通过header跳转) 增删改个人信息 退出登录
 - 当前播放歌曲页面，有进度条，播放下一首，播放上一首，用插件实现
 - 公有歌曲列表，支持用点赞数排序，支持条件分页查询（歌曲名，作者名）点赞数和时间排序
-  - 从公有歌曲列表进入评论区，可以发布评论
-  - 点赞
-  - 加入私有播放列表
-  - 从作者名称进入作者主页
+    - 从公有歌曲列表进入评论区，可以发布评论
+    - 点赞
+    - 加入私有播放列表
+    - 从作者名称进入作者主页
 - 私有播放列表，增删改查，效果和公有列表相同
 - 上传音乐，需要名称，封面，音乐文件
 - 我创作的音乐列表，增删改查，效果和公有列表相同
@@ -64,10 +75,9 @@ SET DEBUG=express-demo1:* & npm start
 - 左侧有一个导航栏可以路由
 - 下方有一个栏目播放音乐，展示进度条，播放下一首
 
-
 不一定非得立刻实现所有内容，可以只实现部分重要内容
 
-已经完成数据库设计和创建，接下来主要是前端部分的开发了 
+已经完成数据库设计和创建，接下来主要是前端部分的开发了
 
 直接上elementUI的组件，在前端设计接口的时候，记得记录接口文档，完全可以使用apifox，进行前后端联调
 
@@ -76,6 +86,7 @@ SET DEBUG=express-demo1:* & npm start
 回顾和gpt的对话，差不多已经可以开始做了
 
 ### step3
+
 导入element-plus
 npm install element-plus --save
 
@@ -85,17 +96,17 @@ npm install element-plus --save
 
 注意为了水表格，我把普通user表和admin表格拆开了，其实不需要
 
-完成了登录注册的开发调试，使用了加密算法bcrypt 
+完成了登录注册的开发调试，使用了加密算法bcrypt
 
 接下来就是layout的开发
 
-也就是说父组件表示一个页面，子组件是布局文件layout，布局文件包含一个插槽，父组件引入布局之后只需要修改插槽内容 
+也就是说父组件表示一个页面，子组件是布局文件layout，布局文件包含一个插槽，父组件引入布局之后只需要修改插槽内容
 
 命名规范：变量之类的都用驼峰法，路径用小写加连字符
 
-暂时完成了公有播放列表界面，现在首先把这个界面做好。用户登录信息，以及当前播放列表和歌曲，当前播放顺序，当前音量设置之类的都需要跨组件保持。关于导航栏，不要忘记设置不同的用户权限显示不同的内容。 
+暂时完成了公有播放列表界面，现在首先把这个界面做好。用户登录信息，以及当前播放列表和歌曲，当前播放顺序，当前音量设置之类的都需要跨组件保持。关于导航栏，不要忘记设置不同的用户权限显示不同的内容。
 
-只要做出来一个页面以及这些公共内容，做多个页面就好说了 
+只要做出来一个页面以及这些公共内容，做多个页面就好说了
 
 在设置个人主页的时候，发现需要维持当前登录信息，最好就是用jwt，在后端设置中间件检查
 
@@ -112,7 +123,8 @@ import export 需要{}，规则我还不是很明确
 初步完成导航栏以及音乐库部分
 
 ### step4
-根据el的资料以及苍穹外卖项目的前端，完成音乐库部分的前端分页列表，条件查询，列表跳转 
+
+根据el的资料以及苍穹外卖项目的前端，完成音乐库部分的前端分页列表，条件查询，列表跳转
 
 列表内容：可以借鉴wyy web端的ui
 
@@ -137,6 +149,7 @@ import export 需要{}，规则我还不是很明确
 接口对接必须自己进行，ai这方面能力堪忧。其实不一定，只是需要足够的引导，而且最好集成所有的接口信息，不要分开
 
 ### now
+
 还剩歌手页，评论区页，一定要完成，其他选做内容比如说管理员页面，跨组件播放页面，图片和歌曲的上传和下载，所有歌手，所有专辑，收藏的专辑，可以之后完成
 
 歌单页的搜索框有问题 是否公开有问题
@@ -158,136 +171,140 @@ import export 需要{}，规则我还不是很明确
 ## 用户接口
 
 ### 用户认证
+
 - **用户注册**
-  - **方法**: `POST /api/user/register`
-  - **请求体**:
-    - `username`: 用户名
-    - `password`: 密码
-    - `name`: 姓名
-    - `phone`: 电话
-    - `email`: 邮箱
-    - `sex`: 性别
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `POST /api/user/register`
+    - **请求体**:
+        - `username`: 用户名
+        - `password`: 密码
+        - `name`: 姓名
+        - `phone`: 电话
+        - `email`: 邮箱
+        - `sex`: 性别
+    - **响应**:
+        - `message`: 成功消息
 
 - **用户登录**
-  - **方法**: `POST /api/user/login`
-  - **请求体**:
-    - `username`: 用户名
-    - `password`: 密码
-  - **响应**:
-    - `message`: 成功消息
-    - `token`: JWT 令牌
+    - **方法**: `POST /api/user/login`
+    - **请求体**:
+        - `username`: 用户名
+        - `password`: 密码
+    - **响应**:
+        - `message`: 成功消息
+        - `token`: JWT 令牌
 
 - **获取用户信息**
-  - **方法**: `GET /api/user/info`
-  - **请求头**:
-    - `Authorization`: Bearer token
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 用户信息对象
+    - **方法**: `GET /api/user/info`
+    - **请求头**:
+        - `Authorization`: Bearer token
+    - **响应**:
+        - `message`: 成功消息
+        - `data`: 用户信息对象
 
 - **更新用户信息**
-  - **方法**: `PUT /api/user/info`
-  - **请求头**:
-    - `Authorization`: Bearer token
-  - **请求体**:
-    - `name`: 姓名
-    - `phone`: 电话
-    - `email`: 邮箱
-    - `sex`: 性别
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `PUT /api/user/info`
+    - **请求头**:
+        - `Authorization`: Bearer token
+    - **请求体**:
+        - `name`: 姓名
+        - `phone`: 电话
+        - `email`: 邮箱
+        - `sex`: 性别
+    - **响应**:
+        - `message`: 成功消息
 
 ## 歌曲接口
 
 ### 公共歌曲
+
 - **获取公共歌曲列表**
-  - **方法**: `GET /api/songs/public`
-  - **请求参数**:
-    - `page`: 页码
-    - `pageSize`: 每页数量
-    - `search`: 搜索关键词
-    - `sortBy`: 排序方式
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 
-      - `list`: 歌曲列表
-      - `total`: 总数
+    - **方法**: `GET /api/songs/public`
+    - **请求参数**:
+        - `page`: 页码
+        - `pageSize`: 每页数量
+        - `search`: 搜索关键词
+        - `sortBy`: 排序方式
+    - **响应**:
+        - `message`: 成功消息
+        - `data`:
+            - `list`: 歌曲列表
+            - `total`: 总数
 
 ### 喜欢的歌曲
+
 - **获取喜欢的歌曲**
-  - **方法**: `GET /api/songs/liked`
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 喜欢的歌曲列表
+    - **方法**: `GET /api/songs/liked`
+    - **响应**:
+        - `message`: 成功消息
+        - `data`: 喜欢的歌曲列表
 
 - **添加喜欢的歌曲**
-  - **方法**: `POST /api/songs/liked/:songId`
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `POST /api/songs/liked/:songId`
+    - **响应**:
+        - `message`: 成功消息
 
 - **取消喜欢歌曲**
-  - **方法**: `DELETE /api/songs/liked/:songId`
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `DELETE /api/songs/liked/:songId`
+    - **响应**:
+        - `message`: 成功消息
 
 ## 歌单接口
 
 ### 用户歌单
+
 - **获取用户歌单列表**
-  - **方法**: `GET /api/playlists`
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 歌单列表
+    - **方法**: `GET /api/playlists`
+    - **响应**:
+        - `message`: 成功消息
+        - `data`: 歌单列表
 
 - **创建歌单**
-  - **方法**: `POST /api/playlists`
-  - **请求体**:
-    - `name`: 歌单名称
-    - `description`: 歌单描述
-    - `isPublic`: 是否公开
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 创建的歌单信息
+    - **方法**: `POST /api/playlists`
+    - **请求体**:
+        - `name`: 歌单名称
+        - `description`: 歌单描述
+        - `isPublic`: 是否公开
+    - **响应**:
+        - `message`: 成功消息
+        - `data`: 创建的歌单信息
 
 - **获取歌单详情**
-  - **方法**: `GET /api/playlists/:id`
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 
-      - `playlist`: 歌单信息
-      - `songs`: 歌曲列表
+    - **方法**: `GET /api/playlists/:id`
+    - **响应**:
+        - `message`: 成功消息
+        - `data`:
+            - `playlist`: 歌单信息
+            - `songs`: 歌曲列表
 
 - **添加歌曲到歌单**
-  - **方法**: `POST /api/playlists/:playlistId/songs/:songId`
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `POST /api/playlists/:playlistId/songs/:songId`
+    - **响应**:
+        - `message`: 成功消息
 
 - **从歌单移除歌曲**
-  - **方法**: `DELETE /api/playlists/:playlistId/songs/:songId`
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `DELETE /api/playlists/:playlistId/songs/:songId`
+    - **响应**:
+        - `message`: 成功消息
 
 ## 评论接口
 
 - **获取歌曲评论**
-  - **方法**: `GET /api/comments/song/:songId`
-  - **请求参数**:
-    - `page`: 页码
-    - `pageSize`: 每页数量
-  - **响应**:
-    - `message`: 成功消息
-    - `data`: 
-      - `list`: 评论列表
-      - `total`: 总数
+    - **方法**: `GET /api/comments/song/:songId`
+    - **请求参数**:
+        - `page`: 页码
+        - `pageSize`: 每页数量
+    - **响应**:
+        - `message`: 成功消息
+        - `data`:
+            - `list`: 评论列表
+            - `total`: 总数
 
 - **发表评论**
-  - **方法**: `POST /api/comments/song/:songId`
-  - **请求体**:
-    - `content`: 评论内容
-  - **响应**:
-    - `message`: 成功消息
+    - **方法**: `POST /api/comments/song/:songId`
+    - **请求体**:
+        - `content`: 评论内容
+    - **响应**:
+        - `message`: 成功消息
 
 注意：所有需要认证的接口都需要在请求头中携带 `Authorization: Bearer token`
 

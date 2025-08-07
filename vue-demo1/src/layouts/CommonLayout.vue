@@ -1,41 +1,41 @@
 <template>
   <div class="common-layout">
-    <!-- 头部区域 -->
-    <div class="fixed-header">
-      <Banner :page-name="pageName"/>
-    </div>
+	<!-- 头部区域 -->
+	<div class="fixed-header">
+	  <Banner :page-name="pageName"/>
+	</div>
 
-    <!-- 侧边栏区域 -->
-    <div class="fixed-aside">
-      <Navbar />
-    </div>
+	<!-- 侧边栏区域 -->
+	<div class="fixed-aside">
+	  <Navbar/>
+	</div>
 
-    <!-- 主内容区域 -->
-    <div class="main-content">
-      <slot name="main"></slot>
-    </div>
+	<!-- 主内容区域 -->
+	<div class="main-content">
+	  <slot name="main"></slot>
+	</div>
 
-    <!-- 底部区域 -->
-    <div class="fixed-footer">
-      <MusicPlayer />
-    </div>
+	<!-- 底部区域 -->
+	<div class="fixed-footer">
+	  <MusicPlayer/>
+	</div>
   </div>
 </template>
 
 <script>
-import Banner from '@/components/Banner.vue';  // 条幅信息栏
-import Navbar from '@/components/Navbar.vue';  // 导航栏
-import MusicPlayer from '@/components/MusicPlayer.vue';  // 音乐播放栏
+import Banner from 'src/components/Banner.vue';  // 条幅信息栏
+import Navbar from 'src/components/Navbar.vue';  // 导航栏
+import MusicPlayer from 'src/components/MusicPlayer.vue';  // 音乐播放栏
 
 export default {
   name: 'BaseLayout',
   components: {
-    Banner,
-    Navbar,
-    MusicPlayer
+	Banner,
+	Navbar,
+	MusicPlayer
   },
   props: {
-    pageName: String,
+	pageName: String,
   },
 };
 </script>
