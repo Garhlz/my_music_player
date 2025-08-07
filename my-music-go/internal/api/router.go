@@ -18,11 +18,12 @@ func SetupRouter(
 	songHandler *handlers.SongHandler,
 	artistHandler *handlers.ArtistHandler,
 	albumHandler *handlers.AlbumHandler,
+	likeHandler *handlers.LikeHandler,
 ) *gin.Engine {
 
 	router := gin.Default()
 
-	// --- 基础路由, 位于所有分组之外 ---
+	// --- 基础路由 ---
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
@@ -34,7 +35,7 @@ func SetupRouter(
 	apiV1 := router.Group("/api/v1")
 	{
 		// --- 公共路由组 (Public Routes) ---
-		// 只有登录和注册是真正公开的
+		// 只有登录和注册是真正公开的，放在这里
 		authRoutes := apiV1.Group("/auth")
 		{
 			authRoutes.POST("/register", userHandler.Register)
@@ -42,35 +43,46 @@ func SetupRouter(
 		}
 
 		// --- 认证保护路由组 (Protected Routes) ---
-		// 这个分组下的所有接口都需要通过 JWT 中间件认证
+		// 所有其他业务接口都放在这个由中间件保护的分组下
 		protected := apiV1.Group("/")
 		protected.Use(authMiddleware) // 使用闭包传递回的函数
 		{
-			userRoutes := protected.Group("/users")
 			{
-				userRoutes.GET("/:id", userHandler.GetUserProfile)
-				userRoutes.GET("/:id/name", userHandler.GetUsernameAndName)
-				userRoutes.PUT("/:id", userHandler.UpdateUserProfile)
-			}
+				// “我”的专属路由，处理对当前登录用户自身资源的操作
+				meRoutes := protected.Group("/me")
+				{
+					meRoutes.PUT("/profile", userHandler.UpdateMyProfile)
+					meRoutes.GET("/liked-songs", likeHandler.ListMyLikedSongs)
+					meRoutes.POST("/liked-songs/:songId", likeHandler.LikeSong)
+					meRoutes.DELETE("/liked-songs/:songId", likeHandler.UnlikeSong)
+				}
 
-			songRoutes := protected.Group("/songs")
-			{
-				songRoutes.GET("", songHandler.ListSongs)
-				songRoutes.GET("/:id", songHandler.GetSongDetail)
-			}
+				// 对其他用户或通用资源的查询与操作
+				userRoutes := protected.Group("/users")
+				{
+					userRoutes.GET("/:id", userHandler.GetUserProfile)
+					userRoutes.GET("/:id/name", userHandler.GetUsernameAndName)
+					userRoutes.GET("/:id/liked-songs", likeHandler.ListUserLikedSongs)
+				}
 
-			artistRoutes := protected.Group("/artists")
-			{
-				artistRoutes.GET("/:id", artistHandler.GetArtistDetail)
-			}
+				songRoutes := protected.Group("/songs")
+				{
+					songRoutes.GET("", songHandler.ListSongs)
+					songRoutes.GET("/:id", songHandler.GetSongDetail)
+				}
 
-			albumRoutes := protected.Group("/albums")
-			{
-				albumRoutes.GET("", albumHandler.ListAlbums)
-				albumRoutes.GET("/:id", albumHandler.GetAlbumDetail)
+				artistRoutes := protected.Group("/artists")
+				{
+					artistRoutes.GET("/:id", artistHandler.GetArtistDetail)
+				}
+
+				albumRoutes := protected.Group("/albums")
+				{
+					albumRoutes.GET("", albumHandler.ListAlbums)
+					albumRoutes.GET("/:id", albumHandler.GetAlbumDetail)
+				}
 			}
 		}
 	}
-
 	return router
 }

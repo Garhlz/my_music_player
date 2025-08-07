@@ -7,7 +7,6 @@ import (
 	"my-music-go/internal/models"
 	"my-music-go/internal/services"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -92,17 +91,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token, "user_id": userID, "message": "登录成功"})
 }
 
-// getUserIDFromParam 是一个辅助函数，用于提取和验证 URL 中的用户ID，避免代码重复
-func getUserIDFromParam(c *gin.Context) (int64, error) {
-	userIDStr := c.Param("id")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的用户ID格式"})
-		return 0, err
-	}
-	return userID, nil
-}
-
 // GetUserProfile 处理获取用户完整公开信息的请求
 // @Summary      获取用户个人资料
 // @Description  根据用户ID获取用户的完整公开信息，包括关注数和粉丝数。
@@ -117,10 +105,10 @@ func getUserIDFromParam(c *gin.Context) (int64, error) {
 // @Failure      500  {object}  map[string]string "{"error": "获取用户信息失败，请稍后重试"}"
 // @Router       /users/{id} [get]
 func (h *UserHandler) GetUserProfile(c *gin.Context) {
-	userID, err := getUserIDFromParam(c)
+	userID, err := GetIDFromParam(c, "id")
 	if err != nil {
 		return
-	}
+	} // 已经在辅助函数内处理了返回值了
 
 	profile, err := h.userService.GetUserProfile(userID)
 	if err != nil {
@@ -149,7 +137,7 @@ func (h *UserHandler) GetUserProfile(c *gin.Context) {
 // @Failure      500  {object}  map[string]string "{"error": "获取用户名失败，请稍后重试"}"
 // @Router       /users/{id}/name [get]
 func (h *UserHandler) GetUsernameAndName(c *gin.Context) {
-	userID, err := getUserIDFromParam(c)
+	userID, err := GetIDFromParam(c, "id")
 	if err != nil {
 		return
 	}
@@ -168,35 +156,23 @@ func (h *UserHandler) GetUsernameAndName(c *gin.Context) {
 	c.JSON(http.StatusOK, usernameInfo)
 }
 
-// UpdateUserProfile 处理更新用户信息的请求
+// UpdateMyProfile 处理更新当前用户信息的请求
 // @Summary      更新当前登录用户信息
-// @Description  更新当前认证用户（通过JWT Token识别）的个人资料。用户只能更新自己的信息。
+// @Description  更新当前认证用户（通过JWT Token识别）的个人资料。
 // @Tags         用户信息 (User)
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path      int  true  "要更新的用户ID (必须是当前登录用户的ID)"
 // @Param        updateRequest body models.UpdateUserRequest true "要更新的用户信息"
 // @Success      200  {object}  map[string]string "{"message": "用户信息更新成功"}"
-// @Failure      400  {object}  map[string]string "{"error": "无效的用户ID格式 或 请求参数格式错误"}"
+// @Failure      400  {object}  map[string]string "{"error": "请求参数格式错误"}"
 // @Failure      401  {object}  map[string]string "{"error": "需要认证"}"
-// @Failure      403  {object}  map[string]string "{"error": "无权修改其他用户的信息"}"
 // @Failure      404  {object}  map[string]string "{"error": "尝试更新的用户不存在"}"
 // @Failure      500  {object}  map[string]string "{"error": "更新用户信息失败，请稍后重试"}"
 // @Router       /users/{id} [put]
-func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
-	targetUserID, err := getUserIDFromParam(c)
-	if err != nil {
-		return
-	}
-
-	authUserID_any, _ := c.Get("userID")
-	authUserID := authUserID_any.(int64)
-
-	if authUserID != targetUserID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "无权修改其他用户的信息"})
-		return
-	}
+func (h *UserHandler) UpdateMyProfile(c *gin.Context) {
+	// 从 JWT context 获取 userID
+	authUserID := c.MustGet("userID").(int64)
 
 	var req models.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -204,7 +180,7 @@ func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	err = h.userService.UpdateUserProfile(targetUserID, &req)
+	err := h.userService.UpdateUserProfile(authUserID, &req)
 	if err != nil {
 		if errors.Is(err, services.ErrUserNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "尝试更新的用户不存在"})

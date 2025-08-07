@@ -19,4 +19,7 @@ var (
 	ErrArtistNotFound = errors.New("artist not found")
 
 	ErrAlbumNotFound = errors.New("album not found")
+
+	ErrSongAlreadyLiked = errors.New("song already liked")
+	ErrLikeNotFound     = errors.New("like record not found")
 )

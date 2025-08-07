@@ -493,6 +493,169 @@ paths:
       summary: 用户注册
       tags:
       - 用户认证 (Auth)
+  /me/liked-songs:
+    get:
+      description: 获取当前认证用户（通过JWT Token识别）的喜欢歌曲分页列表，支持搜索和排序。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 搜索关键词 (匹配歌曲名或艺术家名)
+        in: query
+        name: search
+        type: string
+      - description: 排序字段 (latest, oldest, name, duration)
+        enum:
+        - latest
+        - oldest
+        - name
+        - duration
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.SongDetailDTO'
+                  type: array
+              type: object
+        "400":
+          description: '{"error": "无效的查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取列表失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取我喜欢的歌曲列表
+      tags:
+      - 喜欢 (Like)
+  /me/liked-songs/{songId}:
+    delete:
+      description: 将一首指定的歌曲从当前认证用户的“我喜欢”列表中移除。
+      parameters:
+      - description: 歌曲 ID
+        in: path
+        name: songId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "取消成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "无效的歌曲ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "您尚未喜欢这首歌"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "操作失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 从我喜欢列表移除歌曲
+      tags:
+      - 喜欢 (Like)
+    post:
+      description: 将一首指定的歌曲添加到当前认证用户的“我喜欢”列表中。
+      parameters:
+      - description: 歌曲 ID
+        in: path
+        name: songId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{"message": "添加成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "无效的歌曲ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "歌曲不存在"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: '{"error": "已经喜欢过这首歌了"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "操作失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 添加歌曲到我喜欢列表
+      tags:
+      - 喜欢 (Like)
   /songs:
     get:
       description: 获取公开的歌曲列表，支持分页、按歌曲名或艺术家名搜索、以及排序。
@@ -650,13 +813,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新当前认证用户（通过JWT Token识别）的个人资料。用户只能更新自己的信息。
+      description: 更新当前认证用户（通过JWT Token识别）的个人资料。
       parameters:
-      - description: 要更新的用户ID (必须是当前登录用户的ID)
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: 要更新的用户信息
         in: body
         name: updateRequest
@@ -673,19 +831,13 @@ paths:
               type: string
             type: object
         "400":
-          description: '{"error": "无效的用户ID格式 或 请求参数格式错误"}'
+          description: '{"error": "请求参数格式错误"}'
           schema:
             additionalProperties:
               type: string
             type: object
         "401":
           description: '{"error": "需要认证"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: '{"error": "无权修改其他用户的信息"}'
           schema:
             additionalProperties:
               type: string
@@ -707,6 +859,75 @@ paths:
       summary: 更新当前登录用户信息
       tags:
       - 用户信息 (User)
+  /users/{id}/liked-songs:
+    get:
+      description: 获取指定用户的公开喜欢歌曲分页列表，支持搜索和排序。
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 搜索关键词 (匹配歌曲名或艺术家名)
+        in: query
+        name: search
+        type: string
+      - description: 排序字段 (latest, oldest, name, duration)
+        enum:
+        - latest
+        - oldest
+        - name
+        - duration
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.SongDetailDTO'
+                  type: array
+              type: object
+        "400":
+          description: '{"error": "无效的ID或查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取喜欢的歌曲列表失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取指定用户的喜欢列表
+      tags:
+      - 喜欢 (Like)
   /users/{id}/name:
     get:
       description: 根据用户ID获取用户的公开用户名和昵称。

@@ -461,6 +461,260 @@ const docTemplate = `{
                 }
             }
         },
+        "/me/liked-songs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前认证用户（通过JWT Token识别）的喜欢歌曲分页列表，支持搜索和排序。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "喜欢 (Like)"
+                ],
+                "summary": "获取我喜欢的歌曲列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词 (匹配歌曲名或艺术家名)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "latest",
+                            "oldest",
+                            "name",
+                            "duration"
+                        ],
+                        "type": "string",
+                        "description": "排序字段 (latest, oldest, name, duration)",
+                        "name": "sortBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "List": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.SongDetailDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的查询参数\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取列表失败\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/me/liked-songs/{songId}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "将一首指定的歌曲添加到当前认证用户的“我喜欢”列表中。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "喜欢 (Like)"
+                ],
+                "summary": "添加歌曲到我喜欢列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "歌曲 ID",
+                        "name": "songId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "{\"message\": \"添加成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的歌曲ID格式\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"歌曲不存在\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "{\"error\": \"已经喜欢过这首歌了\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"操作失败，请稍后重试\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "将一首指定的歌曲从当前认证用户的“我喜欢”列表中移除。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "喜欢 (Like)"
+                ],
+                "summary": "从我喜欢列表移除歌曲",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "歌曲 ID",
+                        "name": "songId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"message\": \"取消成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的歌曲ID格式\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"您尚未喜欢这首歌\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"操作失败，请稍后重试\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/songs": {
             "get": {
                 "security": [
@@ -707,7 +961,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "更新当前认证用户（通过JWT Token识别）的个人资料。用户只能更新自己的信息。",
+                "description": "更新当前认证用户（通过JWT Token识别）的个人资料。",
                 "consumes": [
                     "application/json"
                 ],
@@ -719,13 +973,6 @@ const docTemplate = `{
                 ],
                 "summary": "更新当前登录用户信息",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "要更新的用户ID (必须是当前登录用户的ID)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "要更新的用户信息",
                         "name": "updateRequest",
@@ -747,7 +994,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "{\"error\": \"无效的用户ID格式 或 请求参数格式错误\"}",
+                        "description": "{\"error\": \"请求参数格式错误\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -757,15 +1004,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "{\"error\": \"需要认证\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "{\"error\": \"无权修改其他用户的信息\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -784,6 +1022,114 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "{\"error\": \"更新用户信息失败，请稍后重试\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/liked-songs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定用户的公开喜欢歌曲分页列表，支持搜索和排序。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "喜欢 (Like)"
+                ],
+                "summary": "获取指定用户的喜欢列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词 (匹配歌曲名或艺术家名)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "latest",
+                            "oldest",
+                            "name",
+                            "duration"
+                        ],
+                        "type": "string",
+                        "description": "排序字段 (latest, oldest, name, duration)",
+                        "name": "sortBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "List": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.SongDetailDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的ID或查询参数\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取喜欢的歌曲列表失败\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
