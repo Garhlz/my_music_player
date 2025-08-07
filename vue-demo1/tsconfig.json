@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": false,
+    // 关键：先关闭严格模式
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "skipLibCheck": true,
+    "noEmit": true,
+    // --- 渐进式迁移的核心 ---
+    "allowJs": true,
+    // ★★★ 允许项目中存在 .js 文件
+    "checkJs": false,
+    // 先不检查 .js 文件中的语法错误
+    "noImplicitAny": false,
+    // ★★★ 暂时允许隐式的 any 类型，减少初期的错误
+    "baseUrl": ".",
+    // 1. 设置 baseUrl 为项目根目录
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+      // 2. 定义路径别名
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/api-client/**/*.ts"
+    // 确保包含了 api-client
+  ]
+}
