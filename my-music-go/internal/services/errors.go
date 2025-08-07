@@ -19,11 +19,15 @@ var (
 	ErrArtistNotFound = errors.New("artist not found")
 	ErrAlbumNotFound  = errors.New("album not found")
 
-	// Playlist related (新增)
+	// Playlist related
 	ErrPlaylistNotFound      = errors.New("playlist not found")
 	ErrSongAlreadyInPlaylist = errors.New("song already in playlist")
 	ErrSongNotInPlaylist     = errors.New("song not in playlist")
 
+	// Comment related
+	ErrCommentNotFound = errors.New("comment not found")
+
 	// General
-	ErrForbidden = errors.New("operation not permitted")
+	ErrForbidden  = errors.New("operation not permitted")
+	ErrBadRequest = errors.New("bad request") // 用于通用的客户端请求逻辑错误
 )

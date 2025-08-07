@@ -20,6 +20,7 @@ func SetupRouter(
 	albumHandler *handlers.AlbumHandler,
 	likeHandler *handlers.LikeHandler,
 	playlistHandler *handlers.PlaylistHandler,
+	commentHandler *handlers.CommentHandler,
 ) *gin.Engine {
 
 	router := gin.Default()
@@ -85,6 +86,8 @@ func SetupRouter(
 				{
 					songRoutes.GET("", songHandler.ListSongs)
 					songRoutes.GET("/:id", songHandler.GetSongDetail)
+					songRoutes.GET("/:id/comments", commentHandler.ListSongComments)
+					songRoutes.POST("/:id/comments", commentHandler.CreateComment)
 				}
 
 				artistRoutes := protected.Group("/artists")
@@ -98,7 +101,18 @@ func SetupRouter(
 					albumRoutes.GET("/:id", albumHandler.GetAlbumDetail)
 				}
 
-				protected.GET("/playlists/:playlistId", playlistHandler.GetPlaylistDetail)
+				playlistsRoutes := protected.Group("/playlists")
+				{
+					playlistsRoutes.GET("/playlists/:playlistId", playlistHandler.GetPlaylistDetail)
+				}
+
+				commentsRoutes := protected.Group("/comments")
+				{
+					commentsRoutes.GET("/:commentId/replies", commentHandler.ListCommentReplies)
+					commentsRoutes.PUT("/:commentId", commentHandler.UpdateComment)
+					commentsRoutes.DELETE("/:commentId", commentHandler.DeleteComment)
+					commentsRoutes.POST("/:commentId/like", commentHandler.ToggleLikeComment)
+				}
 			}
 		}
 	}

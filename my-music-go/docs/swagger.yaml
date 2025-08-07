@@ -70,6 +70,57 @@ definitions:
       songs:
         $ref: '#/definitions/models.PaginatedResponseDTO'
     type: object
+  models.CommentDTO:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_liked_by_me:
+        type: boolean
+      is_root:
+        description: 新增字段
+        type: boolean
+      like_count:
+        type: integer
+      parent_id:
+        description: 使用指针类型处理 NULL
+        type: integer
+      replies:
+        description: 用于嵌套回复
+        items:
+          $ref: '#/definitions/models.CommentDTO'
+        type: array
+      reply_to_user_id:
+        description: 使用指针
+        type: integer
+      reply_to_username:
+        type: string
+      song_id:
+        type: integer
+      text:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
+  models.CreateCommentRequestDTO:
+    properties:
+      parent_id:
+        type: integer
+      reply_to_user_id:
+        type: integer
+      text:
+        maxLength: 1000
+        type: string
+    required:
+    - text
+    type: object
   models.CreatePlaylistRequestDTO:
     properties:
       description:
@@ -80,6 +131,13 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  models.LikeCommentResponseDTO:
+    properties:
+      is_liked_by_me:
+        type: boolean
+      like_count:
+        type: integer
     type: object
   models.LoginRequest:
     properties:
@@ -195,6 +253,14 @@ definitions:
         type: integer
       url:
         type: string
+    type: object
+  models.UpdateCommentRequestDTO:
+    properties:
+      text:
+        maxLength: 1000
+        type: string
+    required:
+    - text
     type: object
   models.UpdatePlaylistRequestDTO:
     properties:
@@ -572,6 +638,101 @@ paths:
       summary: 用户注册
       tags:
       - 用户认证 (Auth)
+  /comments/{commentId}:
+    delete:
+      description: 删除当前认证用户发表的一条评论（及其所有回复）。
+      parameters:
+      - description: 评论 ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "删除成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 删除我的评论
+      tags:
+      - 评论 (Comment)
+    put:
+      consumes:
+      - application/json
+      description: 更新当前认证用户发表的一条评论。
+      parameters:
+      - description: 评论 ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      - description: 更新的评论内容
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCommentRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "更新成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 更新我的评论
+      tags:
+      - 评论 (Comment)
+  /comments/{commentId}/like:
+    post:
+      description: 对一条评论进行点赞。如果已经点赞，则取消点赞。
+      parameters:
+      - description: 评论 ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LikeCommentResponseDTO'
+      security:
+      - BearerAuth: []
+      summary: 点赞或取消点赞评论
+      tags:
+      - 评论 (Comment)
+  /comments/{commentId}/replies:
+    get:
+      description: 根据一条父评论的ID，获取它的所有回复列表（不分页）。
+      parameters:
+      - description: 父评论 ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CommentDTO'
+            type: array
+      summary: 获取评论回复
+      tags:
+      - 评论 (Comment)
   /me/liked-songs:
     get:
       description: 获取当前认证用户（通过JWT Token识别）的喜欢歌曲分页列表，支持搜索和排序。
@@ -1033,6 +1194,70 @@ paths:
       summary: 获取单曲详情
       tags:
       - 歌曲 (Song)
+  /songs/{songId}/comments:
+    get:
+      description: 获取一首歌的根评论（非回复）的分页列表。
+      parameters:
+      - description: 歌曲 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.CommentDTO'
+                  type: array
+              type: object
+      summary: 获取歌曲评论
+      tags:
+      - 评论 (Comment)
+    post:
+      consumes:
+      - application/json
+      description: 为一首歌发表新评论，或回复一条已有的评论。
+      parameters:
+      - description: 歌曲 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 评论内容
+        in: body
+        name: createRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCommentRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CommentDTO'
+      security:
+      - BearerAuth: []
+      summary: 发表评论
+      tags:
+      - 评论 (Comment)
   /users/{id}:
     get:
       description: 根据用户ID获取用户的完整公开信息，包括关注数和粉丝数。
@@ -1246,7 +1471,7 @@ paths:
       parameters:
       - description: 用户 ID
         in: path
-        name: userId
+        name: id
         required: true
         type: integer
       - description: 页码

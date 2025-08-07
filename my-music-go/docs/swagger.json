@@ -455,6 +455,156 @@
                 }
             }
         },
+        "/comments/{commentId}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新当前认证用户发表的一条评论。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "更新我的评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论 ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新的评论内容",
+                        "name": "updateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateCommentRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"message\": \"更新成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除当前认证用户发表的一条评论（及其所有回复）。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "删除我的评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论 ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"message\": \"删除成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/{commentId}/like": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "对一条评论进行点赞。如果已经点赞，则取消点赞。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "点赞或取消点赞评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论 ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LikeCommentResponseDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/{commentId}/replies": {
+            "get": {
+                "description": "根据一条父评论的ID，获取它的所有回复列表（不分页）。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "获取评论回复",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "父评论 ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.CommentDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/me/liked-songs": {
             "get": {
                 "security": [
@@ -1188,6 +1338,108 @@
                 }
             }
         },
+        "/songs/{songId}/comments": {
+            "get": {
+                "description": "获取一首歌的根评论（非回复）的分页列表。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "获取歌曲评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "歌曲 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "List": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.CommentDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "为一首歌发表新评论，或回复一条已有的评论。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "发表评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "歌曲 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "评论内容",
+                        "name": "createRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateCommentRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.CommentDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "security": [
@@ -1530,7 +1782,7 @@
                     {
                         "type": "integer",
                         "description": "用户 ID",
-                        "name": "userId",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -1681,6 +1933,81 @@
                 }
             }
         },
+        "models.CommentDTO": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_liked_by_me": {
+                    "type": "boolean"
+                },
+                "is_root": {
+                    "description": "新增字段",
+                    "type": "boolean"
+                },
+                "like_count": {
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "description": "使用指针类型处理 NULL",
+                    "type": "integer"
+                },
+                "replies": {
+                    "description": "用于嵌套回复",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CommentDTO"
+                    }
+                },
+                "reply_to_user_id": {
+                    "description": "使用指针",
+                    "type": "integer"
+                },
+                "reply_to_username": {
+                    "type": "string"
+                },
+                "song_id": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateCommentRequestDTO": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "parent_id": {
+                    "type": "integer"
+                },
+                "reply_to_user_id": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string",
+                    "maxLength": 1000
+                }
+            }
+        },
         "models.CreatePlaylistRequestDTO": {
             "type": "object",
             "required": [
@@ -1695,6 +2022,17 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.LikeCommentResponseDTO": {
+            "type": "object",
+            "properties": {
+                "is_liked_by_me": {
+                    "type": "boolean"
+                },
+                "like_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -1871,6 +2209,18 @@
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "models.UpdateCommentRequestDTO": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "maxLength": 1000
                 }
             }
         },
