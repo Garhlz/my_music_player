@@ -1,120 +1,105 @@
-import {createRouter, createWebHistory} from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 
-const Login = () => import('src/pages/Login.vue');
-const Register = () => import('src/pages/Register.vue');
-const PublicPlaylist = () => import('src/pages/PublicPlaylist.vue');
-// const Comments = () => import('src/pages/Comments.vue');
-const ManageSongs = () => import('src/pages/ManageSongs.vue');
+// Auth 组件现在是一个包含登录和注册逻辑的单页组件
+const AuthPage = () => import('@/pages/Auth.vue');
 
-const Player = () => import('src/pages/Player.vue');
-const ManageUsers = () => import('src/pages/ManageUsers.vue');
-const MyPlaylist = () => import('src/pages/MyPlaylist.vue');
-const MyLove = () => import('src/pages/MyLove.vue');
-// const MyAlbum = () => import('src/pages/MyAlbum.vue');
-const Uploaded = () => import('src/pages/Uploaded.vue');
+// 其他页面组件统一使用 @/ 别名
+const PublicPlaylist = () => import('@/pages/PublicPlaylist.vue');
+const ManageSongs = () => import('@/pages/ManageSongs.vue');
+const Player = () => import('@/pages/Player.vue');
+const ManageUsers = () => import('@/pages/ManageUsers.vue');
+const MyPlaylist = () => import('@/pages/MyPlaylist.vue');
+const MyLove = () => import('@/pages/MyLove.vue');
+const Uploaded = () => import('@/pages/Uploaded.vue');
+const UserProfile = () => import('@/pages/UserProfile.vue');
+const PlaylistDetail = () => import('@/pages/MyNewPlaylist.vue');
+const AlbumDetail = () => import('@/pages/Albums.vue');
+const ArtistDetail = () => import('@/pages/Artists.vue');
+const CommentDetail = () => import('@/pages/CommentOfSong.vue');
+
 
 const routes = [
-	{
-		path: '/',
-		name: 'Login1',
-		component: Login
-	},
-	{
-		path: '/login',
-		name: 'Login',
-		component: Login
-	},
-	{
-		path: '/register',
-		name: 'Register',
-		component: Register
-	},
-	{
-		path: '/public-playlist',
-		name: 'PublicPlaylist',
-		component: PublicPlaylist
-	},
-	{
-		path: '/pub',
-		name: 'PublicPlaylist1',
-		component: PublicPlaylist
-	},
-	// {
-	//   path: '/comments',
-	//   name: 'Comments',
-	//   component: Comments
-	// },
-	{
-		path: '/manage-songs',
-		name: 'ManageSongs',
-		component: ManageSongs
-	},
-	{
-		path: '/manage-users',
-		name: 'ManageUsers',
-		component: ManageUsers
-	},
-	{
-		path: '/profile/:id',
-		name: 'Profile',
-		component: () => import('src/pages/UserProfile.vue')
-		// component: () => import('src/pages/Profile.vue')
-	},
-	{
-		path: '/player',
-		name: 'Player',
-		component: Player
-	},
-	{
-		path: '/my-playlist/:id',
-		name: 'MyPlaylist',
-		component: MyPlaylist
-	},
-	{
-		path: '/my-love/:id',
-		name: 'MyLove',
-		component: MyLove
-	},
-	// {
-	//   path: '/my-album',
-	//   name: 'MyAlbum',
-	//   component: MyAlbum
-	// },
-	{
-		path: '/uploaded',
-		name: 'Uploaded',
-		component: Uploaded
-	},
-	{
-		path: '/playlist/:id',
-		name: 'PlaylistDetail',
-		component: () => import('src/pages/MyNewPlaylist.vue')
-	},
-	{
-		path: '/album/:id',
-		name: 'AlbumDetail',
-		component: () => import('src/pages/Albums.vue')
-	},
-	{
-		path: '/artist/:id',
-		name: 'ArtistDetail',
-		component: () => import('src/pages/Artists.vue')
-	},
-	{
-		path: '/comment/:id',
-		name: 'CommentDetail',
-		component: () => import('src/pages/CommentOfSong.vue')
-	},
-	// {
-	//   path: '/test/:id',
-	//   name: 'Test',
-	//   component: () => import('src/pages/test.vue')
-	// }
+  {
+    path: '/',
+    // 默认重定向到 /auth 即可
+    redirect: '/auth',
+  },
+  {
+    path: '/auth',
+    name: 'Auth',
+    component: AuthPage, // AuthPage (Auth.vue) 是一个包含所有逻辑的单页
+    // 这里不再需要 children 数组，因为登录和注册逻辑在 Auth.vue 内部处理
+  },
+  {
+    path: '/public-playlist',
+    name: 'PublicPlaylist',
+    component: PublicPlaylist,
+  },
+  {
+    path: '/pub', // 建议统一别名，或者如果不再需要可以删除此路由
+    name: 'PublicPlaylistAlias',
+    component: PublicPlaylist,
+  },
+  {
+    path: '/manage-songs',
+    name: 'ManageSongs',
+    component: ManageSongs,
+  },
+  {
+    path: '/manage-users',
+    name: 'ManageUsers',
+    component: ManageUsers,
+  },
+  {
+    path: '/profile/:id',
+    name: 'Profile',
+    component: UserProfile,
+  },
+  {
+    path: '/player',
+    name: 'Player',
+    component: Player,
+  },
+  {
+    path: '/my-playlist/:id',
+    name: 'MyPlaylist',
+    component: MyPlaylist,
+  },
+  {
+    path: '/my-love/:id',
+    name: 'MyLove',
+    component: MyLove,
+  },
+  {
+    path: '/uploaded',
+    name: 'Uploaded',
+    component: Uploaded,
+  },
+  {
+    path: '/playlist/:id',
+    name: 'PlaylistDetail',
+    component: PlaylistDetail,
+  },
+  {
+    path: '/album/:id',
+    name: 'AlbumDetail',
+    component: AlbumDetail,
+  },
+  {
+    path: '/artist/:id',
+    name: 'ArtistDetail',
+    component: ArtistDetail,
+  },
+  {
+    path: '/comment/:id',
+    name: 'CommentDetail',
+    component: CommentDetail,
+  },
 ];
 
 const router = createRouter({
-	history: createWebHistory('/'),
-	routes
+  history: createWebHistory('/'),
+  routes,
 });
 
 export default router;

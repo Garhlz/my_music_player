@@ -4,7 +4,9 @@
       <!-- 左侧：网站Logo和名称 -->
       <div class="logo-section">
         <div class="logo-wrapper">
-          <el-icon class="logo-icon"><Headset /></el-icon>
+          <el-icon class="logo-icon">
+            <Headset />
+          </el-icon>
         </div>
         <h2 class="website-name">音乐之声</h2>
       </div>
@@ -19,11 +21,15 @@
       <!-- 右侧：用户操作区 -->
       <div class="header-actions">
         <el-button class="action-btn profile-btn" @click="goToProfile">
-          <el-icon><UserFilled /></el-icon>
+          <el-icon>
+            <UserFilled />
+          </el-icon>
           <span>个人主页</span>
         </el-button>
         <el-button class="action-btn logout-btn" @click="logout">
-          <el-icon><SwitchButton /></el-icon>
+          <el-icon>
+            <SwitchButton />
+          </el-icon>
           <span>退出登录</span>
         </el-button>
       </div>
@@ -32,13 +38,13 @@
 </template>
 
 <script>
-import { Headset, UserFilled, SwitchButton } from '@element-plus/icons-vue'
+import { Headset, UserFilled, SwitchButton } from '@element-plus/icons-vue';
 
 export default {
   components: {
     Headset,
     UserFilled,
-    SwitchButton
+    SwitchButton,
   },
   methods: {
     goToProfile() {
@@ -48,9 +54,9 @@ export default {
     logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('isAuthenticated');
-      this.$router.push('/login');
-      console.log("已退出登录");
-    }
+      this.$router.push('/auth');
+      console.log('已退出登录');
+    },
   },
   props: {
     pageName: String,
@@ -210,15 +216,15 @@ export default {
   .website-name {
     display: none;
   }
-  
+
   .action-btn {
     padding: 0 12px;
   }
-  
+
   .action-btn span {
     display: none;
   }
-  
+
   .page-title h2 {
     font-size: 16px;
   }
@@ -229,7 +235,7 @@ export default {
   .header {
     background: rgba(0, 0, 0, 0.8);
   }
-  
+
   .action-btn {
     background: rgba(255, 255, 255, 0.05);
   }

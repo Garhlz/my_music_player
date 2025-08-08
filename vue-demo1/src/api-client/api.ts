@@ -638,19 +638,55 @@ export interface ModelsRegisterRequest {
      * @type {string}
      * @memberof ModelsRegisterRequest
      */
-    'email'?: string;
+    'avatar'?: string;
     /**
      * 
      * @type {string}
      * @memberof ModelsRegisterRequest
      */
-    'name'?: string;
+    'bio'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsRegisterRequest
+     */
+    'birthday'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsRegisterRequest
+     */
+    'email'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ModelsRegisterRequest
+     */
+    'gender'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsRegisterRequest
+     */
+    'location'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsRegisterRequest
+     */
+    'name': string;
     /**
      * 
      * @type {string}
      * @memberof ModelsRegisterRequest
      */
     'password': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsRegisterRequest
+     */
+    'phone'?: string;
     /**
      * 
      * @type {string}
