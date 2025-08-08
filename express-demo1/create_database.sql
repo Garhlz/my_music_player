@@ -15,7 +15,6 @@ CREATE TABLE `user`
     `name`         VARCHAR(50)           DEFAULT NULL COMMENT '用户姓名,允许为空',
     `phone`        VARCHAR(20)           DEFAULT NULL COMMENT '用户电话号码,允许为空',
     `email`        VARCHAR(100)          DEFAULT NULL COMMENT '用户电子邮件,允许为空',
-    `sex`          VARCHAR(10)           DEFAULT NULL COMMENT '用户性别,允许为空',
     `avatar`       VARCHAR(255)          DEFAULT '/assets/avatars/default-user.jpg' COMMENT '用户头像,允许为空',
     bio            TEXT,                            -- 个人简介
     gender         TINYINT               DEFAULT 0, -- 性别：0-保密，1-男，2-女

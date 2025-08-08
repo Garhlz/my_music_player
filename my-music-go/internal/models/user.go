@@ -20,7 +20,6 @@ type User struct {
 	Name        *string    `db:"name" json:"name,omitempty"`
 	Phone       *string    `db:"phone" json:"phone,omitempty"`
 	Email       *string    `db:"email" json:"email,omitempty"`
-	Sex         *string    `db:"sex" json:"sex,omitempty"`
 	Avatar      string     `db:"avatar" json:"avatar"`
 	Bio         *string    `db:"bio" json:"bio,omitempty"`
 	Gender      int8       `db:"gender" json:"gender"`
@@ -50,10 +49,16 @@ type Follow struct {
 
 // RegisterRequest 用于绑定用户注册的JSON请求 (DTO)
 type RegisterRequest struct {
-	Username string  `json:"username" binding:"required"`
-	Password string  `json:"password" binding:"required"`
-	Email    *string `json:"email"`
-	Name     *string `json:"name"`
+	Username string     `json:"username" binding:"required"`
+	Password string     `json:"password" binding:"required"`
+	Name     *string    `json:"name" binding:"required"`
+	Email    *string    `json:"email,omitempty"`
+	Phone    *string    `json:"phone,omitempty"`
+	Avatar   *string    `json:"avatar,omitempty"`
+	Bio      *string    `json:"bio,omitempty"`
+	Gender   *int8      `json:"gender,omitempty"`
+	Birthday *time.Time `db:"birthday" json:"birthday,omitempty"`
+	Location *string    `db:"location" json:"location,omitempty"`
 }
 
 // LoginRequest 用于绑定用户登录的JSON请求 (DTO)

@@ -43,11 +43,34 @@ func (s *UserService) RegisterUser(req *models.RegisterRequest) error {
 	newUser := &models.User{
 		Username: req.Username,
 		Password: string(hashedPassword),
-		Name:     req.Name,
-		Email:    req.Email,
-		Avatar:   "/assets/avatars/default-user.jpg", // 在 Service 层设置默认值
-		Status:   1,
-		Gender:   0,
+	}
+	if req.Name != nil {
+		newUser.Name = req.Name
+	}
+	if req.Email != nil {
+		newUser.Email = req.Email
+	}
+	if req.Phone != nil {
+		newUser.Phone = req.Phone
+	}
+	if req.Avatar != nil {
+		newUser.Avatar = *req.Avatar
+	} else {
+		newUser.Avatar = "/assets/avatars/default-user.jpg"
+	}
+	if req.Bio != nil {
+		newUser.Bio = req.Bio
+	}
+	if req.Gender != nil {
+		newUser.Gender = *req.Gender
+	} else {
+		newUser.Gender = 0 // 0是保密, 1是男, 2是女
+	}
+	if req.Birthday != nil {
+		newUser.Birthday = req.Birthday
+	}
+	if req.Location != nil {
+		newUser.Location = req.Location
 	}
 
 	err = s.userRepo.Create(newUser)

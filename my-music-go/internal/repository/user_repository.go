@@ -72,8 +72,8 @@ func (r *UserRepository) FindByID(userID int64) (*models.User, error) {
 func (r *UserRepository) Create(user *models.User) error {
 	// 4. 使用命名查询 (Named Query) 来执行插入，更清晰、更安全
 	query := `
-		INSERT INTO user (username, password, name, email, avatar, status, gender) 
-		VALUES (:username, :password, :name, :email, :avatar, :status, :gender)`
+		INSERT INTO user (username, password, name, email, phone, avatar, bio, gender, birthday, location) 
+		VALUES (:username, :password, :name, :email, :phone, :avatar, :bio, :gender, :birthday, :location)`
 
 	// 5. 使用 db.NamedExec，它会自动匹配 user 结构体的字段和查询中的命名参数
 	_, err := r.db.NamedExec(query, user)

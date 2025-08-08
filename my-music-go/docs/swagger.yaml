@@ -208,15 +208,28 @@ definitions:
     type: object
   models.RegisterRequest:
     properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      birthday:
+        type: string
       email:
+        type: string
+      gender:
+        type: integer
+      location:
         type: string
       name:
         type: string
       password:
         type: string
+      phone:
+        type: string
       username:
         type: string
     required:
+    - name
     - password
     - username
     type: object

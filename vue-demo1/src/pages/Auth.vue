@@ -35,7 +35,7 @@
           <div v-if="activeTab === 'login'" key="login" class="form-content">
             <div class="form-header">
               <h2>欢迎回来!</h2>
-              <p>很高兴再次见到你</p>
+              <p>进入你的音乐小窝</p>
             </div>
             <el-form
               :model="loginForm"
@@ -163,6 +163,7 @@ const loginForm = reactive<ModelsLoginRequest>({
   username: '',
   password: '',
 });
+
 const loginRules = reactive<FormRules>({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
