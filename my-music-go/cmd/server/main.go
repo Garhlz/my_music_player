@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	_ "my-music-go/docs" // 导入 swag 生成的 docs 包
 	"my-music-go/internal/api"
@@ -33,6 +34,10 @@ import (
 // @name Authorization
 
 func main() {
+	fmt.Println("Environment Variables from OS:")
+	for _, env := range os.Environ() {
+		fmt.Println(env)
+	}
 	logger := log.New(os.Stdout, "MUSIC_API: ", log.LstdFlags|log.Lshortfile)
 
 	cfg, err := config.LoadConfig(".") // 从当前目录加载 .env

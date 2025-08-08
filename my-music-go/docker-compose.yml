@@ -1,0 +1,46 @@
+version: '3.8' # 建议明确指定一个版本，例如 3.8
+
+services:
+  # === 后端 Go 服务 ===
+  backend:
+    container_name: music-app-backend
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=elaine
+      - DB_PASSWORD=123456
+      - DB_NAME=music_db1
+      - SERVER_ADDRESS=:8080
+      - JWT_SECRET=MYLITTLEAIRPORT
+    depends_on:
+      db:
+        condition: service_healthy # 确保 backend 依赖 db 的健康状态
+
+  # === MySQL 数据库服务 ===
+  db:
+    container_name: music-app-db
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: music_db1
+      MYSQL_USER: elaine
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql # <-- 这里引用命名卷
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+# === 命名卷定义应该在这里，与 services 块平级 ===
+volumes:
+  db_data: # 定义一个名为 db_data 的命名卷
