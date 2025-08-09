@@ -1,17 +1,14 @@
 <template>
   <div class="app-container">
-	<router-view></router-view>
-	<Player v-if="currentSong"/>
+    <router-view></router-view>
   </div>
 </template>
 
 <script setup>
-import {computed} from 'vue'
-import Player from 'src/components/Player.vue'
-import {usePlayerStore} from 'src/stores/player'
+import { computed } from 'vue';
+import { usePlayerStore } from 'src/stores/player';
 
-const playerStore = usePlayerStore()
-const currentSong = computed(() => playerStore.getCurrentSong)
+const playerStore = usePlayerStore();
 </script>
 
 <style>
@@ -19,5 +16,13 @@ const currentSong = computed(() => playerStore.getCurrentSong)
   height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* 防止子组件溢出 */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
 }
 </style>

@@ -31,11 +31,6 @@ const routes = [
     // 这里不再需要 children 数组，因为登录和注册逻辑在 Auth.vue 内部处理
   },
   {
-    path: '/public-playlist',
-    name: 'PublicPlaylist',
-    component: PublicPlaylist,
-  },
-  {
     path: '/pub', // 建议统一别名，或者如果不再需要可以删除此路由
     name: 'PublicPlaylistAlias',
     component: PublicPlaylist,

@@ -275,33 +275,28 @@ const handleRegister = async () => {
       ...(registerForm.gender !== undefined && registerForm.gender !== null && { gender: registerForm.gender }),
       ...(registerForm.birthday && { birthday: new Date(registerForm.birthday).toISOString() }),
     };
-    // 注册逻辑
     await authApi.authRegisterPost(payload);
     ElMessage.success('注册成功！请登录。');
     activeTab.value = 'login';
   } catch (error: any) {
     console.error('注册失败:', error);
-    // **增强的错误处理逻辑**
-    let errorMessage = '注册失败，请稍后重试'; // 默认错误信息
+    let errorMessage = '注册失败，请稍后重试';
     if (error.response) {
-      // 如果有来自服务器的响应
       const status = error.response.status;
       const dataError = error.response.data?.error;
       switch (status) {
-        case 409: // Conflict
+        case 409:
           errorMessage = dataError || '该用户名已被注册';
           break;
-        case 400: // Bad Request
+        case 400:
           errorMessage = dataError || '提交的信息有误，请检查';
           break;
         default:
           errorMessage = dataError || `服务器错误 (代码: ${status})`;
       }
     } else if (error.request) {
-      // 如果请求已发出，但没有收到响应 (例如网络问题)
       errorMessage = '网络连接失败，请检查您的网络';
     } else {
-      // 如果是设置请求时发生的错误
       errorMessage = error.message;
     }
     ElMessage.error(errorMessage);
@@ -309,7 +304,6 @@ const handleRegister = async () => {
     loading.value = false;
   }
 };
-
 </script>
 
 <style scoped>
@@ -320,9 +314,10 @@ const handleRegister = async () => {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #ffe4e9, #f5d7f0); /* Deeper pink to soft lavender */
+  background: linear-gradient(135deg, #ffe4e9, #f5d7f0);
   background-size: 300% 300%;
   animation: gradientBG 12s ease infinite;
+  overflow: hidden; /* 防止溢出滚动 */
 }
 
 .auth-wrapper {
@@ -331,13 +326,12 @@ const handleRegister = async () => {
   display: flex;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 182, 193, 0.6); /* Stronger pink border */
+  border: 1px solid rgba(255, 182, 193, 0.6);
   border-radius: 1.75rem;
   box-shadow: 0 20px 40px rgba(255, 105, 180, 0.2);
-  overflow: hidden;
+  overflow: hidden; /* 防止子元素溢出 */
 }
 
-/* --- 左侧装饰面板 --- */
 .decoration-panel {
   display: none;
   flex: 1;
@@ -346,7 +340,7 @@ const handleRegister = async () => {
   padding: 2.5rem;
   color: white;
   text-align: center;
-  background: linear-gradient(135deg, #ff99ac, #d8b4fe); /* Bolder pink to lavender */
+  background: linear-gradient(135deg, #ff99ac, #d8b4fe);
   position: relative;
 }
 
@@ -368,21 +362,20 @@ const handleRegister = async () => {
   opacity: 0.85;
 }
 
-/* --- 右侧表单区域 --- */
 .form-panel {
   flex: 1;
   padding: 2.5rem 3.5rem;
   background-color: #fff;
-  overflow-y: auto;
-  max-height: 90vh;
+  max-height: calc(100vh - 2rem); /* 减去顶部和底部 padding */
+  overflow-y: auto; /* 仅在内容溢出时启用垂直滚动 */
+  overflow-x: hidden; /* 防止水平滚动 */
 }
 
-/* --- Tab Switcher --- */
 .tab-switcher {
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
-  background: #ffe4e9; /* Deeper pink background */
+  background: #ffe4e9;
   padding: 0.5rem;
   border-radius: 1rem;
 }
@@ -399,7 +392,8 @@ const handleRegister = async () => {
   position: relative;
 }
 
-.tab-button:hover, .tab-button:focus {
+.tab-button:hover,
+.tab-button:focus {
   color: #ff6699;
   background: rgba(255, 105, 180, 0.25);
   outline: none;
@@ -407,11 +401,10 @@ const handleRegister = async () => {
 
 .tab-button.active {
   color: #fff;
-  background: #ff6699; /* More vibrant pink for active tab */
+  background: #ff6699;
   box-shadow: 0 2px 8px rgba(255, 105, 180, 0.35);
 }
 
-/* --- 表单内容 --- */
 .form-content {
   width: 100%;
   max-width: 450px;
@@ -435,10 +428,9 @@ const handleRegister = async () => {
   color: #7b6b8e;
 }
 
-/* --- Element Plus 样式覆盖 --- */
 :deep(.el-input__wrapper) {
   background-color: #fff0f5 !important;
-  border: 1px solid #ff99ac !important; /* Bolder pink border */
+  border: 1px solid #ff99ac !important;
   border-radius: 0.75rem !important;
   padding: 0.3rem 1rem !important;
   transition: all 0.3s ease;
@@ -477,7 +469,7 @@ const handleRegister = async () => {
   font-size: 1rem;
   border: none;
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, #ff6699, #ff3385); /* Bolder pink gradient */
+  background: linear-gradient(135deg, #ff6699, #ff3385);
   box-shadow: 0 4px 12px rgba(255, 102, 153, 0.35);
   transition: all 0.3s ease;
 }
@@ -583,12 +575,13 @@ const handleRegister = async () => {
   }
 }
 
-/* Vue Transitions */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease;
 }
 
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -604,5 +597,31 @@ const handleRegister = async () => {
 .slide-fade-leave-to {
   transform: translateY(-8px);
   opacity: 0;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+  .auth-wrapper {
+    max-width: 90%;
+    flex-direction: column;
+    border-radius: 1rem;
+  }
+
+  .decoration-panel {
+    display: none; /* 移动端隐藏装饰面板 */
+  }
+
+  .form-panel {
+    padding: 1.5rem 2rem;
+    max-height: calc(100vh - 2rem); /* 调整移动端高度 */
+  }
+
+  .tab-switcher {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-content {
+    max-width: 100%;
+  }
 }
 </style>

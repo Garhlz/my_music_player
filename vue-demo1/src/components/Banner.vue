@@ -37,37 +37,32 @@
   </el-header>
 </template>
 
-<script>
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
 import { Headset, UserFilled, SwitchButton } from '@element-plus/icons-vue';
 
-export default {
-  components: {
-    Headset,
-    UserFilled,
-    SwitchButton,
-  },
-  methods: {
-    goToProfile() {
-      const userId = localStorage.getItem('userId');
-      this.$router.push(`/profile/${userId}`);
-    },
-    logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('isAuthenticated');
-      this.$router.push('/auth');
-      console.log('已退出登录');
-    },
-  },
-  props: {
-    pageName: String,
-  },
+defineProps<{
+  pageName: string;
+}>();
+
+const router = useRouter();
+
+const goToProfile = () => {
+  const userId = localStorage.getItem('userId');
+  router.push(`/profile/${userId}`);
+};
+
+const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('isAuthenticated');
+  router.push('/auth');
+  console.log('已退出登录');
 };
 </script>
 
 <style scoped>
 .header {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
+  background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 0 32px;
   height: 64px;
@@ -77,10 +72,7 @@ export default {
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
-}
-
-.header:hover {
-  background: rgba(255, 255, 255, 1);
+  animation: fadeIn 0.5s ease-in;
 }
 
 .header-container {
@@ -110,6 +102,7 @@ export default {
 
 .logo-wrapper:hover {
   transform: rotate(15deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .logo-icon {
@@ -124,7 +117,6 @@ export default {
   background: linear-gradient(45deg, var(--el-color-primary), var(--el-color-primary-light-3));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: 0.5px;
 }
 
 /* 页面标题样式 */
@@ -139,13 +131,12 @@ export default {
   font-size: 18px;
   font-weight: 500;
   color: var(--el-text-color-primary);
-  transition: all 0.3s ease;
 }
 
 /* 操作按钮区域样式 */
 .header-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
 }
 
@@ -154,8 +145,8 @@ export default {
   align-items: center;
   gap: 8px;
   height: 38px;
-  padding: 0 20px;
-  border-radius: 19px;
+  padding: 0 16px;
+  border-radius: 20px;
   border: 2px solid transparent;
   background: var(--el-fill-color-light);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -183,7 +174,6 @@ export default {
 
 .action-btn .el-icon {
   font-size: 18px;
-  transition: transform 0.3s ease;
 }
 
 .action-btn:hover .el-icon {
@@ -227,17 +217,6 @@ export default {
 
   .page-title h2 {
     font-size: 16px;
-  }
-}
-
-/* 暗色模式适配 */
-@media (prefers-color-scheme: dark) {
-  .header {
-    background: rgba(0, 0, 0, 0.8);
-  }
-
-  .action-btn {
-    background: rgba(255, 255, 255, 0.05);
   }
 }
 </style>
