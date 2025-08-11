@@ -35,6 +35,7 @@ const routes = [
     name: 'PublicPlaylistAlias',
     component: PublicPlaylist,
   },
+
   {
     path: '/manage-songs',
     name: 'ManageSongs',
@@ -60,11 +61,7 @@ const routes = [
     name: 'MyPlaylist',
     component: MyPlaylist,
   },
-  {
-    path: '/my-love/:id',
-    name: 'MyLove',
-    component: MyLove,
-  },
+
   {
     path: '/uploaded',
     name: 'Uploaded',

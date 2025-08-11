@@ -1,4 +1,3 @@
-```vue
 <template>
   <el-dialog
     :model-value="modelValue"
@@ -473,4 +472,3 @@ const resetState = () => {
   }
 }
 </style>
-```

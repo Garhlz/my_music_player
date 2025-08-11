@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 import { Headset, UserFilled, SwitchButton } from '@element-plus/icons-vue';
 
 defineProps<{
@@ -46,6 +47,7 @@ defineProps<{
 }>();
 
 const router = useRouter();
+const userStore = useUserStore();
 
 const goToProfile = () => {
   const userId = localStorage.getItem('userId');
@@ -53,8 +55,9 @@ const goToProfile = () => {
 };
 
 const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('isAuthenticated');
+  // localStorage.removeItem('token');
+  // localStorage.removeItem('isAuthenticated');
+  userStore.logout();
   router.push('/auth');
   console.log('已退出登录');
 };
