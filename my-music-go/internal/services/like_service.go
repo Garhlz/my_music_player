@@ -31,7 +31,7 @@ func (s *LikeService) ListLikedSongs(userID int64, params *models.ListLikedSongs
 	var total int
 	var errSongs, errTotal error
 
-	wg.Add(2) // 我们有两个并发任务
+	wg.Add(2) // 有两个并发任务
 
 	// 1. 获取歌曲列表
 	go func() {

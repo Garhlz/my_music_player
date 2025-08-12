@@ -1,6 +1,8 @@
 package services
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"my-music-go/internal/models"
 	"my-music-go/internal/repository"
@@ -9,15 +11,14 @@ import (
 
 // SongService 是否依赖? 是的, 需要知道歌曲数量
 type AlbumService struct {
-	albumRepo   repository.IAlbumRepository // 注意这里是接口, 而且不是指针
-	songService *SongService                // 依赖另一个 Service
+	albumRepo repository.IAlbumRepository // 注意这里是接口, 而且不是指针
+
 }
 
 // NewAlbumService 构造函数
-func NewAlbumService(albumRepo repository.IAlbumRepository, songService *SongService) *AlbumService {
+func NewAlbumService(albumRepo repository.IAlbumRepository) *AlbumService {
 	return &AlbumService{
-		albumRepo:   albumRepo,
-		songService: songService,
+		albumRepo: albumRepo,
 	}
 }
 
@@ -64,50 +65,13 @@ func (s *AlbumService) ListAlbums(albumParams *models.ListAlbumsRequestDTO) (*mo
 	}, nil
 }
 
-func (s *AlbumService) GetAlbumDetail(albumID int64, songParams *models.ListSongsRequestDTO) (*models.AlbumDetailDTO, error) {
-	var wg sync.WaitGroup
-
-	var album *models.Album
-	var artists []models.Artist
-	var paginatedSongs *models.PaginatedResponseDTO
-	var errAlbum, errArtists, errSongs error
-
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
-		album, errAlbum = s.albumRepo.FindByID(albumID)
-	}()
-
-	go func() {
-		defer wg.Done()
-		artists, errArtists = s.albumRepo.FindArtistsByAlbumID(albumID)
-	}()
-
-	// 复用 songService, 获取专辑的歌曲列表
-	go func() {
-		defer wg.Done()
-		songParams.AlbumID = &albumID
-		paginatedSongs, errSongs = s.songService.ListSongs(songParams)
-	}()
-
-	wg.Wait()
-
-	// 统一检查错误
-	if errAlbum != nil || errArtists != nil || errSongs != nil {
-		// 这里可以根据具体错误返回，或者统一返回一个通用错误
-		return nil, fmt.Errorf("failed to get album detail. albumErr:%w, artistsErr:%w, songsErr:%w", errAlbum, errArtists, errSongs)
+func (s *AlbumService) GetAlbum(albumID int64) (*models.Album, error) {
+	albumInfo, err := s.albumRepo.FindByID(albumID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrAlbumNotFound // 保持错误类型的封装
+		}
+		return nil, fmt.Errorf("failed to find album by id: %w", err)
 	}
-
-	if album == nil {
-		return nil, ErrAlbumNotFound // 使用正确的哨兵错误
-	}
-	// 组合最终的响应DTO
-	response := &models.AlbumDetailDTO{
-		Album:   *album, // 注意这里解引用
-		Artists: artists,
-		Songs:   paginatedSongs,
-	}
-
-	return response, nil
+	return albumInfo, nil
 }

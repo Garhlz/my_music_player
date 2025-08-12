@@ -6,7 +6,6 @@ import (
 	"my-music-go/internal/models"
 	"my-music-go/internal/services"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,10 +32,8 @@ func NewSongHandler(songService *services.SongService) *SongHandler {
 // @Failure      500  {object}  map[string]string "{"error": "获取歌曲详情失败，请稍后重试"}"
 // @Router       /songs/{id} [get]
 func (h *SongHandler) GetSongDetail(c *gin.Context) {
-	songIDStr := c.Param("id")
-	songID, err := strconv.ParseInt(songIDStr, 10, 64)
+	songID, err := GetIDFromParam(c, "id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的歌曲ID格式"})
 		return
 	}
 

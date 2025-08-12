@@ -7,13 +7,8 @@ definitions:
     required:
     - song_id
     type: object
-  models.AlbumDetailDTO:
+  models.Album:
     properties:
-      artists:
-        description: 包含完整的艺术家对象列表
-        items:
-          $ref: '#/definitions/models.Artist'
-        type: array
       cover:
         type: string
       created_at:
@@ -26,8 +21,6 @@ definitions:
         type: string
       release_date:
         type: string
-      songs:
-        $ref: '#/definitions/models.PaginatedResponseDTO'
     type: object
   models.AlbumListDTO:
     properties:
@@ -62,13 +55,6 @@ definitions:
         type: string
       sex:
         type: string
-    type: object
-  models.ArtistDetailResponseDTO:
-    properties:
-      artist:
-        $ref: '#/definitions/models.Artist'
-      songs:
-        $ref: '#/definitions/models.PaginatedResponseDTO'
     type: object
   models.CommentDTO:
     properties:
@@ -334,8 +320,6 @@ definitions:
         type: string
       phone:
         type: string
-      sex:
-        type: string
       status:
         type: integer
       updated_time:
@@ -429,44 +413,22 @@ paths:
       - 专辑 (Album)
   /albums/{id}:
     get:
-      description: 根据专辑ID获取其详细信息（包括艺术家），并返回该专辑包含的歌曲分页列表。
+      description: 根据专辑ID获取其详细信息。
       parameters:
       - description: 专辑 ID
         in: path
         name: id
         required: true
         type: integer
-      - default: 1
-        description: 歌曲列表的页码
-        in: query
-        name: page
-        type: integer
-      - default: 10
-        description: 每页的歌曲数量
-        in: query
-        name: pageSize
-        type: integer
-      - description: 在歌曲中搜索的关键词 (匹配歌曲名或艺术家名)
-        in: query
-        name: search
-        type: string
-      - description: 歌曲列表的排序字段 (latest, play_count, like_count)
-        enum:
-        - latest
-        - play_count
-        - like_count
-        in: query
-        name: sortBy
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.AlbumDetailDTO'
+            $ref: '#/definitions/models.Album'
         "400":
-          description: '{"error": "无效的ID或查询参数"}'
+          description: '{"error": "无效的专辑ID"}'
           schema:
             additionalProperties:
               type: string
@@ -484,19 +446,133 @@ paths:
               type: string
             type: object
         "500":
-          description: '{"error": "获取专辑详情失败"}'
+          description: '{"error": "获取专辑失败"}'
           schema:
             additionalProperties:
               type: string
             type: object
       security:
       - BearerAuth: []
-      summary: 获取专辑详情及歌曲列表
+      summary: 获取专辑详情
+      tags:
+      - 专辑 (Album)
+  /albums/{id}/songs:
+    get:
+      description: 根据专辑ID获取其歌曲的分页列表，支持搜索和排序。
+      parameters:
+      - description: 专辑 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: 歌曲列表的页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页的歌曲数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+        in: query
+        name: search
+        type: string
+      - description: 歌曲列表的排序字段
+        enum:
+        - oldest
+        - latest
+        - play_count
+        - like_count
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.SongDetailDTO'
+                  type: array
+              type: object
+        "400":
+          description: '{"error": "无效的ID或查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取歌曲列表失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取专辑的歌曲列表
       tags:
       - 专辑 (Album)
   /artists/{id}:
     get:
-      description: 根据艺术家ID获取其详细信息，并返回该艺术家的歌曲分页列表。歌曲列表支持搜索和排序。
+      description: 根据艺术家ID获取其详细信息。
+      parameters:
+      - description: 艺术家 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Artist'
+        "400":
+          description: '{"error": "无效的艺术家ID"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "艺术家未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取艺术家失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取艺术家详情
+      tags:
+      - 艺术家 (Artist)
+  /artists/{id}/songs:
+    get:
+      description: 根据艺术家ID获取其歌曲的分页列表，支持搜索和排序。
       parameters:
       - description: 艺术家 ID
         in: path
@@ -532,7 +608,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ArtistDetailResponseDTO'
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.SongDetailDTO'
+                  type: array
+              type: object
         "400":
           description: '{"error": "无效的ID或查询参数"}'
           schema:
@@ -545,21 +628,15 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "404":
-          description: '{"error": "艺术家未找到"}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "500":
-          description: '{"error": "获取艺术家详情失败"}'
+          description: '{"error": "获取歌曲列表失败"}'
           schema:
             additionalProperties:
               type: string
             type: object
       security:
       - BearerAuth: []
-      summary: 获取艺术家详情及歌曲列表
+      summary: 获取艺术家的歌曲列表
       tags:
       - 艺术家 (Artist)
   /auth/login:

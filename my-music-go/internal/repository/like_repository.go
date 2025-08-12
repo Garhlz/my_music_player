@@ -35,7 +35,7 @@ func buildLikedSongsConditions(params *models.ListLikedSongsRequestDTO) (string,
 		args = append(args, likePattern, likePattern)
 	}
 	if len(conditions) > 0 {
-		return "AND " + strings.Join(conditions, " AND "), args
+		return " AND " + strings.Join(conditions, " AND "), args
 	}
 	return "", args
 }

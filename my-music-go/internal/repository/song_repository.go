@@ -51,10 +51,10 @@ func (r *SongRepository) FindDetailByID(songID int64) (*models.SongDetailDTO, er
 // List 和 Count 方法是重点
 func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.SongDetailDTO, error) {
 	var songs []models.SongDetailDTO
-
+	// 之前后端没有弄清楚author_id和artist_id
 	// 基础查询语句
 	baseQuery := `
-		SELECT s.*, a.name as artist_name, al.name as album_name
+		SELECT s.*, a.name as artist_name, al.name as album_name, a.id as artist_id
 		FROM song s
 		LEFT JOIN artist a ON s.author_id = a.id
 		LEFT JOIN album al ON s.album_id = al.id`
@@ -74,6 +74,11 @@ func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.Song
 	if params.ArtistID != nil {
 		conditions = append(conditions, "s.author_id = ?")
 		args = append(args, *params.ArtistID)
+	}
+
+	if params.AlbumID != nil {
+		conditions = append(conditions, "s.album_id = ?")
+		args = append(args, *params.AlbumID)
 	}
 
 	if params.PlaylistID != nil {
@@ -128,6 +133,11 @@ func (r *SongRepository) Count(params *models.ListSongsRequestDTO) (int, error) 
 	if params.ArtistID != nil {
 		conditions = append(conditions, "s.author_id = ?")
 		args = append(args, *params.ArtistID)
+	}
+
+	if params.AlbumID != nil {
+		conditions = append(conditions, "s.album_id = ?")
+		args = append(args, *params.AlbumID)
 	}
 
 	if params.PlaylistID != nil {

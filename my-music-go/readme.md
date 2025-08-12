@@ -1,4 +1,6 @@
 https://github.com/Garhlz/my_music_player/commits/feature/backend-rewrite-go/
+
+- swag生成文档的指令:
 swag init -g ./cmd/server/main.go
 
 

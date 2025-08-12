@@ -63,19 +63,19 @@ func main() {
 	// 将 repo 和 config 实例注入到 Service 中
 	userService := services.NewUserService(userRepo, cfg)
 	songService := services.NewSongService(songRepo)
-	artistService := services.NewArtistService(artistRepo, songService)
-	albumService := services.NewAlbumService(albumRepo, songService)
-	likeService := services.NewLikeService(likeRepo, songRepo)
+	artistService := services.NewArtistService(artistRepo)
+	albumService := services.NewAlbumService(albumRepo)
 	playlistService := services.NewPlaylistService(playlistRepo, songService)
+	likeService := services.NewLikeService(likeRepo, songRepo)
 	commentService := services.NewCommentService(commentRepo, songRepo)
 
 	// 将 service 实例注入到 Handler 中
 	userHandler := handlers.NewUserHandler(userService)
 	songHandler := handlers.NewSongHandler(songService)
-	artistHandler := handlers.NewArtistHandler(artistService)
-	albumHandler := handlers.NewAlbumHandler(albumService)
-	likeHandler := handlers.NewLikeHandler(likeService)
+	artistHandler := handlers.NewArtistHandler(artistService, songService)
+	albumHandler := handlers.NewAlbumHandler(albumService, songService)
 	playlistHandler := handlers.NewPlaylistHandler(playlistService)
+	likeHandler := handlers.NewLikeHandler(likeService)
 	commentHandler := handlers.NewCommentHandler(commentService)
 
 	// 将所有 handler 注入到 router 设置函数中

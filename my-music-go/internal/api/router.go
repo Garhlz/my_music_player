@@ -92,13 +92,15 @@ func SetupRouter(
 
 				artistRoutes := protected.Group("/artists")
 				{
-					artistRoutes.GET("/:id", artistHandler.GetArtistDetail)
+					artistRoutes.GET("/:id", artistHandler.GetArtistInfo)
+					artistRoutes.GET("/:id/songs", artistHandler.ListSongsByArtist)
 				}
 
 				albumRoutes := protected.Group("/albums")
 				{
 					albumRoutes.GET("", albumHandler.ListAlbums)
-					albumRoutes.GET("/:id", albumHandler.GetAlbumDetail)
+					albumRoutes.GET("/:id", albumHandler.GetAlbumInfo)
+					albumRoutes.GET("/:id/songs", albumHandler.ListSongsByAlbum)
 				}
 
 				playlistsRoutes := protected.Group("/playlists")

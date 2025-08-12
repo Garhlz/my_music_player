@@ -124,14 +124,14 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据专辑ID获取其详细信息（包括艺术家），并返回该专辑包含的歌曲分页列表。",
+                "description": "根据专辑ID获取其详细信息。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "专辑 (Album)"
                 ],
-                "summary": "获取专辑详情及歌曲列表",
+                "summary": "获取专辑详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -139,48 +139,17 @@
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "歌曲列表的页码",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "每页的歌曲数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "在歌曲中搜索的关键词 (匹配歌曲名或艺术家名)",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "latest",
-                            "play_count",
-                            "like_count"
-                        ],
-                        "type": "string",
-                        "description": "歌曲列表的排序字段 (latest, play_count, like_count)",
-                        "name": "sortBy",
-                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.AlbumDetailDTO"
+                            "$ref": "#/definitions/models.Album"
                         }
                     },
                     "400": {
-                        "description": "{\"error\": \"无效的ID或查询参数\"}",
+                        "description": "{\"error\": \"无效的专辑ID\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -207,7 +176,115 @@
                         }
                     },
                     "500": {
-                        "description": "{\"error\": \"获取专辑详情失败\"}",
+                        "description": "{\"error\": \"获取专辑失败\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/albums/{id}/songs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据专辑ID获取其歌曲的分页列表，支持搜索和排序。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "专辑 (Album)"
+                ],
+                "summary": "获取专辑的歌曲列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "专辑 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "歌曲列表的页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页的歌曲数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "在歌曲中搜索的关键词 (匹配歌曲名或专辑名)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "oldest",
+                            "latest",
+                            "play_count",
+                            "like_count"
+                        ],
+                        "type": "string",
+                        "description": "歌曲列表的排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "List": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.SongDetailDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的ID或查询参数\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取歌曲列表失败\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -225,14 +302,84 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据艺术家ID获取其详细信息，并返回该艺术家的歌曲分页列表。歌曲列表支持搜索和排序。",
+                "description": "根据艺术家ID获取其详细信息。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "艺术家 (Artist)"
                 ],
-                "summary": "获取艺术家详情及歌曲列表",
+                "summary": "获取艺术家详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "艺术家 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Artist"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的艺术家ID\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"艺术家未找到\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取艺术家失败\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/artists/{id}/songs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据艺术家ID获取其歌曲的分页列表，支持搜索和排序。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "艺术家 (Artist)"
+                ],
+                "summary": "获取艺术家的歌曲列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -278,7 +425,22 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ArtistDetailResponseDTO"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "List": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.SongDetailDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -299,17 +461,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "{\"error\": \"艺术家未找到\"}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
                     "500": {
-                        "description": "{\"error\": \"获取艺术家详情失败\"}",
+                        "description": "{\"error\": \"获取歌曲列表失败\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1839,16 +1992,9 @@
                 }
             }
         },
-        "models.AlbumDetailDTO": {
+        "models.Album": {
             "type": "object",
             "properties": {
-                "artists": {
-                    "description": "包含完整的艺术家对象列表",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Artist"
-                    }
-                },
                 "cover": {
                     "type": "string"
                 },
@@ -1866,9 +2012,6 @@
                 },
                 "release_date": {
                     "type": "string"
-                },
-                "songs": {
-                    "$ref": "#/definitions/models.PaginatedResponseDTO"
                 }
             }
         },
@@ -1921,17 +2064,6 @@
                 },
                 "sex": {
                     "type": "string"
-                }
-            }
-        },
-        "models.ArtistDetailResponseDTO": {
-            "type": "object",
-            "properties": {
-                "artist": {
-                    "$ref": "#/definitions/models.Artist"
-                },
-                "songs": {
-                    "$ref": "#/definitions/models.PaginatedResponseDTO"
                 }
             }
         },
@@ -2332,9 +2464,6 @@
                     "type": "string"
                 },
                 "phone": {
-                    "type": "string"
-                },
-                "sex": {
                     "type": "string"
                 },
                 "status": {
