@@ -8,11 +8,11 @@ const Pub = () => import('@/pages/Pub.vue');
 const ManageSongs = () => import('@/pages/ManageSongs.vue');
 const Player = () => import('@/pages/Player.vue');
 const ManageUsers = () => import('@/pages/ManageUsers.vue');
-const MyPlaylist = () => import('@/pages/MyPlaylist.vue');
+const PlaylistGridPage = () => import('@/pages/PlaylistGridPage.vue');
+const PlaylistDetail = () => import('@/pages/PlaylistDetail.vue');
 const FavoriteSongs = () => import('@/pages/FavoriteSongs.vue');
 const Uploaded = () => import('@/pages/Uploaded.vue');
 const UserProfile = () => import('@/pages/UserProfile.vue');
-const PlaylistDetail = () => import('@/pages/MyNewPlaylist.vue');
 const AlbumDetail = () => import('@/pages/AlbumDetail.vue');
 const ArtistDetail = () => import('@/pages/ArtistDetail.vue');
 const CommentDetail = () => import('@/pages/CommentOfSong.vue');
@@ -56,9 +56,9 @@ const routes = [
     component: Player,
   },
   {
-    path: '/my-playlist/:id',
-    name: 'MyPlaylist',
-    component: MyPlaylist,
+    path: '/playlist-grid/:id',
+    name: 'PlaylistGrid',
+    component: PlaylistGridPage,
   },
   {
     path: '/love/:id',

@@ -1044,6 +1044,12 @@ const docTemplate = `{
                         "description": "每页数量",
                         "name": "pageSize",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词 (匹配歌单名)",
+                        "name": "search",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1366,6 +1372,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
+                "description": "根据歌单ID获取其详细信息。",
                 "produces": [
                     "application/json"
                 ],
@@ -1380,17 +1387,107 @@ const docTemplate = `{
                         "name": "playlistId",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PlaylistInfoDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的歌单ID\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"歌单未找到\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取歌单失败\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/playlists/{playlistId}/songs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据歌单ID获取其歌曲的分页列表，支持搜索和排序。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "歌单 (Playlist)"
+                ],
+                "summary": "获取歌单的歌曲列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "歌单 ID",
+                        "name": "playlistId",
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "歌曲列表页码",
+                        "default": 1,
+                        "description": "歌曲列表的页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "歌曲列表每页数量",
+                        "default": 10,
+                        "description": "每页的歌曲数量",
                         "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "在歌曲中搜索的关键词 (匹配歌曲名或专辑名)",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "oldest",
+                            "latest",
+                            "play_count",
+                            "like_count"
+                        ],
+                        "type": "string",
+                        "description": "歌曲列表的排序字段",
+                        "name": "sortBy",
                         "in": "query"
                     }
                 ],
@@ -1398,7 +1495,49 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.PlaylistDetailDTO"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.PaginatedResponseDTO"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "List": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.SongDetailDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的ID或查询参数\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取歌曲列表失败\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -2198,49 +2337,6 @@ const docTemplate = `{
                     "description": "使用 interface{} 来适应任何类型的列表数据"
                 },
                 "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.PlaylistDetailDTO": {
-            "type": "object",
-            "properties": {
-                "cover": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "creator_name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "is_public": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "song_count": {
-                    "type": "integer"
-                },
-                "songs": {
-                    "description": "复用分页结构",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.PaginatedResponseDTO"
-                        }
-                    ]
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "integer"
                 }
             }

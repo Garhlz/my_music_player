@@ -64,7 +64,7 @@ func SetupRouter(
 
 					playlistRoutes := meRoutes.Group("/playlists")
 					{
-						playlistRoutes.GET("", playlistHandler.ListMyPlaylists)
+						playlistRoutes.GET("", playlistHandler.ListMyPlaylists) // mePlaylistGet
 						playlistRoutes.POST("", playlistHandler.CreatePlaylist)
 						playlistRoutes.PUT("/:playlistId", playlistHandler.UpdatePlaylist)
 						playlistRoutes.DELETE("/:playlistId", playlistHandler.DeletePlaylist)
@@ -79,7 +79,7 @@ func SetupRouter(
 					userRoutes.GET("/:id", userHandler.GetUserProfile)
 					userRoutes.GET("/:id/name", userHandler.GetUsernameAndName)
 					userRoutes.GET("/:id/liked-songs", likeHandler.ListUserLikedSongs)
-					userRoutes.GET("/:id/playlists", playlistHandler.ListUserPlaylists)
+					userRoutes.GET("/:id/playlists", playlistHandler.ListUserPlaylists) // userIdPlaylistGet
 				}
 
 				songRoutes := protected.Group("/songs")
@@ -105,7 +105,8 @@ func SetupRouter(
 
 				playlistsRoutes := protected.Group("/playlists")
 				{
-					playlistsRoutes.GET("/playlists/:playlistId", playlistHandler.GetPlaylistDetail)
+					playlistsRoutes.GET("/:playlistId", playlistHandler.GetPlaylistInfo)
+					playlistsRoutes.GET("/:playlistId/songs", playlistHandler.ListSongsByPlaylist)
 				}
 
 				commentsRoutes := protected.Group("/comments")

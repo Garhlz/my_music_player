@@ -1,6 +1,8 @@
 package services
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"my-music-go/internal/models"
 	"my-music-go/internal/repository"
@@ -56,7 +58,7 @@ func (s *PlaylistService) ListUserPlaylists(userID int64, params *models.ListPla
 	}()
 	go func() {
 		defer wg.Done()
-		total, errTotal = s.playlistRepo.CountByUserID(userID)
+		total, errTotal = s.playlistRepo.CountByUserID(userID, params)
 	}()
 	wg.Wait()
 
@@ -68,42 +70,6 @@ func (s *PlaylistService) ListUserPlaylists(userID int64, params *models.ListPla
 	}
 
 	return &models.PaginatedResponseDTO{Total: total, List: playlists}, nil
-}
-
-// GetPlaylistDetail 获取歌单详情（包含歌曲列表）
-func (s *PlaylistService) GetPlaylistDetail(playlistID int64, songParams *models.ListSongsRequestDTO) (*models.PlaylistDetailDTO, error) {
-	var wg sync.WaitGroup
-	var playlistInfo *models.PlaylistInfoDTO
-	var paginatedSongs *models.PaginatedResponseDTO
-	var errPlaylist, errSongs error
-
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		playlistInfo, errPlaylist = s.playlistRepo.FindInfoByID(playlistID)
-	}()
-
-	// 复用songService, 查找当前歌单中所有歌曲的列表(分页查询), 包含了总数和当前页的列表
-	go func() {
-		defer wg.Done()
-		songParams.PlaylistID = &playlistID // 复用 SongService
-		// 因此songRepo中的count和list方法都得修改
-		paginatedSongs, errSongs = s.songService.ListSongs(songParams)
-	}()
-
-	wg.Wait()
-
-	if errPlaylist != nil {
-		return nil, fmt.Errorf("failed to get playlist info: %w", errPlaylist)
-	}
-	if playlistInfo == nil {
-		return nil, ErrPlaylistNotFound
-	}
-	if errSongs != nil {
-		return nil, fmt.Errorf("failed to get playlist songs: %w", errSongs)
-	}
-
-	return &models.PlaylistDetailDTO{PlaylistInfoDTO: *playlistInfo, Songs: paginatedSongs}, nil
 }
 
 // CreatePlaylist 为指定用户创建歌单
@@ -203,4 +169,16 @@ func (s *PlaylistService) RemoveSongFromPlaylist(userID, playlistID, songID int6
 		return ErrSongNotInPlaylist
 	}
 	return nil
+}
+
+// 新建一个简单的get方法
+func (s *PlaylistService) GetPlaylist(playlistID int64) (*models.PlaylistInfoDTO, error) {
+	playlistInfo, err := s.playlistRepo.FindInfoByID(playlistID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrPlaylistNotFound
+		}
+		return nil, fmt.Errorf("failed to find playlist by id: %w", err)
+	}
+	return playlistInfo, nil
 }

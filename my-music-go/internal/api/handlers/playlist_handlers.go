@@ -12,10 +12,11 @@ import (
 
 type PlaylistHandler struct {
 	playlistService *services.PlaylistService
+	songService     *services.SongService
 }
 
-func NewPlaylistHandler(playlistService *services.PlaylistService) *PlaylistHandler {
-	return &PlaylistHandler{playlistService: playlistService}
+func NewPlaylistHandler(playlistService *services.PlaylistService, songService *services.SongService) *PlaylistHandler {
+	return &PlaylistHandler{playlistService: playlistService, songService: songService}
 }
 
 // ListMyPlaylists 获取我自己的歌单列表
@@ -25,6 +26,7 @@ func NewPlaylistHandler(playlistService *services.PlaylistService) *PlaylistHand
 // @Security BearerAuth
 // @Param page query int false "页码"
 // @Param pageSize query int false "每页数量"
+// @Param search query string  false  "搜索关键词 (匹配歌单名)"
 // @Success 200 {object} models.PaginatedResponseDTO{List=[]models.PlaylistInfoDTO}
 // @Router /me/playlists [get]
 func (h *PlaylistHandler) ListMyPlaylists(c *gin.Context) {
@@ -58,6 +60,7 @@ func (h *PlaylistHandler) ListUserPlaylists(c *gin.Context) {
 	if err != nil {
 		return
 	}
+
 	var params models.ListPlaylistsRequestDTO
 	if err := c.ShouldBindQuery(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的查询参数"})
@@ -95,39 +98,6 @@ func (h *PlaylistHandler) CreatePlaylist(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"id": playlistID, "message": "创建成功"})
-}
-
-// GetPlaylistDetail 获取歌单详情
-// @Summary 获取歌单详情
-// @Tags  歌单 (Playlist)
-// @Produce json
-// @Security BearerAuth
-// @Param playlistId path int true "歌单 ID"
-// @Param page query int false "歌曲列表页码"
-// @Param pageSize query int false "歌曲列表每页数量"
-// @Success 200 {object} models.PlaylistDetailDTO
-// @Router /playlists/{playlistId} [get]
-func (h *PlaylistHandler) GetPlaylistDetail(c *gin.Context) {
-	playlistID, err := GetIDFromParam(c, "playlistId")
-	if err != nil {
-		return
-	}
-	var songParams models.ListSongsRequestDTO
-	if err := c.ShouldBindQuery(&songParams); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的查询参数"})
-		return
-	}
-	response, err := h.playlistService.GetPlaylistDetail(playlistID, &songParams)
-	if err != nil {
-		if errors.Is(err, services.ErrPlaylistNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "歌单未找到"})
-		} else {
-			log.Printf("获取歌单详情失败: %+v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取详情失败"})
-		}
-		return
-	}
-	c.JSON(http.StatusOK, response)
 }
 
 // UpdatePlaylist 更新歌单信息
@@ -271,4 +241,81 @@ func (h *PlaylistHandler) RemoveSongFromPlaylist(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "移除成功"})
+}
+
+// GetPlaylistInfo 获取单个歌单的详细信息
+// @Summary      获取歌单详情
+// @Description  根据歌单ID获取其详细信息。
+// @Tags         歌单 (Playlist)
+// @Produce      json
+// @Security     BearerAuth
+// @Param        playlistId        path      int     true   "歌单 ID"
+// @Success      200       {object}  models.PlaylistInfoDTO
+// @Failure      400       {object}  map[string]string "{"error": "无效的歌单ID"}"
+// @Failure      401       {object}  map[string]string "{"error": "需要认证"}"
+// @Failure      404       {object}  map[string]string "{"error": "歌单未找到"}"
+// @Failure      500       {object}  map[string]string "{"error": "获取歌单失败"}"
+// @Router /playlists/{playlistId} [get]
+func (h *PlaylistHandler) GetPlaylistInfo(c *gin.Context) {
+	playlistID, err := GetIDFromParam(c, "playlistId")
+	if err != nil {
+		return
+	}
+
+	playlist, err := h.playlistService.GetPlaylist(playlistID)
+	if err != nil {
+		if errors.Is(err, services.ErrPlaylistNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			log.Printf("获取歌单失败: %+v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取歌单失败"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, playlist)
+}
+
+// ListSongsByPlaylist 获取指定歌单的歌曲分页列表
+// @Summary      获取歌单的歌曲列表
+// @Description  根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+// @Tags         歌单 (Playlist)
+// @Produce      json
+// @Security     BearerAuth
+// @Param        playlistId        path      int     true   "歌单 ID"
+// @Param        page      query     int     false  "歌曲列表的页码" default(1)
+// @Param        pageSize  query     int     false  "每页的歌曲数量" default(10)
+// @Param        search    query     string  false  "在歌曲中搜索的关键词 (匹配歌曲名或专辑名)"
+// @Param        sortBy    query     string  false  "歌曲列表的排序字段" Enums(oldest, latest, play_count, like_count)
+// @Success      200       {object}  models.PaginatedResponseDTO{List=[]models.SongDetailDTO}
+// @Failure      400       {object}  map[string]string "{"error": "无效的ID或查询参数"}"
+// @Failure      401       {object}  map[string]string "{"error": "需要认证"}"
+// @Failure      500       {object}  map[string]string "{"error": "获取歌曲列表失败"}"
+// @Router       /playlists/{playlistId}/songs [get]
+func (h *PlaylistHandler) ListSongsByPlaylist(c *gin.Context) {
+	// 1. 解析路径参数 playlistID
+	playlistID, err := GetIDFromParam(c, "playlistId")
+	if err != nil {
+		return
+	}
+
+	// 2. 绑定歌曲列表的查询参数 (page, pageSize, etc.)
+	var songParams models.ListSongsRequestDTO
+	if err := c.ShouldBindQuery(&songParams); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的查询参数"})
+		return
+	}
+
+	// 3. 将从路径中获取的 playlistID 设置到查询参数中
+	songParams.PlaylistID = &playlistID
+
+	// 4. 调用 SongService 的方法
+	response, err := h.songService.ListSongs(&songParams)
+	if err != nil {
+		log.Printf("获取歌单歌曲列表失败: %+v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取歌曲列表失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }

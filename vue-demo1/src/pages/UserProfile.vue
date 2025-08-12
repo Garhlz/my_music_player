@@ -45,7 +45,7 @@
                   <el-button
                     type="primary"
                     class="action-btn"
-                    @click="router.push(`/my-playlist/${userInfo?.id}`)"
+                    @click="router.push(`/playlist-grid/${userInfo?.id}`)"
                   >
                     <el-icon>
                       <Menu />

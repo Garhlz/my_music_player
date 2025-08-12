@@ -27,7 +27,7 @@
         </el-icon>
         <span>我喜欢的音乐</span>
       </el-menu-item>
-      <el-menu-item index="/my-playlist" @click="navigateTo(`/my-playlist/${userId}`)" class="menu-item">
+      <el-menu-item index="/playlist-grid" @click="navigateTo(`/playlist-grid/${userId}`)" class="menu-item">
         <el-icon>
           <Menu />
         </el-icon>

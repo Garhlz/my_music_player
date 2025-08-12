@@ -2,7 +2,10 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"my-music-go/internal/models"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -11,7 +14,7 @@ type IPlaylistRepository interface {
 	// 歌单管理
 	FindInfoByID(playlistID int64) (*models.PlaylistInfoDTO, error)
 	ListByUserID(userID int64, params *models.ListPlaylistsRequestDTO) ([]models.PlaylistInfoDTO, error)
-	CountByUserID(userID int64) (int, error)
+	CountByUserID(userID int64, params *models.ListPlaylistsRequestDTO) (int, error)
 	Create(playlist *models.PlaylistInfo) (int64, error)
 	Update(playlist *models.PlaylistInfo) error
 	Delete(playlistID int64) error
@@ -43,7 +46,7 @@ func (r *PlaylistRepository) FindInfoByID(playlistID int64) (*models.PlaylistInf
 
 	err := r.db.Get(&info, query, playlistID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // 错误依然是留给上层进行处理
 		}
 		return nil, err
@@ -51,29 +54,82 @@ func (r *PlaylistRepository) FindInfoByID(playlistID int64) (*models.PlaylistInf
 	return &info, nil
 }
 
-// ListByUserID 查找当前用户创建的所有播放列表
+func buildPlaylistConditions(userID int64, params *models.ListPlaylistsRequestDTO) (string, []interface{}) {
+	var conditions []string
+	var args []interface{}
+
+	// 1. 用户ID条件
+	conditions = append(conditions, "pi.user_id = ?")
+	args = append(args, userID)
+
+	// 2. 搜索条件
+	if params.Search != "" {
+		conditions = append(conditions, "pi.name LIKE ?") // 只有一个占位符
+		likePattern := "%" + params.Search + "%"
+		args = append(args, likePattern) // 只添加一个参数
+	}
+
+	// 组合所有条件
+	if len(conditions) > 0 {
+		return "WHERE " + strings.Join(conditions, " AND "), args
+	}
+
+	return "", args
+}
+
 func (r *PlaylistRepository) ListByUserID(userID int64, params *models.ListPlaylistsRequestDTO) ([]models.PlaylistInfoDTO, error) {
 	var playlists []models.PlaylistInfoDTO
-	query := `
+
+	// 1. 定义基础查询语句，不包含 WHERE 及之后的子句
+	baseQuery := `
 		SELECT 
 			pi.*, u.username as creator_name,
 			(SELECT COUNT(*) FROM playlist_songs ps WHERE ps.playlist_id = pi.id) as song_count
 		FROM playlist_info pi
-		LEFT JOIN user u ON pi.user_id = u.id
-		WHERE pi.user_id = ?
-		ORDER BY pi.created_at DESC LIMIT ? OFFSET ?`
+		LEFT JOIN user u ON pi.user_id = u.id`
 
+	// 2. 使用辅助函数构建 WHERE 子句和参数
+	whereClause, args := buildPlaylistConditions(userID, params)
+
+	// 3. 构建完整的 SQL 语句
+	// 注意每个子句前面的空格
+	query := baseQuery + " " + whereClause
+	query += " ORDER BY pi.created_at DESC" // 这里可以根据 params.SortBy 进一步做动态排序
+	query += " LIMIT ? OFFSET ?"
+
+	// 4. 将分页参数添加到 args 列表的末尾
 	offset := (params.Page - 1) * params.PageSize
-	err := r.db.Select(&playlists, query, userID, params.PageSize, offset)
-	return playlists, err
+	finalArgs := append(args, params.PageSize, offset)
+
+	// 5. 执行查询，传入构建好的 query 和 finalArgs
+	err := r.db.Select(&playlists, query, finalArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list playlists by user id: %w", err)
+	}
+
+	return playlists, nil
 }
 
-// CountByUserID 查找用户id创建的播放列表数量
-func (r *PlaylistRepository) CountByUserID(userID int64) (int, error) {
+// 修改函数签名，让它能接收 params
+func (r *PlaylistRepository) CountByUserID(userID int64, params *models.ListPlaylistsRequestDTO) (int, error) {
 	var total int
-	query := "SELECT COUNT(*) FROM playlist_info WHERE user_id = ?"
-	err := r.db.Get(&total, query, userID)
-	return total, err
+
+	// 1. 基础查询语句
+	baseQuery := "SELECT COUNT(pi.id) FROM playlist_info pi"
+
+	// 2. 使用同一个辅助函数构建 WHERE 子句和参数
+	whereClause, args := buildPlaylistConditions(userID, params)
+
+	// 3. 构建完整的 SQL 语句
+	query := baseQuery + " " + whereClause
+
+	// 4. 执行查询
+	err := r.db.Get(&total, query, args...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count playlists by user id: %w", err)
+	}
+
+	return total, nil
 }
 
 // Create 创建新的播放列表

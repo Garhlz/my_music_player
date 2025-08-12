@@ -27,8 +27,9 @@ type PlaylistSong struct {
 
 // ListPlaylistsRequestDTO 用于绑定获取歌单列表的查询参数
 type ListPlaylistsRequestDTO struct {
-	Page     int `form:"page"`
-	PageSize int `form:"pageSize"`
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+	Search   string `form:"search"`
 }
 
 // PlaylistInfoDTO 用于歌单列表的响应，包含了歌曲数量和创建者名字

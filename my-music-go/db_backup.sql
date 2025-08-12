@@ -23,14 +23,14 @@ DROP TABLE IF EXISTS `album`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `album` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '专辑ID,主键,自动递增',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '专辑名称,不能为空',
-  `cover` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '专辑封面,不能为空',
-  `release_date` date DEFAULT NULL COMMENT '专辑发行日期,允许为空',
-  `description` text COLLATE utf8mb4_unicode_ci COMMENT '专辑描述,允许为空',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间,默认为当前时间',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '涓撹緫ID,涓婚敭,鑷姩閫掑',
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '涓撹緫鍚嶇О,涓嶈兘涓虹┖',
+  `cover` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '涓撹緫灏侀潰,涓嶈兘涓虹┖',
+  `release_date` date DEFAULT NULL COMMENT '涓撹緫鍙戣鏃ユ湡,鍏佽涓虹┖',
+  `description` text COLLATE utf8mb4_unicode_ci COMMENT '涓撹緫鎻忚堪,鍏佽涓虹┖',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '鍒涘缓鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='专辑表,存储专辑的基本信息';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='涓撹緫琛?瀛樺偍涓撹緫鐨勫熀鏈俊鎭?;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,26 +39,24 @@ CREATE TABLE `album` (
 
 LOCK TABLES `album` WRITE;
 /*!40000 ALTER TABLE `album` DISABLE KEYS */;
-INSERT INTO `album` VALUES (1,'The Beatles','/assets/covers/albums/the_beatles.jpg','1968-11-22','《The Beatles》是披头士的第九张专辑，也被称为“白色专辑”，以其多样化的音乐风格和创新性广受好评。','2024-12-28 11:20:05'),(2,'Abbey Road','/assets/covers/albums/abbey_road.jpg','1969-09-26','《Abbey Road》是披头士的第十一张专辑，专辑中的“Come Together”和“Something”成为经典，展示了他们创作的巅峰。','2024-12-28 11:20:05'),(3,'Blonde on Blonde','/assets/covers/albums/blonde_on_blonde.jpg','1966-06-20','《Blonde on Blonde》是鲍勃·迪伦的第七张专辑，被认为是迪伦音乐生涯的里程碑之一，融合了民谣与摇滚元素。','2024-12-28 11:20:05'),(4,'Highway 61 Revisited','/assets/covers/albums/highway_61_revisited.jpg','1965-08-30','《Highway 61 Revisited》是鲍勃·迪伦的第六张专辑，开创了他转向电声音乐的风格，收录了经典的“Like a Rolling Stone”。','2024-12-28 11:20:05');
+INSERT INTO `album` VALUES (1,'The Beatles','/assets/covers/albums/the_beatles.jpg','1968-11-22','銆奣he Beatles銆嬫槸鎶ご澹殑绗節寮犱笓杈戯紝涔熻绉颁负鈥滅櫧鑹蹭笓杈戔€濓紝浠ュ叾澶氭牱鍖栫殑闊充箰椋庢牸鍜屽垱鏂版€у箍鍙楀ソ璇勩€?,'2024-12-28 11:20:05'),(2,'Abbey Road','/assets/covers/albums/abbey_road.jpg','1969-09-26','銆夾bbey Road銆嬫槸鎶ご澹殑绗崄涓€寮犱笓杈戯紝涓撹緫涓殑鈥淐ome Together鈥濆拰鈥淪omething鈥濇垚涓虹粡鍏革紝灞曠ず浜嗕粬浠垱浣滅殑宸呭嘲銆?,'2024-12-28 11:20:05'),(3,'Blonde on Blonde','/assets/covers/albums/blonde_on_blonde.jpg','1966-06-20','銆夿londe on Blonde銆嬫槸椴嶅媰路杩鸡鐨勭涓冨紶涓撹緫锛岃璁や负鏄开浼﹂煶涔愮敓娑殑閲岀▼纰戜箣涓€锛岃瀺鍚堜簡姘戣埃涓庢憞婊氬厓绱犮€?,'2024-12-28 11:20:05'),(4,'Highway 61 Revisited','/assets/covers/albums/highway_61_revisited.jpg','1965-08-30','銆奌ighway 61 Revisited銆嬫槸椴嶅媰路杩鸡鐨勭鍏紶涓撹緫锛屽紑鍒涗簡浠栬浆鍚戠數澹伴煶涔愮殑椋庢牸锛屾敹褰曚簡缁忓吀鐨勨€淟ike a Rolling Stone鈥濄€?,'2024-12-28 11:20:05');
 /*!40000 ALTER TABLE `album` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
 -- Table structure for table `artist`
---
-
 DROP TABLE IF EXISTS `artist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `artist` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '艺术家ID,主键,自动递增',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '艺术家名称,不能为空',
-  `sex` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '艺术家性别,允许为空',
-  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/assets/avatars/default-artist.jpg' COMMENT '艺术家头像,允许为空',
-  `description` text COLLATE utf8mb4_unicode_ci COMMENT '艺术家描述,允许为空',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间,默认为当前时间',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '鑹烘湳瀹禝D,涓婚敭,鑷姩閫掑',
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '鑹烘湳瀹跺悕绉?涓嶈兘涓虹┖',
+  `sex` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '鑹烘湳瀹舵€у埆,鍏佽涓虹┖',
+  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/assets/avatars/default-artist.jpg' COMMENT '鑹烘湳瀹跺ご鍍?鍏佽涓虹┖',
+  `description` text COLLATE utf8mb4_unicode_ci COMMENT '鑹烘湳瀹舵弿杩?鍏佽涓虹┖',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '鍒涘缓鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='艺术家表,存储艺术家的基本信息';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='鑹烘湳瀹惰〃,瀛樺偍鑹烘湳瀹剁殑鍩烘湰淇℃伅';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +65,7 @@ CREATE TABLE `artist` (
 
 LOCK TABLES `artist` WRITE;
 /*!40000 ALTER TABLE `artist` DISABLE KEYS */;
-INSERT INTO `artist` VALUES (1,'The Beatles',NULL,'/assets/avatars/the_beatles.jpg','披头士是20世纪60年代最具影响力的英国摇滚乐队之一，他们的音乐风格对全球流行文化产生了深远影响。','2024-12-28 11:20:05'),(2,'Bob Dylan',NULL,'/assets/avatars/bob_dylan.jpg','鲍勃·迪伦是美国民谣歌手和词曲创作人，他的作品对现代音乐和社会运动有着重要的影响。','2024-12-28 11:20:05');
+INSERT INTO `artist` VALUES (1,'The Beatles',NULL,'/assets/avatars/the_beatles.jpg','鎶ご澹槸20涓栫邯60骞翠唬鏈€鍏峰奖鍝嶅姏鐨勮嫳鍥芥憞婊氫箰闃熶箣涓€锛屼粬浠殑闊充箰椋庢牸瀵瑰叏鐞冩祦琛屾枃鍖栦骇鐢熶簡娣辫繙褰卞搷銆?,'2024-12-28 11:20:05'),(2,'Bob Dylan',NULL,'/assets/avatars/bob_dylan.jpg','椴嶅媰路杩鸡鏄編鍥芥皯璋ｆ瓕鎵嬪拰璇嶆洸鍒涗綔浜猴紝浠栫殑浣滃搧瀵圭幇浠ｉ煶涔愬拰绀句細杩愬姩鏈夌潃閲嶈鐨勫奖鍝嶃€?,'2024-12-28 11:20:05');
 /*!40000 ALTER TABLE `artist` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,13 +77,13 @@ DROP TABLE IF EXISTS `artist_album`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `artist_album` (
-  `artist_id` int NOT NULL COMMENT '艺术家ID,关联艺术家表的ID',
-  `album_id` int NOT NULL COMMENT '专辑ID,关联专辑表的ID',
+  `artist_id` int NOT NULL COMMENT '鑹烘湳瀹禝D,鍏宠仈鑹烘湳瀹惰〃鐨処D',
+  `album_id` int NOT NULL COMMENT '涓撹緫ID,鍏宠仈涓撹緫琛ㄧ殑ID',
   PRIMARY KEY (`artist_id`,`album_id`),
   KEY `album_id` (`album_id`),
   CONSTRAINT `artist_album_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`id`) ON DELETE CASCADE,
   CONSTRAINT `artist_album_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `album` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='艺术家与专辑关联表,存储艺术家与专辑的关系';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='鑹烘湳瀹朵笌涓撹緫鍏宠仈琛?瀛樺偍鑹烘湳瀹朵笌涓撹緫鐨勫叧绯?;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -106,16 +104,16 @@ DROP TABLE IF EXISTS `comment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `comment` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '评论ID,主键,自动递增',
-  `user_id` int NOT NULL COMMENT '用户ID,关联用户表的ID',
-  `song_id` int NOT NULL COMMENT '歌曲ID,关联歌曲表的ID',
-  `text` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '评论内容,不能为空',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评论创建时间,默认为当前时间',
-  `parent_id` int DEFAULT NULL COMMENT '父评论ID,允许为空',
-  `reply_to_user_id` int DEFAULT NULL COMMENT '回复目标用户ID',
-  `like_count` int NOT NULL DEFAULT '0' COMMENT '点赞数,默认为0',
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '评论更新时间,默认为当前时间',
-  `is_root` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否为根评论 (TRUE: 根评论, FALSE: 回复评论)',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '璇勮ID,涓婚敭,鑷姩閫掑',
+  `user_id` int NOT NULL COMMENT '鐢ㄦ埛ID,鍏宠仈鐢ㄦ埛琛ㄧ殑ID',
+  `song_id` int NOT NULL COMMENT '姝屾洸ID,鍏宠仈姝屾洸琛ㄧ殑ID',
+  `text` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '璇勮鍐呭,涓嶈兘涓虹┖',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '璇勮鍒涘缓鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
+  `parent_id` int DEFAULT NULL COMMENT '鐖惰瘎璁篒D,鍏佽涓虹┖',
+  `reply_to_user_id` int DEFAULT NULL COMMENT '鍥炲鐩爣鐢ㄦ埛ID',
+  `like_count` int NOT NULL DEFAULT '0' COMMENT '鐐硅禐鏁?榛樿涓?',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '璇勮鏇存柊鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
+  `is_root` tinyint(1) NOT NULL DEFAULT '0' COMMENT '鏄惁涓烘牴璇勮 (TRUE: 鏍硅瘎璁? FALSE: 鍥炲璇勮)',
   PRIMARY KEY (`id`),
   KEY `reply_to_user_id` (`reply_to_user_id`),
   KEY `idx_comment_song_id` (`song_id`),
@@ -125,7 +123,7 @@ CREATE TABLE `comment` (
   CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `song` (`id`),
   CONSTRAINT `comment_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL,
   CONSTRAINT `comment_ibfk_4` FOREIGN KEY (`reply_to_user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='评论表,存储用户对歌曲的评论';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='璇勮琛?瀛樺偍鐢ㄦ埛瀵规瓕鏇茬殑璇勮';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,7 +132,7 @@ CREATE TABLE `comment` (
 
 LOCK TABLES `comment` WRITE;
 /*!40000 ALTER TABLE `comment` DISABLE KEYS */;
-INSERT INTO `comment` VALUES (1,2,1,'back to UUSR comrade!!!','2024-12-28 11:37:40',NULL,NULL,1,'2025-08-07 16:05:04',1),(2,2,1,'I like this song','2024-12-28 11:38:01',1,2,0,'2024-12-28 11:38:01',0),(3,3,1,'it\'s just like the beach boy\'s california girls','2024-12-28 11:38:54',1,2,0,'2024-12-28 11:38:54',0),(4,1,1,'111','2024-12-28 15:47:36',1,2,0,'2024-12-28 15:47:36',0),(5,1,1,'111','2024-12-29 11:36:04',NULL,NULL,0,'2025-08-07 15:36:55',1),(6,1,1,'111','2024-12-29 11:36:11',1,3,0,'2024-12-29 11:36:11',0),(7,5,1,'喔哦喔哦喔哦~','2025-08-02 14:46:46',1,2,0,'2025-08-02 14:46:46',0),(8,5,2,'hello world test','2025-08-07 16:00:34',NULL,NULL,0,'2025-08-07 16:00:34',1),(9,5,2,'hello world test','2025-08-07 16:00:59',NULL,NULL,0,'2025-08-07 16:00:59',1);
+INSERT INTO `comment` VALUES (1,2,1,'back to UUSR comrade!!!','2024-12-28 11:37:40',NULL,NULL,1,'2025-08-07 16:05:04',1),(2,2,1,'I like this song','2024-12-28 11:38:01',1,2,0,'2024-12-28 11:38:01',0),(3,3,1,'it\'s just like the beach boy\'s california girls','2024-12-28 11:38:54',1,2,0,'2024-12-28 11:38:54',0),(4,1,1,'111','2024-12-28 15:47:36',1,2,0,'2024-12-28 15:47:36',0),(5,1,1,'111','2024-12-29 11:36:04',NULL,NULL,0,'2025-08-07 15:36:55',1),(6,1,1,'111','2024-12-29 11:36:11',1,3,0,'2024-12-29 11:36:11',0),(7,5,1,'鍠斿摝鍠斿摝鍠斿摝~','2025-08-02 14:46:46',1,2,0,'2025-08-02 14:46:46',0),(8,5,2,'hello world test','2025-08-07 16:00:34',NULL,NULL,0,'2025-08-07 16:00:34',1),(9,5,2,'hello world test','2025-08-07 16:00:59',NULL,NULL,0,'2025-08-07 16:00:59',1);
 /*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -147,15 +145,15 @@ DROP TABLE IF EXISTS `comment_like`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `comment_like` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `comment_id` int NOT NULL COMMENT '评论ID',
-  `user_id` int NOT NULL COMMENT '用户ID',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+  `comment_id` int NOT NULL COMMENT '璇勮ID',
+  `user_id` int NOT NULL COMMENT '鐢ㄦ埛ID',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '鐐硅禐鏃堕棿',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_comment_user` (`comment_id`,`user_id`) COMMENT '确保用户对同一评论只能点赞一次',
+  UNIQUE KEY `unique_comment_user` (`comment_id`,`user_id`) COMMENT '纭繚鐢ㄦ埛瀵瑰悓涓€璇勮鍙兘鐐硅禐涓€娆?,
   KEY `fk_comment_like_user` (`user_id`),
   CONSTRAINT `fk_comment_like_comment` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_comment_like_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='评论点赞表';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='璇勮鐐硅禐琛?;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,12 +203,12 @@ DROP TABLE IF EXISTS `manager`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `manager` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '管理员ID,主键,自动递增',
-  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '管理员用户名,唯一且不能为空',
-  `password` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '管理员密码,不能为空',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '绠＄悊鍛業D,涓婚敭,鑷姩閫掑',
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '绠＄悊鍛樼敤鎴峰悕,鍞竴涓斾笉鑳戒负绌?,
+  `password` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '绠＄悊鍛樺瘑鐮?涓嶈兘涓虹┖',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='管理员表,存储管理员的基本信息';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='绠＄悊鍛樿〃,瀛樺偍绠＄悊鍛樼殑鍩烘湰淇℃伅';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -230,18 +228,18 @@ DROP TABLE IF EXISTS `playlist_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `playlist_info` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '播放列表ID,主键,自动递增',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '播放列表名称,不能为空',
-  `user_id` int NOT NULL COMMENT '用户ID,关联用户表的ID',
-  `cover` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/assets/covers/playlists/default.jpg' COMMENT '播放列表封面,允许为空',
-  `description` text COLLATE utf8mb4_unicode_ci COMMENT '播放列表描述,允许为空',
-  `is_public` tinyint(1) DEFAULT '0' COMMENT '是否公开,默认为不公开',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间,默认为当前时间',
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间,默认为当前时间',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '鎾斁鍒楄〃ID,涓婚敭,鑷姩閫掑',
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '鎾斁鍒楄〃鍚嶇О,涓嶈兘涓虹┖',
+  `user_id` int NOT NULL COMMENT '鐢ㄦ埛ID,鍏宠仈鐢ㄦ埛琛ㄧ殑ID',
+  `cover` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/assets/covers/playlists/default.jpg' COMMENT '鎾斁鍒楄〃灏侀潰,鍏佽涓虹┖',
+  `description` text COLLATE utf8mb4_unicode_ci COMMENT '鎾斁鍒楄〃鎻忚堪,鍏佽涓虹┖',
+  `is_public` tinyint(1) DEFAULT '0' COMMENT '鏄惁鍏紑,榛樿涓轰笉鍏紑',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '鍒涘缓鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '鏇存柊鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `playlist_info_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='播放列表信息表,存储播放列表的基本信息';
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='鎾斁鍒楄〃淇℃伅琛?瀛樺偍鎾斁鍒楄〃鐨勫熀鏈俊鎭?;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -262,11 +260,11 @@ DROP TABLE IF EXISTS `playlist_songs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `playlist_songs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '播放列表歌曲关联ID,主键,自动递增',
-  `playlist_id` int NOT NULL COMMENT '播放列表ID,关联播放列表表的ID',
-  `song_id` int NOT NULL COMMENT '歌曲ID,关联歌曲表的ID',
-  `user_id` int NOT NULL COMMENT '用户ID,关联用户表的ID',
-  `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间,默认为当前时间',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '鎾斁鍒楄〃姝屾洸鍏宠仈ID,涓婚敭,鑷姩閫掑',
+  `playlist_id` int NOT NULL COMMENT '鎾斁鍒楄〃ID,鍏宠仈鎾斁鍒楄〃琛ㄧ殑ID',
+  `song_id` int NOT NULL COMMENT '姝屾洸ID,鍏宠仈姝屾洸琛ㄧ殑ID',
+  `user_id` int NOT NULL COMMENT '鐢ㄦ埛ID,鍏宠仈鐢ㄦ埛琛ㄧ殑ID',
+  `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '娣诲姞鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
   PRIMARY KEY (`id`),
   KEY `playlist_id` (`playlist_id`),
   KEY `song_id` (`song_id`),
@@ -274,7 +272,7 @@ CREATE TABLE `playlist_songs` (
   CONSTRAINT `playlist_songs_ibfk_1` FOREIGN KEY (`playlist_id`) REFERENCES `playlist_info` (`id`),
   CONSTRAINT `playlist_songs_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `song` (`id`),
   CONSTRAINT `playlist_songs_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='播放列表歌曲关联表,存储播放列表与歌曲的关系';
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='鎾斁鍒楄〃姝屾洸鍏宠仈琛?瀛樺偍鎾斁鍒楄〃涓庢瓕鏇茬殑鍏崇郴';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -283,7 +281,7 @@ CREATE TABLE `playlist_songs` (
 
 LOCK TABLES `playlist_songs` WRITE;
 /*!40000 ALTER TABLE `playlist_songs` DISABLE KEYS */;
-INSERT INTO `playlist_songs` VALUES (2,1,36,1,'2024-12-28 11:36:08'),(3,3,44,2,'2024-12-28 11:42:34'),(4,4,1,1,'2024-12-28 15:46:28'),(6,7,1,5,'2025-08-02 14:47:50'),(8,8,3,5,'2025-08-07 06:48:27');
+INSERT INTO `playlist_songs` VALUES (2,1,36,1,'2024-12-28 11:36:08'),(3,3,44,2,'2024-12-28 11:42:34'),(4,4,1,1,'2024-12-28 15:46:28'),(6,7,1,5,'2025-08-02 14:47:50'),(8,8,3,5,'2025-08-07 06:48:27'),(9,9,1,5,'2025-08-11 14:59:16'),(10,7,2,5,'2025-08-11 14:59:20'),(11,7,3,5,'2025-08-11 14:59:23'),(12,12,3,5,'2025-08-12 05:03:16');
 /*!40000 ALTER TABLE `playlist_songs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -295,24 +293,24 @@ DROP TABLE IF EXISTS `song`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `song` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '歌曲ID,主键,自动递增',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '歌曲名称,不能为空',
-  `author_id` int NOT NULL COMMENT '歌曲作者ID,不能为空,对应艺术家的ID',
-  `album_id` int NOT NULL COMMENT '专辑ID,不能为空,对应专辑的ID',
-  `url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '歌曲存放地址,不能为空',
-  `cover` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '歌曲封面,不能为空',
-  `duration` int NOT NULL DEFAULT '180' COMMENT '歌曲时长,默认为180秒',
-  `play_count` int NOT NULL DEFAULT '0' COMMENT '播放次数,默认为0',
-  `like_count` int NOT NULL DEFAULT '0' COMMENT '点赞次数,默认为0',
-  `is_public` tinyint(1) DEFAULT '1' COMMENT '是否公开,默认为公开',
-  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '歌曲创建时间,默认为当前时间',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '姝屾洸ID,涓婚敭,鑷姩閫掑',
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '姝屾洸鍚嶇О,涓嶈兘涓虹┖',
+  `author_id` int NOT NULL COMMENT '姝屾洸浣滆€匢D,涓嶈兘涓虹┖,瀵瑰簲鑹烘湳瀹剁殑ID',
+  `album_id` int NOT NULL COMMENT '涓撹緫ID,涓嶈兘涓虹┖,瀵瑰簲涓撹緫鐨処D',
+  `url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '姝屾洸瀛樻斁鍦板潃,涓嶈兘涓虹┖',
+  `cover` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '姝屾洸灏侀潰,涓嶈兘涓虹┖',
+  `duration` int NOT NULL DEFAULT '180' COMMENT '姝屾洸鏃堕暱,榛樿涓?80绉?,
+  `play_count` int NOT NULL DEFAULT '0' COMMENT '鎾斁娆℃暟,榛樿涓?',
+  `like_count` int NOT NULL DEFAULT '0' COMMENT '鐐硅禐娆℃暟,榛樿涓?',
+  `is_public` tinyint(1) DEFAULT '1' COMMENT '鏄惁鍏紑,榛樿涓哄叕寮€',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '姝屾洸鍒涘缓鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
   PRIMARY KEY (`id`),
   KEY `idx_song_name` (`name`),
   KEY `idx_song_album_id` (`album_id`),
   KEY `idx_song_author_id` (`author_id`),
   CONSTRAINT `song_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `artist` (`id`),
   CONSTRAINT `song_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `album` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='歌曲表,存储歌曲的基本信息';
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT COMMENT='姝屾洸琛?瀛樺偍姝屾洸鐨勫熀鏈俊鎭?;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,7 +319,7 @@ CREATE TABLE `song` (
 
 LOCK TABLES `song` WRITE;
 /*!40000 ALTER TABLE `song` DISABLE KEYS */;
-INSERT INTO `song` VALUES (1,'Back in the U.S.S.R.',1,1,'/songs/the_beatles_back_in_the_ussr.mp3','/assets/covers/back_in_the_ussr.jpg',183,0,0,1,'2024-12-28 11:20:05'),(2,'Dear Prudence',1,1,'/songs/the_beatles_dear_prudence.mp3','/assets/covers/dear_prudence.jpg',189,0,0,1,'2024-12-28 11:20:05'),(3,'Glass Onion',1,1,'/songs/the_beatles_glass_onion.mp3','/assets/covers/glass_onion.jpg',154,0,0,1,'2024-12-28 11:20:05'),(4,'Ob-La-Di, Ob-La-Da',1,1,'/songs/the_beatles_ob_la_di_ob_la_da.mp3','/assets/covers/ob_la_di_ob_la_da.jpg',113,0,0,1,'2024-12-28 11:20:05'),(5,'Wild Honey Pie',1,1,'/songs/the_beatles_wild_honey_pie.mp3','/assets/covers/wild_honey_pie.jpg',60,0,0,1,'2024-12-28 11:20:05'),(6,'The Continuing Story of Bungalow Bill',1,1,'/songs/the_beatles_bungalow_bill.mp3','/assets/covers/bungalow_bill.jpg',205,0,0,1,'2024-12-28 11:20:05'),(7,'While My Guitar Gently Weeps',1,1,'/songs/the_beatles_while_my_guitar_gently_weeps.mp3','/assets/covers/while_my_guitar_gently_weeps.jpg',185,0,0,1,'2024-12-28 11:20:05'),(8,'Happiness Is a Warm Gun',1,1,'/songs/the_beatles_happiness_is_a_warm_gun.mp3','/assets/covers/happiness_is_a_warm_gun.jpg',183,0,0,1,'2024-12-28 11:20:05'),(9,'Martha My Dear',1,1,'/songs/the_beatles_martha_my_dear.mp3','/assets/covers/martha_my_dear.jpg',158,0,0,1,'2024-12-28 11:20:05'),(10,'I’m So Tired',1,1,'/songs/the_beatles_im_so_tired.mp3','/assets/covers/im_so_tired.jpg',202,0,0,1,'2024-12-28 11:20:05'),(11,'Blackbird',1,1,'/songs/the_beatles_blackbird.mp3','/assets/covers/blackbird.jpg',144,0,0,1,'2024-12-28 11:20:05'),(12,'Piggies',1,1,'/songs/the_beatles_piggies.mp3','/assets/covers/piggies.jpg',160,0,0,1,'2024-12-28 11:20:05'),(13,'Rocky Raccoon',1,1,'/songs/the_beatles_rocky_raccoon.mp3','/assets/covers/rocky_raccoon.jpg',222,0,0,1,'2024-12-28 11:20:05'),(14,'Don’t Pass Me By',1,1,'/songs/the_beatles_dont_pass_me_by.mp3','/assets/covers/dont_pass_me_by.jpg',200,0,0,1,'2024-12-28 11:20:05'),(15,'Why Don’t We Do It in the Road?',1,1,'/songs/the_beatles_why_dont_we_do_it_in_the_road.mp3','/assets/covers/why_dont_we_do_it_in_the_road.jpg',91,0,0,1,'2024-12-28 11:20:05'),(16,'I Will',1,1,'/songs/the_beatles_i_will.mp3','/assets/covers/i_will.jpg',134,0,0,1,'2024-12-28 11:20:05'),(17,'Junk',1,1,'/songs/the_beatles_junk.mp3','/assets/covers/junk.jpg',173,0,0,1,'2024-12-28 11:20:05'),(18,'Yer Blues',1,1,'/songs/the_beatles_yer_blues.mp3','/assets/covers/yer_blues.jpg',215,0,0,1,'2024-12-28 11:20:05'),(19,'Mother Nature’s Son',1,1,'/songs/the_beatles_mother_natures_son.mp3','/assets/covers/mother_natures_son.jpg',157,0,0,1,'2024-12-28 11:20:05'),(20,'Everybody’s Got Something to Hide Except Me and My Monkey',1,1,'/songs/the_beatles_everybodys_got_something.mp3','/assets/covers/everybodys_got_something.jpg',152,0,0,1,'2024-12-28 11:20:05'),(21,'Sexy Sadie',1,1,'/songs/the_beatles_sexy_sadie.mp3','/assets/covers/sexy_sadie.jpg',176,0,0,1,'2024-12-28 11:20:05'),(22,'Helter Skelter',1,1,'/songs/the_beatles_helter_skelter.mp3','/assets/covers/helter_skelter.jpg',271,0,0,1,'2024-12-28 11:20:05'),(23,'Long, Long, Long',1,1,'/songs/the_beatles_long_long_long.mp3','/assets/covers/long_long_long.jpg',157,0,0,1,'2024-12-28 11:20:05'),(24,'Come Together',1,2,'/songs/abbey_road_come_together.mp3','/assets/covers/come_together.jpg',259,0,0,1,'2024-12-28 11:20:05'),(25,'Something',1,2,'/songs/abbey_road_something.mp3','/assets/covers/something.jpg',182,0,0,1,'2024-12-28 11:20:05'),(26,'Maxwell’s Silver Hammer',1,2,'/songs/abbey_road_maxwells_silver_hammer.mp3','/assets/covers/maxwells_silver_hammer.jpg',207,0,0,1,'2024-12-28 11:20:05'),(27,'Oh! Darling',1,2,'/songs/abbey_road_oh_darling.mp3','/assets/covers/oh_darling.jpg',187,0,0,1,'2024-12-28 11:20:05'),(28,'Octopus’s Garden',1,2,'/songs/abbey_road_octopuss_garden.mp3','/assets/covers/octopuss_garden.jpg',174,0,0,1,'2024-12-28 11:20:05'),(29,'I Want You (She’s So Heavy)',1,2,'/songs/abbey_road_i_want_you.mp3','/assets/covers/i_want_you.jpg',467,0,0,1,'2024-12-28 11:20:05'),(30,'Here Comes the Sun',1,2,'/songs/abbey_road_here_comes_the_sun.mp3','/assets/covers/here_comes_the_sun.jpg',185,0,0,1,'2024-12-28 11:20:05'),(31,'Because',1,2,'/songs/abbey_road_because.mp3','/assets/covers/because.jpg',137,0,0,1,'2024-12-28 11:20:05'),(32,'You Never Give Me Your Money',1,2,'/songs/abbey_road_you_never_give_me.mp3','/assets/covers/you_never_give_me.jpg',210,0,0,1,'2024-12-28 11:20:05'),(33,'Sun King',1,2,'/songs/abbey_road_sun_king.mp3','/assets/covers/sun_king.jpg',143,0,0,1,'2024-12-28 11:20:05'),(34,'Mean Mr. Mustard',1,2,'/songs/abbey_road_mean_mr_mustard.mp3','/assets/covers/mean_mr_mustard.jpg',99,0,0,1,'2024-12-28 11:20:05'),(35,'Polythene Pam',1,2,'/songs/abbey_road_polythene_pam.mp3','/assets/covers/polythene_pam.jpg',102,0,0,1,'2024-12-28 11:20:05'),(36,'She Came in Through the Bathroom Window',1,2,'/songs/abbey_road_she_came_in_through_the_bathroom_window.mp3','/assets/covers/she_came_in_through_the_bathroom_window.jpg',111,0,0,1,'2024-12-28 11:20:05'),(37,'Golden Slumbers',1,2,'/songs/abbey_road_golden_slumbers.mp3','/assets/covers/golden_slumbers.jpg',144,0,0,1,'2024-12-28 11:20:05'),(38,'Carry That Weight',1,2,'/songs/abbey_road_carry_that_weight.mp3','/assets/covers/carry_that_weight.jpg',137,0,0,1,'2024-12-28 11:20:05'),(39,'The End',1,2,'/songs/abbey_road_the_end.mp3','/assets/covers/the_end.jpg',139,0,0,1,'2024-12-28 11:20:05'),(40,'Her Majesty',1,2,'/songs/abbey_road_her_majesty.mp3','/assets/covers/her_majesty.jpg',23,0,0,1,'2024-12-28 11:20:05'),(41,'Rainy Day Women #12 & 35',2,3,'/songs/bob_dylan_rainy_day_women.mp3','/assets/covers/rainy_day_women.jpg',227,0,0,1,'2024-12-28 11:20:05'),(42,'Pledging My Time',2,3,'/songs/bob_dylan_pledging_my_time.mp3','/assets/covers/pledging_my_time.jpg',311,0,0,1,'2024-12-28 11:20:05'),(43,'Visions of Johanna',2,3,'/songs/bob_dylan_visions_of_johanna.mp3','/assets/covers/visions_of_johanna.jpg',420,0,0,1,'2024-12-28 11:20:05'),(44,'Just Like a Woman',2,3,'/songs/bob_dylan_just_like_a_woman.mp3','/assets/covers/just_like_a_woman.jpg',262,0,0,1,'2024-12-28 11:20:05'),(45,'Obviously 5 Believers',2,3,'/songs/bob_dylan_obviously_5_believers.mp3','/assets/covers/obviously_5_believers.jpg',211,0,0,1,'2024-12-28 11:20:05'),(46,'Sad Eyed Lady of the Lowlands',2,3,'/songs/bob_dylan_sad_eyed_lady.mp3','/assets/covers/sad_eyed_lady.jpg',696,0,0,1,'2024-12-28 11:20:05'),(47,'4th Time Around',2,3,'/songs/bob_dylan_4th_time_around.mp3','/assets/covers/4th_time_around.jpg',188,0,0,1,'2024-12-28 11:20:05'),(48,'I Want You',2,3,'/songs/bob_dylan_i_want_you.mp3','/assets/covers/i_want_you.jpg',213,0,0,1,'2024-12-28 11:20:05'),(49,'Stuck Inside of Mobile with the Memphis Blues Again',2,3,'/songs/bob_dylan_stuck_inside_mobile.mp3','/assets/covers/stuck_inside_mobile.jpg',359,0,0,1,'2024-12-28 11:20:05'),(50,'Temporary Like Achilles',2,3,'/songs/bob_dylan_temporary_like_achilles.mp3','/assets/covers/temporary_like_achilles.jpg',265,0,0,1,'2024-12-28 11:20:05'),(51,'Like a Rolling Stone',2,4,'/songs/bob_dylan_like_a_rolling_stone.mp3','/assets/covers/like_a_rolling_stone.jpg',367,0,0,1,'2024-12-28 11:20:05'),(52,'Tombstone Blues',2,4,'/songs/bob_dylan_tombstone_blues.mp3','/assets/covers/tombstone_blues.jpg',295,0,0,1,'2024-12-28 11:20:05'),(53,'It Takes a Lot to Laugh, It Takes a Train to Cry',2,4,'/songs/bob_dylan_it_takes_a_lot.mp3','/assets/covers/it_takes_a_lot.jpg',314,0,0,1,'2024-12-28 11:20:05'),(54,'Ballad of a Thin Man',2,4,'/songs/bob_dylan_ballad_of_a_thin_man.mp3','/assets/covers/ballad_of_a_thin_man.jpg',245,0,0,1,'2024-12-28 11:20:05'),(55,'From a Buick 6',2,4,'/songs/bob_dylan_from_a_buick_6.mp3','/assets/covers/from_a_buick_6.jpg',215,0,0,1,'2024-12-28 11:20:05'),(56,'Queen Jane Approximately',2,4,'/songs/bob_dylan_queen_jane_approximately.mp3','/assets/covers/queen_jane_approximately.jpg',339,0,0,1,'2024-12-28 11:20:05'),(57,'Highway 61 Revisited',2,4,'/songs/bob_dylan_highway_61_revisited.mp3','/assets/covers/highway_61_revisited.jpg',280,0,0,1,'2024-12-28 11:20:05'),(58,'Just Like Tom Thumb’s Blues',2,4,'/songs/bob_dylan_just_like_tom_thumbs_blues.mp3','/assets/covers/just_like_tom_thumbs_blues.jpg',330,0,0,1,'2024-12-28 11:20:05'),(59,'Desolation Row',2,4,'/songs/bob_dylan_desolation_row.mp3','/assets/covers/desolation_row.jpg',719,0,0,1,'2024-12-28 11:20:05');
+INSERT INTO `song` VALUES (1,'Back in the U.S.S.R.',1,1,'/songs/the_beatles_back_in_the_ussr.mp3','/assets/covers/back_in_the_ussr.jpg',183,0,0,1,'2024-12-28 11:20:05'),(2,'Dear Prudence',1,1,'/songs/the_beatles_dear_prudence.mp3','/assets/covers/dear_prudence.jpg',189,0,0,1,'2024-12-28 11:20:05'),(3,'Glass Onion',1,1,'/songs/the_beatles_glass_onion.mp3','/assets/covers/glass_onion.jpg',154,0,0,1,'2024-12-28 11:20:05'),(4,'Ob-La-Di, Ob-La-Da',1,1,'/songs/the_beatles_ob_la_di_ob_la_da.mp3','/assets/covers/ob_la_di_ob_la_da.jpg',113,0,0,1,'2024-12-28 11:20:05'),(5,'Wild Honey Pie',1,1,'/songs/the_beatles_wild_honey_pie.mp3','/assets/covers/wild_honey_pie.jpg',60,0,0,1,'2024-12-28 11:20:05'),(6,'The Continuing Story of Bungalow Bill',1,1,'/songs/the_beatles_bungalow_bill.mp3','/assets/covers/bungalow_bill.jpg',205,0,0,1,'2024-12-28 11:20:05'),(7,'While My Guitar Gently Weeps',1,1,'/songs/the_beatles_while_my_guitar_gently_weeps.mp3','/assets/covers/while_my_guitar_gently_weeps.jpg',185,0,0,1,'2024-12-28 11:20:05'),(8,'Happiness Is a Warm Gun',1,1,'/songs/the_beatles_happiness_is_a_warm_gun.mp3','/assets/covers/happiness_is_a_warm_gun.jpg',183,0,0,1,'2024-12-28 11:20:05'),(9,'Martha My Dear',1,1,'/songs/the_beatles_martha_my_dear.mp3','/assets/covers/martha_my_dear.jpg',158,0,0,1,'2024-12-28 11:20:05'),(10,'I鈥檓 So Tired',1,1,'/songs/the_beatles_im_so_tired.mp3','/assets/covers/im_so_tired.jpg',202,0,0,1,'2024-12-28 11:20:05'),(11,'Blackbird',1,1,'/songs/the_beatles_blackbird.mp3','/assets/covers/blackbird.jpg',144,0,0,1,'2024-12-28 11:20:05'),(12,'Piggies',1,1,'/songs/the_beatles_piggies.mp3','/assets/covers/piggies.jpg',160,0,0,1,'2024-12-28 11:20:05'),(13,'Rocky Raccoon',1,1,'/songs/the_beatles_rocky_raccoon.mp3','/assets/covers/rocky_raccoon.jpg',222,0,0,1,'2024-12-28 11:20:05'),(14,'Don鈥檛 Pass Me By',1,1,'/songs/the_beatles_dont_pass_me_by.mp3','/assets/covers/dont_pass_me_by.jpg',200,0,0,1,'2024-12-28 11:20:05'),(15,'Why Don鈥檛 We Do It in the Road?',1,1,'/songs/the_beatles_why_dont_we_do_it_in_the_road.mp3','/assets/covers/why_dont_we_do_it_in_the_road.jpg',91,0,0,1,'2024-12-28 11:20:05'),(16,'I Will',1,1,'/songs/the_beatles_i_will.mp3','/assets/covers/i_will.jpg',134,0,0,1,'2024-12-28 11:20:05'),(17,'Junk',1,1,'/songs/the_beatles_junk.mp3','/assets/covers/junk.jpg',173,0,0,1,'2024-12-28 11:20:05'),(18,'Yer Blues',1,1,'/songs/the_beatles_yer_blues.mp3','/assets/covers/yer_blues.jpg',215,0,0,1,'2024-12-28 11:20:05'),(19,'Mother Nature鈥檚 Son',1,1,'/songs/the_beatles_mother_natures_son.mp3','/assets/covers/mother_natures_son.jpg',157,0,0,1,'2024-12-28 11:20:05'),(20,'Everybody鈥檚 Got Something to Hide Except Me and My Monkey',1,1,'/songs/the_beatles_everybodys_got_something.mp3','/assets/covers/everybodys_got_something.jpg',152,0,0,1,'2024-12-28 11:20:05'),(21,'Sexy Sadie',1,1,'/songs/the_beatles_sexy_sadie.mp3','/assets/covers/sexy_sadie.jpg',176,0,0,1,'2024-12-28 11:20:05'),(22,'Helter Skelter',1,1,'/songs/the_beatles_helter_skelter.mp3','/assets/covers/helter_skelter.jpg',271,0,0,1,'2024-12-28 11:20:05'),(23,'Long, Long, Long',1,1,'/songs/the_beatles_long_long_long.mp3','/assets/covers/long_long_long.jpg',157,0,0,1,'2024-12-28 11:20:05'),(24,'Come Together',1,2,'/songs/abbey_road_come_together.mp3','/assets/covers/come_together.jpg',259,0,0,1,'2024-12-28 11:20:05'),(25,'Something',1,2,'/songs/abbey_road_something.mp3','/assets/covers/something.jpg',182,0,0,1,'2024-12-28 11:20:05'),(26,'Maxwell鈥檚 Silver Hammer',1,2,'/songs/abbey_road_maxwells_silver_hammer.mp3','/assets/covers/maxwells_silver_hammer.jpg',207,0,0,1,'2024-12-28 11:20:05'),(27,'Oh! Darling',1,2,'/songs/abbey_road_oh_darling.mp3','/assets/covers/oh_darling.jpg',187,0,0,1,'2024-12-28 11:20:05'),(28,'Octopus鈥檚 Garden',1,2,'/songs/abbey_road_octopuss_garden.mp3','/assets/covers/octopuss_garden.jpg',174,0,0,1,'2024-12-28 11:20:05'),(29,'I Want You (She鈥檚 So Heavy)',1,2,'/songs/abbey_road_i_want_you.mp3','/assets/covers/i_want_you.jpg',467,0,0,1,'2024-12-28 11:20:05'),(30,'Here Comes the Sun',1,2,'/songs/abbey_road_here_comes_the_sun.mp3','/assets/covers/here_comes_the_sun.jpg',185,0,0,1,'2024-12-28 11:20:05'),(31,'Because',1,2,'/songs/abbey_road_because.mp3','/assets/covers/because.jpg',137,0,0,1,'2024-12-28 11:20:05'),(32,'You Never Give Me Your Money',1,2,'/songs/abbey_road_you_never_give_me.mp3','/assets/covers/you_never_give_me.jpg',210,0,0,1,'2024-12-28 11:20:05'),(33,'Sun King',1,2,'/songs/abbey_road_sun_king.mp3','/assets/covers/sun_king.jpg',143,0,0,1,'2024-12-28 11:20:05'),(34,'Mean Mr. Mustard',1,2,'/songs/abbey_road_mean_mr_mustard.mp3','/assets/covers/mean_mr_mustard.jpg',99,0,0,1,'2024-12-28 11:20:05'),(35,'Polythene Pam',1,2,'/songs/abbey_road_polythene_pam.mp3','/assets/covers/polythene_pam.jpg',102,0,0,1,'2024-12-28 11:20:05'),(36,'She Came in Through the Bathroom Window',1,2,'/songs/abbey_road_she_came_in_through_the_bathroom_window.mp3','/assets/covers/she_came_in_through_the_bathroom_window.jpg',111,0,0,1,'2024-12-28 11:20:05'),(37,'Golden Slumbers',1,2,'/songs/abbey_road_golden_slumbers.mp3','/assets/covers/golden_slumbers.jpg',144,0,0,1,'2024-12-28 11:20:05'),(38,'Carry That Weight',1,2,'/songs/abbey_road_carry_that_weight.mp3','/assets/covers/carry_that_weight.jpg',137,0,0,1,'2024-12-28 11:20:05'),(39,'The End',1,2,'/songs/abbey_road_the_end.mp3','/assets/covers/the_end.jpg',139,0,0,1,'2024-12-28 11:20:05'),(40,'Her Majesty',1,2,'/songs/abbey_road_her_majesty.mp3','/assets/covers/her_majesty.jpg',23,0,0,1,'2024-12-28 11:20:05'),(41,'Rainy Day Women #12 & 35',2,3,'/songs/bob_dylan_rainy_day_women.mp3','/assets/covers/rainy_day_women.jpg',227,0,0,1,'2024-12-28 11:20:05'),(42,'Pledging My Time',2,3,'/songs/bob_dylan_pledging_my_time.mp3','/assets/covers/pledging_my_time.jpg',311,0,0,1,'2024-12-28 11:20:05'),(43,'Visions of Johanna',2,3,'/songs/bob_dylan_visions_of_johanna.mp3','/assets/covers/visions_of_johanna.jpg',420,0,0,1,'2024-12-28 11:20:05'),(44,'Just Like a Woman',2,3,'/songs/bob_dylan_just_like_a_woman.mp3','/assets/covers/just_like_a_woman.jpg',262,0,0,1,'2024-12-28 11:20:05'),(45,'Obviously 5 Believers',2,3,'/songs/bob_dylan_obviously_5_believers.mp3','/assets/covers/obviously_5_believers.jpg',211,0,0,1,'2024-12-28 11:20:05'),(46,'Sad Eyed Lady of the Lowlands',2,3,'/songs/bob_dylan_sad_eyed_lady.mp3','/assets/covers/sad_eyed_lady.jpg',696,0,0,1,'2024-12-28 11:20:05'),(47,'4th Time Around',2,3,'/songs/bob_dylan_4th_time_around.mp3','/assets/covers/4th_time_around.jpg',188,0,0,1,'2024-12-28 11:20:05'),(48,'I Want You',2,3,'/songs/bob_dylan_i_want_you.mp3','/assets/covers/i_want_you.jpg',213,0,0,1,'2024-12-28 11:20:05'),(49,'Stuck Inside of Mobile with the Memphis Blues Again',2,3,'/songs/bob_dylan_stuck_inside_mobile.mp3','/assets/covers/stuck_inside_mobile.jpg',359,0,0,1,'2024-12-28 11:20:05'),(50,'Temporary Like Achilles',2,3,'/songs/bob_dylan_temporary_like_achilles.mp3','/assets/covers/temporary_like_achilles.jpg',265,0,0,1,'2024-12-28 11:20:05'),(51,'Like a Rolling Stone',2,4,'/songs/bob_dylan_like_a_rolling_stone.mp3','/assets/covers/like_a_rolling_stone.jpg',367,0,0,1,'2024-12-28 11:20:05'),(52,'Tombstone Blues',2,4,'/songs/bob_dylan_tombstone_blues.mp3','/assets/covers/tombstone_blues.jpg',295,0,0,1,'2024-12-28 11:20:05'),(53,'It Takes a Lot to Laugh, It Takes a Train to Cry',2,4,'/songs/bob_dylan_it_takes_a_lot.mp3','/assets/covers/it_takes_a_lot.jpg',314,0,0,1,'2024-12-28 11:20:05'),(54,'Ballad of a Thin Man',2,4,'/songs/bob_dylan_ballad_of_a_thin_man.mp3','/assets/covers/ballad_of_a_thin_man.jpg',245,0,0,1,'2024-12-28 11:20:05'),(55,'From a Buick 6',2,4,'/songs/bob_dylan_from_a_buick_6.mp3','/assets/covers/from_a_buick_6.jpg',215,0,0,1,'2024-12-28 11:20:05'),(56,'Queen Jane Approximately',2,4,'/songs/bob_dylan_queen_jane_approximately.mp3','/assets/covers/queen_jane_approximately.jpg',339,0,0,1,'2024-12-28 11:20:05'),(57,'Highway 61 Revisited',2,4,'/songs/bob_dylan_highway_61_revisited.mp3','/assets/covers/highway_61_revisited.jpg',280,0,0,1,'2024-12-28 11:20:05'),(58,'Just Like Tom Thumb鈥檚 Blues',2,4,'/songs/bob_dylan_just_like_tom_thumbs_blues.mp3','/assets/covers/just_like_tom_thumbs_blues.jpg',330,0,0,1,'2024-12-28 11:20:05'),(59,'Desolation Row',2,4,'/songs/bob_dylan_desolation_row.mp3','/assets/covers/desolation_row.jpg',719,0,0,1,'2024-12-28 11:20:05');
 /*!40000 ALTER TABLE `song` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -333,25 +331,25 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '用户ID,主键,自动递增',
-  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户名,唯一且不能为空',
-  `password` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户密码,不能为空',
-  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户姓名,允许为空',
-  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户电话号码,允许为空',
-  `email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户电子邮件,允许为空',
-  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/assets/avatars/default-user.jpg' COMMENT '用户头像,允许为空',
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '鐢ㄦ埛ID,涓婚敭,鑷姩閫掑',
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '鐢ㄦ埛鍚?鍞竴涓斾笉鑳戒负绌?,
+  `password` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '鐢ㄦ埛瀵嗙爜,涓嶈兘涓虹┖',
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '鐢ㄦ埛濮撳悕,鍏佽涓虹┖',
+  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '鐢ㄦ埛鐢佃瘽鍙风爜,鍏佽涓虹┖',
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '鐢ㄦ埛鐢靛瓙閭欢,鍏佽涓虹┖',
+  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/assets/avatars/default-user.jpg' COMMENT '鐢ㄦ埛澶村儚,鍏佽涓虹┖',
   `bio` text COLLATE utf8mb4_unicode_ci,
   `gender` tinyint DEFAULT '0',
   `birthday` date DEFAULT NULL,
   `location` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` tinyint NOT NULL DEFAULT '1' COMMENT '用户状态,默认为1',
-  `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '账户创建时间,默认为当前时间',
-  `updated_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '账户更新时间,默认为当前时间',
+  `status` tinyint NOT NULL DEFAULT '1' COMMENT '鐢ㄦ埛鐘舵€?榛樿涓?',
+  `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '璐︽埛鍒涘缓鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
+  `updated_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '璐︽埛鏇存柊鏃堕棿,榛樿涓哄綋鍓嶆椂闂?,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   KEY `idx_user_phone` (`phone`),
   KEY `idx_user_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户表,存储用户的基本信息';
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='鐢ㄦ埛琛?瀛樺偍鐢ㄦ埛鐨勫熀鏈俊鎭?;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -360,7 +358,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'admin','$2a$10$XQ3lTxi12672s7o401OCRe8X/uvhXPZMPPtf08fQgYs48wR1dyx2S','管理员','18971548334','111@111.com','/assets/avatars/default-user.jpg','admin',1,NULL,'111',1,'2024-12-28 11:22:31','2024-12-29 11:37:40'),(2,'user1','$2a$10$VsmbRSJ041kGQ4fbhzmjvO7YM2sLWDUTSUEgo0OrY1XSM.BhYxqi2','doomer no.1','18971548334','111@111.com','/assets/avatars/default-user.jpg','I like music, you too?',1,NULL,'111',1,'2024-12-28 11:37:01','2024-12-28 11:41:24'),(3,'user2','$2a$10$wTp8u5h5iWLE2m5ezAqgnuyovh35yseaezWjGhLM8OSToxLuOcelm','user2','18971548334','111@111.com','/assets/avatars/default-user.jpg',NULL,2,'2024-11-24','111',1,'2024-12-28 11:38:18','2024-12-28 11:38:18'),(4,'Elaine','$2a$10$kaerMaf6Md9dUgshdPr1XOEo0qHKmJn2emKsX8auxJIAZWKPjI7ta','Eglantine','13111111111','example@example.com','/assets/avatars/default-user.jpg','阳光小橘',0,'2025-01-07','nowhere',1,'2025-06-09 14:45:25','2025-06-09 14:45:25'),(5,'hkwxsl','$2a$10$KiEv79t43A/sYNyWAleeNO2V0HbUe54G/20t31VGvP5r0MhB2UmBC','好困我先睡了喵','10011111112','example@example.com','/assets/avatars/default-user.jpg','我真的是一只猫,超级巨大',2,'2025-07-31','123',1,'2025-08-02 14:42:50','2025-08-06 03:37:35'),(6,'test1','$2a$10$HTR/8eLCUlnt6vsmPRsONe9iYgyjkLRbevdgw/BWZifGUgqk9hl6.',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-03 09:00:43','2025-08-03 09:00:43'),(7,'test2','$2a$10$21kAXcns94wW1dFX34H0zewycN8a03cCMHtX47y3R3zvChp31slnG',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-03 18:08:39','2025-08-03 18:08:39'),(8,'test3','$2a$10$xZhQcOWckwe/ptj0DiqfHOEC7qnwkr0VaL4NkCR/UID7KZfsvye2K',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-03 18:39:56','2025-08-03 18:39:56'),(9,'test4','$2a$10$1QflnuTCAgzT5sG41jzjleos4F4Z1CXq9lECM9ozhQZEDU0b1ftby',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-04 02:59:27','2025-08-04 02:59:27'),(10,'test5','$2a$10$kYF73nDO2VmPJd9j5RHxPOT//FF4vCanx9/7SeBY6GbeTPhfQFF5.',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-06 03:36:31','2025-08-06 03:36:31'),(11,'test6','$2a$10$eYG8hTmGTvmQ9ec3i2lE..bT9gg3n2tSOujsx3KQf9k8cV0fxOq3a','test6',NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-08 02:15:43','2025-08-08 02:15:43'),(12,'test7','$2a$10$mIFZaew/MbvtFgnj.26HRuUPO2T2SmDqzRr/Pv7d7IB94dIycSfRS','test7',NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-08 02:49:58','2025-08-08 02:49:58'),(13,'test8','$2a$10$ddRojhKQc6GyS8Rw20QzAe.vOYTf.hBZApewLxz1PxMwE1kGfsGpK','test8',NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-08 02:51:46','2025-08-08 02:51:46'),(14,'test9','$2a$10$W9ykZji7sW0pkmQf5S.aceRv32sBwBM07yfmYVDPAjoD6KclsPl1y','test9','13111111111','example@example.com','/assets/avatars/default-user.jpg','真的是一只猫, 我只会说喵喵~',2,NULL,'广东, 深圳',1,'2025-08-08 02:52:56','2025-08-08 02:52:56');
+INSERT INTO `user` VALUES (1,'admin','$2a$10$XQ3lTxi12672s7o401OCRe8X/uvhXPZMPPtf08fQgYs48wR1dyx2S','绠＄悊鍛?,'18971548334','111@111.com','/assets/avatars/default-user.jpg','admin',1,NULL,'111',1,'2024-12-28 11:22:31','2024-12-29 11:37:40'),(2,'user1','$2a$10$VsmbRSJ041kGQ4fbhzmjvO7YM2sLWDUTSUEgo0OrY1XSM.BhYxqi2','doomer no.1','18971548334','111@111.com','/assets/avatars/default-user.jpg','I like music, you too?',1,NULL,'111',1,'2024-12-28 11:37:01','2024-12-28 11:41:24'),(3,'user2','$2a$10$wTp8u5h5iWLE2m5ezAqgnuyovh35yseaezWjGhLM8OSToxLuOcelm','user2','18971548334','111@111.com','/assets/avatars/default-user.jpg',NULL,2,'2024-11-24','111',1,'2024-12-28 11:38:18','2024-12-28 11:38:18'),(4,'Elaine','$2a$10$kaerMaf6Md9dUgshdPr1XOEo0qHKmJn2emKsX8auxJIAZWKPjI7ta','Eglantine','13111111111','example@example.com','/assets/avatars/default-user.jpg','闃冲厜灏忔',0,'2025-01-07','nowhere',1,'2025-06-09 14:45:25','2025-06-09 14:45:25'),(5,'hkwxsl','$2a$10$KiEv79t43A/sYNyWAleeNO2V0HbUe54G/20t31VGvP5r0MhB2UmBC','濂藉洶鎴戝厛鐫′簡鍠?,'10011111112','example@example.com','/assets/avatars/default-user.jpg','鎴戠湡鐨勬槸涓€鍙尗,瓒呯骇宸ㄥぇ',2,'2025-07-31','123',1,'2025-08-02 14:42:50','2025-08-06 03:37:35'),(6,'test1','$2a$10$HTR/8eLCUlnt6vsmPRsONe9iYgyjkLRbevdgw/BWZifGUgqk9hl6.',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-03 09:00:43','2025-08-03 09:00:43'),(7,'test2','$2a$10$21kAXcns94wW1dFX34H0zewycN8a03cCMHtX47y3R3zvChp31slnG',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-03 18:08:39','2025-08-03 18:08:39'),(8,'test3','$2a$10$xZhQcOWckwe/ptj0DiqfHOEC7qnwkr0VaL4NkCR/UID7KZfsvye2K',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-03 18:39:56','2025-08-03 18:39:56'),(9,'test4','$2a$10$1QflnuTCAgzT5sG41jzjleos4F4Z1CXq9lECM9ozhQZEDU0b1ftby',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-04 02:59:27','2025-08-04 02:59:27'),(10,'test5','$2a$10$kYF73nDO2VmPJd9j5RHxPOT//FF4vCanx9/7SeBY6GbeTPhfQFF5.',NULL,NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-06 03:36:31','2025-08-06 03:36:31'),(11,'test6','$2a$10$eYG8hTmGTvmQ9ec3i2lE..bT9gg3n2tSOujsx3KQf9k8cV0fxOq3a','test6',NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-08 02:15:43','2025-08-08 02:15:43'),(12,'test7','$2a$10$mIFZaew/MbvtFgnj.26HRuUPO2T2SmDqzRr/Pv7d7IB94dIycSfRS','test7',NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-08 02:49:58','2025-08-08 02:49:58'),(13,'test8','$2a$10$ddRojhKQc6GyS8Rw20QzAe.vOYTf.hBZApewLxz1PxMwE1kGfsGpK','test8',NULL,NULL,'/assets/avatars/default-user.jpg',NULL,0,NULL,NULL,1,'2025-08-08 02:51:46','2025-08-08 02:51:46'),(14,'test9','$2a$10$W9ykZji7sW0pkmQf5S.aceRv32sBwBM07yfmYVDPAjoD6KclsPl1y','test9','13111111111','example@example.com','/assets/avatars/default-user.jpg','鐪熺殑鏄竴鍙尗, 鎴戝彧浼氳鍠靛柕~',2,NULL,'骞夸笢, 娣卞湷',1,'2025-08-08 02:52:56','2025-08-08 02:52:56');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -381,7 +379,7 @@ CREATE TABLE `user_likes` (
   KEY `song_id` (`song_id`),
   CONSTRAINT `user_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `user_likes_ibfk_2` FOREIGN KEY (`song_id`) REFERENCES `song` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -390,7 +388,7 @@ CREATE TABLE `user_likes` (
 
 LOCK TABLES `user_likes` WRITE;
 /*!40000 ALTER TABLE `user_likes` DISABLE KEYS */;
-INSERT INTO `user_likes` VALUES (2,1,36,'2024-12-28 15:46:58'),(3,1,51,'2024-12-28 15:47:00'),(4,2,1,'2024-12-28 11:41:39'),(5,2,8,'2024-12-28 11:41:44'),(6,1,21,'2024-12-28 13:57:04'),(15,1,8,'2024-12-28 15:48:27'),(21,1,2,'2024-12-29 11:34:45'),(22,1,4,'2024-12-29 11:34:48'),(23,5,1,'2025-08-02 14:45:45'),(24,5,2,'2025-08-07 02:33:40');
+INSERT INTO `user_likes` VALUES (2,1,36,'2024-12-28 15:46:58'),(3,1,51,'2024-12-28 15:47:00'),(4,2,1,'2024-12-28 11:41:39'),(5,2,8,'2024-12-28 11:41:44'),(6,1,21,'2024-12-28 13:57:04'),(15,1,8,'2024-12-28 15:48:27'),(21,1,2,'2024-12-29 11:34:45'),(22,1,4,'2024-12-29 11:34:48'),(23,5,1,'2025-08-02 14:45:45'),(28,5,2,'2025-08-10 12:17:14'),(31,5,10,'2025-08-10 12:17:35'),(32,5,8,'2025-08-10 12:17:36'),(35,5,5,'2025-08-10 12:17:39'),(37,5,12,'2025-08-10 12:17:43'),(39,5,15,'2025-08-10 12:17:45'),(40,5,16,'2025-08-10 12:17:45'),(41,5,17,'2025-08-10 12:17:46'),(45,5,3,'2025-08-12 04:13:13');
 /*!40000 ALTER TABLE `user_likes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -403,4 +401,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-08 19:40:17
+-- Dump completed on 2025-08-12 14:03:15

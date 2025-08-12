@@ -20,7 +20,7 @@
             :sort-options="albumSortOptions"
             v-model:sortBy="sortBy"
             search-placeholder="在歌曲中搜索"
-            empty-text="这位专辑还没有歌曲"
+            empty-text="这张专辑还没有歌曲"
           />
         </template>
       </DetailLayout>

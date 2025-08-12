@@ -74,7 +74,7 @@ func main() {
 	songHandler := handlers.NewSongHandler(songService)
 	artistHandler := handlers.NewArtistHandler(artistService, songService)
 	albumHandler := handlers.NewAlbumHandler(albumService, songService)
-	playlistHandler := handlers.NewPlaylistHandler(playlistService)
+	playlistHandler := handlers.NewPlaylistHandler(playlistService, songService)
 	likeHandler := handlers.NewLikeHandler(likeService)
 	commentHandler := handlers.NewCommentHandler(commentService)
 

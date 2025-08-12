@@ -20,5 +20,4 @@ export no_proxy="localhost,127.0.0.1,::1,*.local,wsl.localhost,${HOST_IP}"
 mysqldump -u root -p[old_password] --default-character-set=utf8mb4 music_db1 > db_backup.sql
 
 - 导入数据(docker 中)
-mysql -h 127.0.0.1 -P 3307 -u elaine -p123456 --default-character-set=utf8mb4 music_db1 < db_backup.sql
-
+mysql -h 127.0.0.1 -P 3307 -u elaine -p123456 --default-character-set=utf8mb4 music_db1 < db 

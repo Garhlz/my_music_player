@@ -142,33 +142,6 @@ definitions:
       total:
         type: integer
     type: object
-  models.PlaylistDetailDTO:
-    properties:
-      cover:
-        type: string
-      created_at:
-        type: string
-      creator_name:
-        type: string
-      description:
-        type: string
-      id:
-        type: integer
-      is_public:
-        type: boolean
-      name:
-        type: string
-      song_count:
-        type: integer
-      songs:
-        allOf:
-        - $ref: '#/definitions/models.PaginatedResponseDTO'
-        description: 复用分页结构
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-    type: object
   models.PlaylistInfoDTO:
     properties:
       cover:
@@ -997,6 +970,10 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - description: 搜索关键词 (匹配歌单名)
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -1199,19 +1176,12 @@ paths:
       - 用户信息 (User)
   /playlists/{playlistId}:
     get:
+      description: 根据歌单ID获取其详细信息。
       parameters:
       - description: 歌单 ID
         in: path
         name: playlistId
         required: true
-        type: integer
-      - description: 歌曲列表页码
-        in: query
-        name: page
-        type: integer
-      - description: 歌曲列表每页数量
-        in: query
-        name: pageSize
         type: integer
       produces:
       - application/json
@@ -1219,10 +1189,103 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.PlaylistDetailDTO'
+            $ref: '#/definitions/models.PlaylistInfoDTO'
+        "400":
+          description: '{"error": "无效的歌单ID"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "歌单未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取歌单失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: 获取歌单详情
+      tags:
+      - 歌单 (Playlist)
+  /playlists/{playlistId}/songs:
+    get:
+      description: 根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+      parameters:
+      - description: 歌单 ID
+        in: path
+        name: playlistId
+        required: true
+        type: integer
+      - default: 1
+        description: 歌曲列表的页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页的歌曲数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+        in: query
+        name: search
+        type: string
+      - description: 歌曲列表的排序字段
+        enum:
+        - oldest
+        - latest
+        - play_count
+        - like_count
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.PaginatedResponseDTO'
+            - properties:
+                List:
+                  items:
+                    $ref: '#/definitions/models.SongDetailDTO'
+                  type: array
+              type: object
+        "400":
+          description: '{"error": "无效的ID或查询参数"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取歌曲列表失败"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取歌单的歌曲列表
       tags:
       - 歌单 (Playlist)
   /songs:

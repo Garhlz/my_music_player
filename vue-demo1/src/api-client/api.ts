@@ -459,79 +459,6 @@ export interface ModelsPaginatedResponseDTO {
 /**
  * 
  * @export
- * @interface ModelsPlaylistDetailDTO
- */
-export interface ModelsPlaylistDetailDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'cover'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'created_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'creator_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'description'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'id'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'is_public'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'name'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'song_count'?: number;
-    /**
-     * 复用分页结构
-     * @type {ModelsPaginatedResponseDTO}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'songs'?: ModelsPaginatedResponseDTO;
-    /**
-     * 
-     * @type {string}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'updated_at'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ModelsPlaylistDetailDTO
-     */
-    'user_id'?: number;
-}
-/**
- * 
- * @export
  * @interface ModelsPlaylistInfoDTO
  */
 export interface ModelsPlaylistInfoDTO {
@@ -2889,10 +2816,11 @@ export const PlaylistApiAxiosParamCreator = function (configuration?: Configurat
          * @summary 获取我的歌单列表
          * @param {number} [page] 页码
          * @param {number} [pageSize] 每页数量
+         * @param {string} [search] 搜索关键词 (匹配歌单名)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mePlaylistsGet: async (page?: number, pageSize?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        mePlaylistsGet: async (page?: number, pageSize?: number, search?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/me/playlists`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2914,6 +2842,10 @@ export const PlaylistApiAxiosParamCreator = function (configuration?: Configurat
 
             if (pageSize !== undefined) {
                 localVarQueryParameter['pageSize'] = pageSize;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
 
@@ -3131,18 +3063,57 @@ export const PlaylistApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
+         * 根据歌单ID获取其详细信息。
          * @summary 获取歌单详情
          * @param {number} playlistId 歌单 ID
-         * @param {number} [page] 歌曲列表页码
-         * @param {number} [pageSize] 歌曲列表每页数量
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        playlistsPlaylistIdGet: async (playlistId: number, page?: number, pageSize?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        playlistsPlaylistIdGet: async (playlistId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'playlistId' is not null or undefined
             assertParamExists('playlistsPlaylistIdGet', 'playlistId', playlistId)
             const localVarPath = `/playlists/{playlistId}`
+                .replace(`{${"playlistId"}}`, encodeURIComponent(String(playlistId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+         * @summary 获取歌单的歌曲列表
+         * @param {number} playlistId 歌单 ID
+         * @param {number} [page] 歌曲列表的页码
+         * @param {number} [pageSize] 每页的歌曲数量
+         * @param {string} [search] 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+         * @param {PlaylistsPlaylistIdSongsGetSortByEnum} [sortBy] 歌曲列表的排序字段
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        playlistsPlaylistIdSongsGet: async (playlistId: number, page?: number, pageSize?: number, search?: string, sortBy?: PlaylistsPlaylistIdSongsGetSortByEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'playlistId' is not null or undefined
+            assertParamExists('playlistsPlaylistIdSongsGet', 'playlistId', playlistId)
+            const localVarPath = `/playlists/{playlistId}/songs`
                 .replace(`{${"playlistId"}}`, encodeURIComponent(String(playlistId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3164,6 +3135,14 @@ export const PlaylistApiAxiosParamCreator = function (configuration?: Configurat
 
             if (pageSize !== undefined) {
                 localVarQueryParameter['pageSize'] = pageSize;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
+            }
+
+            if (sortBy !== undefined) {
+                localVarQueryParameter['sortBy'] = sortBy;
             }
 
 
@@ -3239,11 +3218,12 @@ export const PlaylistApiFp = function(configuration?: Configuration) {
          * @summary 获取我的歌单列表
          * @param {number} [page] 页码
          * @param {number} [pageSize] 每页数量
+         * @param {string} [search] 搜索关键词 (匹配歌单名)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async mePlaylistsGet(page?: number, pageSize?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MePlaylistsGet200Response>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.mePlaylistsGet(page, pageSize, options);
+        async mePlaylistsGet(page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MePlaylistsGet200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mePlaylistsGet(page, pageSize, search, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PlaylistApi.mePlaylistsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3317,18 +3297,33 @@ export const PlaylistApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * 根据歌单ID获取其详细信息。
          * @summary 获取歌单详情
          * @param {number} playlistId 歌单 ID
-         * @param {number} [page] 歌曲列表页码
-         * @param {number} [pageSize] 歌曲列表每页数量
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async playlistsPlaylistIdGet(playlistId: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelsPlaylistDetailDTO>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.playlistsPlaylistIdGet(playlistId, page, pageSize, options);
+        async playlistsPlaylistIdGet(playlistId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelsPlaylistInfoDTO>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.playlistsPlaylistIdGet(playlistId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PlaylistApi.playlistsPlaylistIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+         * @summary 获取歌单的歌曲列表
+         * @param {number} playlistId 歌单 ID
+         * @param {number} [page] 歌曲列表的页码
+         * @param {number} [pageSize] 每页的歌曲数量
+         * @param {string} [search] 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+         * @param {PlaylistsPlaylistIdSongsGetSortByEnum} [sortBy] 歌曲列表的排序字段
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async playlistsPlaylistIdSongsGet(playlistId: number, page?: number, pageSize?: number, search?: string, sortBy?: PlaylistsPlaylistIdSongsGetSortByEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AlbumsIdSongsGet200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.playlistsPlaylistIdSongsGet(playlistId, page, pageSize, search, sortBy, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PlaylistApi.playlistsPlaylistIdSongsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -3361,11 +3356,12 @@ export const PlaylistApiFactory = function (configuration?: Configuration, baseP
          * @summary 获取我的歌单列表
          * @param {number} [page] 页码
          * @param {number} [pageSize] 每页数量
+         * @param {string} [search] 搜索关键词 (匹配歌单名)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mePlaylistsGet(page?: number, pageSize?: number, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response> {
-            return localVarFp.mePlaylistsGet(page, pageSize, options).then((request) => request(axios, basePath));
+        mePlaylistsGet(page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response> {
+            return localVarFp.mePlaylistsGet(page, pageSize, search, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3421,16 +3417,28 @@ export const PlaylistApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.mePlaylistsPost(createRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * 根据歌单ID获取其详细信息。
          * @summary 获取歌单详情
          * @param {number} playlistId 歌单 ID
-         * @param {number} [page] 歌曲列表页码
-         * @param {number} [pageSize] 歌曲列表每页数量
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        playlistsPlaylistIdGet(playlistId: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsPlaylistDetailDTO> {
-            return localVarFp.playlistsPlaylistIdGet(playlistId, page, pageSize, options).then((request) => request(axios, basePath));
+        playlistsPlaylistIdGet(playlistId: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsPlaylistInfoDTO> {
+            return localVarFp.playlistsPlaylistIdGet(playlistId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+         * @summary 获取歌单的歌曲列表
+         * @param {number} playlistId 歌单 ID
+         * @param {number} [page] 歌曲列表的页码
+         * @param {number} [pageSize] 每页的歌曲数量
+         * @param {string} [search] 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+         * @param {PlaylistsPlaylistIdSongsGetSortByEnum} [sortBy] 歌曲列表的排序字段
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        playlistsPlaylistIdSongsGet(playlistId: number, page?: number, pageSize?: number, search?: string, sortBy?: PlaylistsPlaylistIdSongsGetSortByEnum, options?: RawAxiosRequestConfig): AxiosPromise<AlbumsIdSongsGet200Response> {
+            return localVarFp.playlistsPlaylistIdSongsGet(playlistId, page, pageSize, search, sortBy, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3458,11 +3466,12 @@ export interface PlaylistApiInterface {
      * @summary 获取我的歌单列表
      * @param {number} [page] 页码
      * @param {number} [pageSize] 每页数量
+     * @param {string} [search] 搜索关键词 (匹配歌单名)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PlaylistApiInterface
      */
-    mePlaylistsGet(page?: number, pageSize?: number, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response>;
+    mePlaylistsGet(page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response>;
 
     /**
      * 
@@ -3518,16 +3527,28 @@ export interface PlaylistApiInterface {
     mePlaylistsPost(createRequest: ModelsCreatePlaylistRequestDTO, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
-     * 
+     * 根据歌单ID获取其详细信息。
      * @summary 获取歌单详情
      * @param {number} playlistId 歌单 ID
-     * @param {number} [page] 歌曲列表页码
-     * @param {number} [pageSize] 歌曲列表每页数量
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PlaylistApiInterface
      */
-    playlistsPlaylistIdGet(playlistId: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsPlaylistDetailDTO>;
+    playlistsPlaylistIdGet(playlistId: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsPlaylistInfoDTO>;
+
+    /**
+     * 根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+     * @summary 获取歌单的歌曲列表
+     * @param {number} playlistId 歌单 ID
+     * @param {number} [page] 歌曲列表的页码
+     * @param {number} [pageSize] 每页的歌曲数量
+     * @param {string} [search] 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+     * @param {PlaylistsPlaylistIdSongsGetSortByEnum} [sortBy] 歌曲列表的排序字段
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PlaylistApiInterface
+     */
+    playlistsPlaylistIdSongsGet(playlistId: number, page?: number, pageSize?: number, search?: string, sortBy?: PlaylistsPlaylistIdSongsGetSortByEnum, options?: RawAxiosRequestConfig): AxiosPromise<AlbumsIdSongsGet200Response>;
 
     /**
      * 
@@ -3555,12 +3576,13 @@ export class PlaylistApi extends BaseAPI implements PlaylistApiInterface {
      * @summary 获取我的歌单列表
      * @param {number} [page] 页码
      * @param {number} [pageSize] 每页数量
+     * @param {string} [search] 搜索关键词 (匹配歌单名)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PlaylistApi
      */
-    public mePlaylistsGet(page?: number, pageSize?: number, options?: RawAxiosRequestConfig) {
-        return PlaylistApiFp(this.configuration).mePlaylistsGet(page, pageSize, options).then((request) => request(this.axios, this.basePath));
+    public mePlaylistsGet(page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig) {
+        return PlaylistApiFp(this.configuration).mePlaylistsGet(page, pageSize, search, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3627,17 +3649,31 @@ export class PlaylistApi extends BaseAPI implements PlaylistApiInterface {
     }
 
     /**
-     * 
+     * 根据歌单ID获取其详细信息。
      * @summary 获取歌单详情
      * @param {number} playlistId 歌单 ID
-     * @param {number} [page] 歌曲列表页码
-     * @param {number} [pageSize] 歌曲列表每页数量
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PlaylistApi
      */
-    public playlistsPlaylistIdGet(playlistId: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig) {
-        return PlaylistApiFp(this.configuration).playlistsPlaylistIdGet(playlistId, page, pageSize, options).then((request) => request(this.axios, this.basePath));
+    public playlistsPlaylistIdGet(playlistId: number, options?: RawAxiosRequestConfig) {
+        return PlaylistApiFp(this.configuration).playlistsPlaylistIdGet(playlistId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 根据歌单ID获取其歌曲的分页列表，支持搜索和排序。
+     * @summary 获取歌单的歌曲列表
+     * @param {number} playlistId 歌单 ID
+     * @param {number} [page] 歌曲列表的页码
+     * @param {number} [pageSize] 每页的歌曲数量
+     * @param {string} [search] 在歌曲中搜索的关键词 (匹配歌曲名或专辑名)
+     * @param {PlaylistsPlaylistIdSongsGetSortByEnum} [sortBy] 歌曲列表的排序字段
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PlaylistApi
+     */
+    public playlistsPlaylistIdSongsGet(playlistId: number, page?: number, pageSize?: number, search?: string, sortBy?: PlaylistsPlaylistIdSongsGetSortByEnum, options?: RawAxiosRequestConfig) {
+        return PlaylistApiFp(this.configuration).playlistsPlaylistIdSongsGet(playlistId, page, pageSize, search, sortBy, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3655,6 +3691,16 @@ export class PlaylistApi extends BaseAPI implements PlaylistApiInterface {
     }
 }
 
+/**
+ * @export
+ */
+export const PlaylistsPlaylistIdSongsGetSortByEnum = {
+    Oldest: 'oldest',
+    Latest: 'latest',
+    PlayCount: 'play_count',
+    LikeCount: 'like_count'
+} as const;
+export type PlaylistsPlaylistIdSongsGetSortByEnum = typeof PlaylistsPlaylistIdSongsGetSortByEnum[keyof typeof PlaylistsPlaylistIdSongsGetSortByEnum];
 
 
 /**
