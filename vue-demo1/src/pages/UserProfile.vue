@@ -35,7 +35,7 @@
                   <el-button
                     type="primary"
                     class="action-btn"
-                    @click="router.push(`/my-love/${userInfo?.id}`)"
+                    @click="router.push(`/love/${userInfo?.id}`)"
                   >
                     <el-icon>
                       <Star />

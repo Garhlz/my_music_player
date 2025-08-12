@@ -21,13 +21,13 @@
         </el-icon>
         <span>音乐库</span>
       </el-menu-item>
-      <el-menu-item index="/my-love" @click="navigateTo(`/my-love/${getUserId()}`)" class="menu-item">
+      <el-menu-item index="/love" @click="navigateTo(`/love/${userId}`)" class="menu-item">
         <el-icon>
           <Star />
         </el-icon>
         <span>我喜欢的音乐</span>
       </el-menu-item>
-      <el-menu-item index="/my-playlist" @click="navigateTo(`/my-playlist/${getUserId()}`)" class="menu-item">
+      <el-menu-item index="/my-playlist" @click="navigateTo(`/my-playlist/${userId}`)" class="menu-item">
         <el-icon>
           <Menu />
         </el-icon>
@@ -64,7 +64,10 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { Headset, VideoPlay, Star, Menu, List, Upload, User, Setting } from '@element-plus/icons-vue';
 
+import { useUserStore } from '@/stores/user';
+
 const router = useRouter();
+const userStore = useUserStore();
 const route = useRoute();
 const activeRoute = ref(route.path);
 
@@ -76,15 +79,17 @@ const navigateTo = (path: string) => {
   router.push(path);
 };
 
-const getUserId = () => {
-  try {
-    const userStr = localStorage.getItem('userId');
-    return userStr || '';
-  } catch (error) {
-    console.error('获取用户ID失败:', error);
-    return '';
-  }
-};
+const userId = userStore.userId;
+
+// const getUserId = () => {
+//   try {
+//     const userStr = localStorage.getItem('userId');
+//     return userStr || '';
+//   } catch (error) {
+//     console.error('获取用户ID失败:', error);
+//     return '';
+//   }
+// };
 
 onMounted(() => {
   activeRoute.value = route.path;

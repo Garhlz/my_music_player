@@ -11,11 +11,12 @@
         @keyup.enter="handleSearch"
       />
       <el-select
-        :model-value="sortBy"
+        :model-value="props.sortBy"
         @update:modelValue="emit('update:sortBy', $event)"
         placeholder="排序方式"
         class="sort-select"
         @change="handleSearch"
+        popper-class="highest-z-index-popper"
       >
         <el-option
           v-for="option in props.sortOptions"
@@ -28,7 +29,6 @@
 
     <el-empty v-if="!isLoading && songs.length === 0" description="暂无歌曲" />
 
-    <!--    需要修改, 最好是参考spotify, 反正组件化之后, 修改十分容易-->
     <div v-else class="song-list">
       <div class="song-header">
         <div class="col-index">#</div>
@@ -71,75 +71,13 @@
       @current-change="handlePageChange"
     />
 
-    <!-- 封面预览弹窗 -->
-    <!--    todo 此处暂时意义不明, 后续修改-->
-    <!--    <el-dialog-->
-    <!--      v-model="coverDialogVisible"-->
-    <!--      :title="selectedSong?.name"-->
-    <!--      :width="dialogWidth"-->
-    <!--      align-center-->
-    <!--    >-->
-    <!--      <div class="cover-preview">-->
-    <!--        <el-image-->
-    <!--          :src="selectedSong?.cover || '/assets/default-cover.jpg'"-->
-    <!--          fit="cover"-->
-    <!--        />-->
-    <!--      </div>-->
-    <!--    </el-dialog>-->
-
-    <!-- 添加到歌单弹窗 -->
     <AddToPlaylistDialog
       v-model="playlistDialogVisible"
       :song-to-add="selectedSong"
       @confirm="handlePlaylistAddConfirm"
     />
-
-    <!-- todo 目前是邮右键菜单, 但是并不好用, 后续改成类似spotify的下拉框-->
-    <!--    <el-dropdown-->
-    <!--      ref="contextMenu"-->
-    <!--      trigger="contextmenu"-->
-    <!--      :style="{ position: 'fixed', left: `${contextMenuPos.x}px`, top: `${contextMenuPos.y}px` }"-->
-    <!--      @visible-change="handleContextMenuVisible"-->
-    <!--    >-->
-    <!--      <span></span>-->
-    <!--      <template #dropdown>-->
-    <!--        <el-dropdown-menu>-->
-    <!--          <el-dropdown-item @click="handlePlaySong(contextSong)">-->
-    <!--            <el-icon>-->
-    <!--              <VideoPlay />-->
-    <!--            </el-icon>-->
-    <!--            播放-->
-    <!--          </el-dropdown-item>-->
-    <!--          <el-dropdown-item @click="likeSong(contextSong)">-->
-    <!--            <el-icon>-->
-    <!--              <Star />-->
-    <!--            </el-icon>-->
-    <!--            {{ likedSongIds.has(contextSong?.id!) ? '取消喜欢' : '喜欢' }}-->
-    <!--          </el-dropdown-item>-->
-    <!--          <el-dropdown-item @click="openAddToPlaylistDialog(contextSong)">-->
-    <!--            <el-icon>-->
-    <!--              <Plus />-->
-    <!--            </el-icon>-->
-    <!--            添加到歌单-->
-    <!--          </el-dropdown-item>-->
-    <!--          <el-dropdown-item @click="goToComment(contextSong)">-->
-    <!--            <el-icon>-->
-    <!--              <ChatDotRound />-->
-    <!--            </el-icon>-->
-    <!--            评论-->
-    <!--          </el-dropdown-item>-->
-    <!--          <el-dropdown-item @click="downloadSong(contextSong)">-->
-    <!--            <el-icon>-->
-    <!--              <Download />-->
-    <!--            </el-icon>-->
-    <!--            下载-->
-    <!--          </el-dropdown-item>-->
-    <!--        </el-dropdown-menu>-->
-    <!--      </template>-->
-    <!--    </el-dropdown>-->
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -158,26 +96,21 @@ interface SortOption {
   value: string;
 }
 
-interface Props {
-  // 接收一个获取数据的函数作为 Prop
-  fetchFunction: (
-    page: number,
-    pageSize: number,
-    search: string,
-    sortBy: string,
-  ) => Promise<{ data: ModelsPaginatedResponseDTO }>;
-
-  // 配置项
+const props = defineProps<{
+  fetchFunction: (page: number, pageSize: number, search: string, sortBy: string) => Promise<{
+    data: ModelsPaginatedResponseDTO
+  }>;
   sortOptions: SortOption[];
-  defaultSortBy: string;
+  sortBy: string; // <--- 新增：接收父组件的 v-model 值
   searchPlaceholder?: string;
   emptyText?: string;
-}
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  searchPlaceholder: '搜索歌曲、歌手、专辑',
-  emptyText: '列表是空的哦',
-});
+
+// 定义 Emits：明确告诉 Vue 这个组件会发出 update:sortBy 事件
+const emit = defineEmits<{
+  (e: 'update:sortBy', value: string): void; // <--- 新增：为 v-model 配套的事件
+}>();
 
 // 初始化
 const router = useRouter();
@@ -194,7 +127,6 @@ const pageSize = ref(10);
 const totalSongs = ref(0);
 const isLoading = ref(false);
 const searchQuery = ref('');
-const sortBy = ref(props.defaultSortBy);
 
 const hoveredSong = ref<number | null>(null);
 const likedSongIds = ref<Set<number>>(new Set());
@@ -225,7 +157,7 @@ const loadData = async (refreshLikes: boolean = true) => {
   isLoading.value = true;
   try {
     const fetchTasks = [
-      props.fetchFunction(page.value, pageSize.value, searchQuery.value, sortBy.value),
+      props.fetchFunction(page.value, pageSize.value, searchQuery.value, props.sortBy),
     ];
 
     // 仅在需要时刷新喜欢列表（例如，初次加载或页面大小改变时）
@@ -372,8 +304,8 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 24px;
-  height: 100%;
-  overflow-y: auto;
+  //height: 100%;
+  //overflow-y: auto;
   animation: fadeIn 0.5s ease-in;
 }
 
@@ -383,6 +315,8 @@ onMounted(() => {
   gap: 16px;
   margin-bottom: 24px;
   align-items: center;
+  position: relative; /* 必须设置 position 才能让 z-index 生效 */
+  z-index: 2; /* 设置一个比 song-header 的 z-index: 1 更高的值 */
 }
 
 .search-input {
@@ -541,5 +475,9 @@ onMounted(() => {
   .song-header {
     display: none; /* 移动端隐藏表头 */
   }
+}
+
+:deep(.highest-z-index-popper) {
+  z-index: 9999 !important;
 }
 </style>
