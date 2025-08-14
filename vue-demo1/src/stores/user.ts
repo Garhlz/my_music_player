@@ -2,6 +2,7 @@
 
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { type ModelsUserProfile } from '@/api-client';
 
 // defineStore 的第一个参数是 store 的唯一 ID，Pinia 会用它来连接 devtools
 // 这个 ID 必须是独一无二的，通常用文件名即可
@@ -9,9 +10,8 @@ export const useUserStore = defineStore('user', () => {
   // --- State ---
   // 就像组件里的 data，用来存放核心数据。我们用 ref() 来创建。
   // 我们从 localStorage 读取初始值，这样用户刷新页面后登录状态不会丢失
-  const token = ref < string | null > (localStorage.getItem('token'));
-  const userId = ref < number | null > (JSON.parse(localStorage.getItem('userId') || 'null'));
-
+  const token = ref<string | null>(localStorage.getItem('token'));
+  const userId = ref<number | null>(JSON.parse(localStorage.getItem('userId') || 'null'));
   // --- Getters ---
   // 就像组件里的 computed，用来派生出一些状态。
   const isLoggedIn = computed(() => !!token.value && !!userId.value);
@@ -28,11 +28,12 @@ export const useUserStore = defineStore('user', () => {
   function setCredentials(newToken: string, newUserId: number) {
     token.value = newToken;
     userId.value = newUserId;
-
     // 同时持久化到 localStorage
     localStorage.setItem('token', newToken);
     localStorage.setItem('userId', JSON.stringify(newUserId));
   }
+
+  const userInfo = computed(() => userProfile.value);
 
   /**
    * 清除用户凭证，用于退出登录
@@ -40,7 +41,6 @@ export const useUserStore = defineStore('user', () => {
   function logout() {
     token.value = null;
     userId.value = null;
-
     // 从 localStorage 中移除
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
@@ -59,5 +59,6 @@ export const useUserStore = defineStore('user', () => {
     // Actions
     setCredentials,
     logout,
+    userInfo,
   };
 });

@@ -36,7 +36,7 @@ func (h *PlaylistHandler) ListMyPlaylists(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的查询参数"})
 		return
 	}
-	response, err := h.playlistService.ListUserPlaylists(authUserID, &params)
+	response, err := h.playlistService.ListUserPlaylists(authUserID, &params, false)
 	if err != nil {
 		log.Printf("获取我的歌单列表失败: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取列表失败"})
@@ -45,7 +45,7 @@ func (h *PlaylistHandler) ListMyPlaylists(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// ListUserPlaylists 获取指定用户的歌单列表
+// ListUserPlaylists 获取指定用户的歌单列表, 只包含公开歌单
 // @Summary 获取指定用户的歌单列表
 // @Tags  歌单 (Playlist)
 // @Produce json
@@ -66,7 +66,7 @@ func (h *PlaylistHandler) ListUserPlaylists(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的查询参数"})
 		return
 	}
-	response, err := h.playlistService.ListUserPlaylists(userID, &params)
+	response, err := h.playlistService.ListUserPlaylists(userID, &params, true)
 	if err != nil {
 		log.Printf("获取用户歌单列表失败: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取列表失败"})

@@ -1,23 +1,29 @@
 <template>
   <div
     class="song-item"
-    :class="{ 'song-item-selected': isPlaying }"
+    :class="{
+      'song-item-playing': isPlaying,
+      'song-item-hovered': isHovered
+    }"
     @mouseenter="emit('update:hoveredId', song.id)"
     @mouseleave="emit('update:hoveredId', null)"
-    @click="emit('select', song)"
-    @dblclick="emit('play', song)"
-    @contextmenu.prevent="openContextMenu($event, song)"
+    @dblclick="handleDoubleClick"
     tabindex="0"
     @keydown="handleKeydown"
   >
+    <!-- 序号/播放按钮 -->
     <div class="col-index">
-      <span v-if="!isHovered">{{ index }}</span>
-      <el-icon v-else class="play-icon" @click.stop="emit('play', song)">
+      <span v-if="!isHovered && !isPlaying" class="index-number">{{ index }}</span>
+      <el-icon v-else-if="isPlaying && !isHovered" class="playing-icon">
+        <VideoPause />
+      </el-icon>
+      <el-icon v-else class="play-icon" @click.stop="handlePlayClick">
         <VideoPlay />
       </el-icon>
     </div>
 
-    <div class="col-title" @click.stop="emit('play', song)">
+    <!-- 歌曲信息（封面+标题+歌手） -->
+    <div class="col-info">
       <div class="song-cover">
         <el-image
           :src="song.cover || '/assets/default-cover.jpg'"
@@ -25,236 +31,350 @@
           lazy
           @error="handleImageError"
         />
-      </div>
-      <span class="song-name">{{ song.name }}</span>
-    </div>
-
-    <div class="col-duration">
-      <template v-if="!isHovered">
-        {{ formatDuration(song.duration) }}
-      </template>
-      <div v-else class="action-buttons">
-        <el-tooltip
-          v-for="action in actions"
-          :key="action.event"
-          :content="action.content"
-          placement="top"
-        >
-          <el-icon
-            @click.stop="emit(action.event, song)"
-            :class="{ 'liked': action.event === 'like' && isLiked }"
-          >
-            <component :is="action.icon" />
+        <!-- hover时的播放遮罩 -->
+        <div v-if="isHovered" class="cover-overlay" @click.stop="handlePlayClick">
+          <el-icon>
+            <VideoPlay />
           </el-icon>
-        </el-tooltip>
+        </div>
+      </div>
+      <div class="song-details">
+        <div class="song-name" @click.stop="handlePlayClick">{{ song.name }}</div>
+        <div class="artist-name" @click.stop="emit('goToArtist', song.artist_id)">
+          {{ song.artist_name || '未知歌手' }}
+        </div>
       </div>
     </div>
 
-    <div class="col-artist" @click.stop="emit('goToArtist', song.artist_id)">
-      {{ song.artist_name || '未知歌手' }}
+    <!-- 专辑名 -->
+    <div class="col-album">
+      <span class="album-name" @click.stop="emit('goToAlbum', song.album_id)">{{ song.album_name || '未知专辑' }}</span>
     </div>
 
-    <div class="col-album" @click.stop="emit('goToAlbum', song.album_id)">
-      {{ song.album_name || '未知专辑' }}
+    <!-- 操作按钮（hover时显示） -->
+    <div class="col-actions">
+      <transition name="fade">
+        <div v-if="isHovered" class="action-buttons">
+          <!-- 喜欢按钮 -->
+          <el-tooltip content="喜欢" placement="top">
+            <el-icon
+              class="action-icon"
+              :class="{ 'liked': isLiked }"
+              @click.stop="emit('like', song)"
+            >
+              <StarFilled v-if="isLiked" />
+              <Star v-else />
+            </el-icon>
+          </el-tooltip>
+
+          <!-- 添加到歌单 -->
+          <el-tooltip content="添加到歌单" placement="top">
+            <el-icon class="action-icon" @click.stop="emit('addToPlaylist', song)">
+              <Plus />
+            </el-icon>
+          </el-tooltip>
+
+          <!-- 更多选项 -->
+          <el-tooltip content="更多选项" placement="top">
+            <el-icon class="action-icon" @click.stop="handleMoreOptions">
+              <MoreFilled />
+            </el-icon>
+          </el-tooltip>
+        </div>
+      </transition>
+    </div>
+
+    <!-- 时长 -->
+    <div class="col-duration">
+      <span>{{ formatDuration(song.duration) }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ModelsSongDetailDTO } from '@/api-client';
-import { VideoPlay, Star, Plus, ChatDotRound, Download } from '@element-plus/icons-vue';
+import {
+  VideoPlay, VideoPause, Star, StarFilled, Plus, MoreFilled,
+} from '@element-plus/icons-vue';
 import { formatDuration } from '@/utils/format';
 
-// 定义 Props
+// Props定义
 interface Props {
   song: ModelsSongDetailDTO;
   index: number;
   isLiked: boolean;
   isHovered: boolean;
   isPlaying?: boolean;
-  columnLayout?: string;
 }
 
 const props = defineProps<Props>();
 
-// 定义 Emits
+// 事件定义
 const emit = defineEmits<{
   (e: 'update:hoveredId', id: number | null): void;
   (e: 'play', song: ModelsSongDetailDTO): void;
-  (e: 'select', song: ModelsSongDetailDTO): void;
   (e: 'like', song: ModelsSongDetailDTO): void;
   (e: 'addToPlaylist', song: ModelsSongDetailDTO): void;
-  (e: 'comment', song: ModelsSongDetailDTO): void;
-  (e: 'download', song: ModelsSongDetailDTO): void;
+  (e: 'showMoreOptions', song: ModelsSongDetailDTO): void;
   (e: 'goToArtist', artistId?: number | null): void;
   (e: 'goToAlbum', albumId?: number | null): void;
-  (e: 'contextmenu', payload: { song: ModelsSongDetailDTO; x: number; y: number }): void;
 }>();
 
-// 操作按钮配置
-const actions = [
-  { event: 'like', content: '喜欢', icon: Star },
-  { event: 'addToPlaylist', content: '添加到歌单', icon: Plus },
-  { event: 'comment', content: '评论', icon: ChatDotRound },
-  { event: 'download', content: '下载', icon: Download },
-];
+// 处理播放点击
+const handlePlayClick = () => {
+  emit('play', props.song);
+};
 
-// 方法
+// 处理双击播放
+const handleDoubleClick = () => {
+  emit('play', props.song);
+};
+
+// 处理更多选项
+const handleMoreOptions = () => {
+  emit('showMoreOptions', props.song);
+};
+
+// 处理图片加载错误
 const handleImageError = () => {
   console.warn(`Failed to load cover for song: ${props.song.name}`);
 };
 
-const openContextMenu = (event: MouseEvent, song: ModelsSongDetailDTO) => {
-  emit('contextmenu', { song, x: event.clientX, y: event.clientY });
-};
-
+// 键盘事件处理
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     emit('play', props.song);
   }
 };
-
 </script>
 
 <style scoped>
+/* Spotify风格的歌曲项 */
 .song-item {
   display: grid;
-  grid-template-columns: v-bind(columnLayout || '60px minmax(300px, 2.5fr) 180px minmax(160px, 1fr) minmax(160px, 1fr)');
-  padding: 12px 24px;
-  border-bottom: 1px solid #ebeef5;
+  grid-template-columns: 48px 1fr minmax(120px, 1fr) 180px 60px;
+  gap: 16px;
+  padding: 8px 16px;
   align-items: center;
-  transition: all 0.2s ease-out;
-  animation: fadeIn 0.5s ease-in;
-  height: 72px; /* 固定高度，配合虚拟列表 */
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  cursor: default;
+  user-select: none;
 }
 
+/* hover效果 */
 .song-item:hover {
-  background-color: #f5f7fa;
-  transform: translateX(4px);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.song-item-selected {
-  border-left: 4px solid var(--el-color-primary);
-  background-color: var(--el-color-primary-light-9);
+/* 正在播放的歌曲 */
+.song-item-playing {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
+/* 序号列 */
 .col-index {
-  text-align: center;
-  color: #909399;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #b3b3b3;
   font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 
-.col-title {
+.index-number {
+  font-weight: 400;
+}
+
+.play-icon,
+.playing-icon {
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.play-icon:hover {
+  transform: scale(1.1);
+}
+
+.playing-icon {
+  color: #1db954;
+}
+
+/* 歌曲信息列 */
+.col-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
-  cursor: pointer;
 }
 
 .song-cover {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
-  overflow: hidden;
+  position: relative;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
-  transition: all 0.3s;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-.song-cover:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.song-cover .el-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 封面hover播放遮罩 */
+.cover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.cover-overlay .el-icon {
+  color: white;
+  font-size: 18px;
+}
+
+/* 歌曲详情 */
+.song-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
 }
 
 .song-name {
-  font-weight: 500;
-  color: #303133;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.col-duration {
-  min-width: 180px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding-right: 24px;
-}
-
-.col-artist,
-.col-album {
-  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
-  color: #606266;
+  line-height: 1.4;
 }
 
-.col-artist:hover,
-.col-album:hover {
-  color: #409EFF;
+.song-name:hover {
+  text-decoration: underline;
+}
+
+.artist-name {
+  font-size: 12px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.artist-name:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* 专辑列 */
+.col-album {
+  color: #b3b3b3;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 新增或修改 .album-name 的样式 */
+.album-name {
+  /* display: inline-block; */ /* 可选，如果需要更精确的盒模型控制 */
+  cursor: pointer; /* 将手型光标应用到 span 上 */
+  transition: color 0.2s ease; /* 平滑颜色过渡 */
+}
+
+/* 将 :hover 伪类选择器直接作用于 .album-name */
+.album-name:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* 操作按钮列 */
+.col-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 120px;
 }
 
 .action-buttons {
   display: flex;
   gap: 12px;
-  justify-content: flex-start;
   align-items: center;
 }
 
-.action-buttons .el-icon {
-  font-size: 16px;
+.action-icon {
+  font-size: 24px;
+  color: #b3b3b3;
   cursor: pointer;
-  color: #606266;
-  padding: 4px;
-  border-radius: 50%;
-  transition: all 0.2s;
+  padding: 2px;
+  transition: all 0.2s ease;
 }
 
-.action-buttons .el-icon:hover {
-  color: #409EFF;
-  background-color: var(--el-fill-color-light);
-  transform: scale(1.2);
+.action-icon:hover {
+  color: #fff;
+  transform: scale(1.1);
 }
 
-.liked {
-  color: #ffcc00 !important;
-  animation: heartBeat 0.3s ease-in-out;
+.action-icon.liked {
+  color: #1db954;
 }
 
-.play-icon {
-  color: var(--el-color-primary);
-  font-size: 20px;
+/* 时长列 */
+.col-duration {
+  color: #b3b3b3;
+  font-size: 13px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* 过渡动画 */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-@keyframes heartBeat {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 
+/* 响应式设计 */
 @media screen and (max-width: 768px) {
   .song-item {
-    grid-template-columns: 50px 3fr 100px;
-    padding: 8px 16px;
+    grid-template-columns: 40px 1fr 50px;
+    padding: 8px 12px;
   }
+
   .col-album,
-  .col-duration {
+  .col-actions {
     display: none;
   }
+
   .song-cover {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
-  .action-buttons {
-    gap: 12px;
+
+  .song-name {
+    font-size: 13px;
+  }
+
+  .artist-name {
+    font-size: 11px;
   }
 }
 </style>

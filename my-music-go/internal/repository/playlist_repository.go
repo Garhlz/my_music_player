@@ -13,8 +13,8 @@ import (
 type IPlaylistRepository interface {
 	// 歌单管理
 	FindInfoByID(playlistID int64) (*models.PlaylistInfoDTO, error)
-	ListByUserID(userID int64, params *models.ListPlaylistsRequestDTO) ([]models.PlaylistInfoDTO, error)
-	CountByUserID(userID int64, params *models.ListPlaylistsRequestDTO) (int, error)
+	ListByUserID(userID int64, params *models.ListPlaylistsRequestDTO, publicOnly bool) ([]models.PlaylistInfoDTO, error)
+	CountByUserID(userID int64, params *models.ListPlaylistsRequestDTO, publicOnly bool) (int, error)
 	Create(playlist *models.PlaylistInfo) (int64, error)
 	Update(playlist *models.PlaylistInfo) error
 	Delete(playlistID int64) error
@@ -54,7 +54,7 @@ func (r *PlaylistRepository) FindInfoByID(playlistID int64) (*models.PlaylistInf
 	return &info, nil
 }
 
-func buildPlaylistConditions(userID int64, params *models.ListPlaylistsRequestDTO) (string, []interface{}) {
+func buildPlaylistConditions(userID int64, params *models.ListPlaylistsRequestDTO, publicOnly bool) (string, []interface{}) {
 	var conditions []string
 	var args []interface{}
 
@@ -69,6 +69,10 @@ func buildPlaylistConditions(userID int64, params *models.ListPlaylistsRequestDT
 		args = append(args, likePattern) // 只添加一个参数
 	}
 
+	// 3. 是否仅公开
+	if publicOnly {
+		conditions = append(conditions, "is_public = 1")
+	}
 	// 组合所有条件
 	if len(conditions) > 0 {
 		return "WHERE " + strings.Join(conditions, " AND "), args
@@ -77,7 +81,7 @@ func buildPlaylistConditions(userID int64, params *models.ListPlaylistsRequestDT
 	return "", args
 }
 
-func (r *PlaylistRepository) ListByUserID(userID int64, params *models.ListPlaylistsRequestDTO) ([]models.PlaylistInfoDTO, error) {
+func (r *PlaylistRepository) ListByUserID(userID int64, params *models.ListPlaylistsRequestDTO, publicOnly bool) ([]models.PlaylistInfoDTO, error) {
 	var playlists []models.PlaylistInfoDTO
 
 	// 1. 定义基础查询语句，不包含 WHERE 及之后的子句
@@ -89,7 +93,7 @@ func (r *PlaylistRepository) ListByUserID(userID int64, params *models.ListPlayl
 		LEFT JOIN user u ON pi.user_id = u.id`
 
 	// 2. 使用辅助函数构建 WHERE 子句和参数
-	whereClause, args := buildPlaylistConditions(userID, params)
+	whereClause, args := buildPlaylistConditions(userID, params, publicOnly)
 
 	// 3. 构建完整的 SQL 语句
 	// 注意每个子句前面的空格
@@ -111,14 +115,14 @@ func (r *PlaylistRepository) ListByUserID(userID int64, params *models.ListPlayl
 }
 
 // 修改函数签名，让它能接收 params
-func (r *PlaylistRepository) CountByUserID(userID int64, params *models.ListPlaylistsRequestDTO) (int, error) {
+func (r *PlaylistRepository) CountByUserID(userID int64, params *models.ListPlaylistsRequestDTO, publicOnly bool) (int, error) {
 	var total int
 
 	// 1. 基础查询语句
 	baseQuery := "SELECT COUNT(pi.id) FROM playlist_info pi"
 
 	// 2. 使用同一个辅助函数构建 WHERE 子句和参数
-	whereClause, args := buildPlaylistConditions(userID, params)
+	whereClause, args := buildPlaylistConditions(userID, params, publicOnly)
 
 	// 3. 构建完整的 SQL 语句
 	query := baseQuery + " " + whereClause

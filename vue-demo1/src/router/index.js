@@ -5,18 +5,15 @@ const AuthPage = () => import('@/pages/Auth.vue');
 
 // 其他页面组件统一使用 @/ 别名
 const Pub = () => import('@/pages/Pub.vue');
-const ManageSongs = () => import('@/pages/ManageSongs.vue');
 const Player = () => import('@/pages/Player.vue');
-const ManageUsers = () => import('@/pages/ManageUsers.vue');
 const PlaylistGridPage = () => import('@/pages/PlaylistGridPage.vue');
 const PlaylistDetail = () => import('@/pages/PlaylistDetail.vue');
 const FavoriteSongs = () => import('@/pages/FavoriteSongs.vue');
-const Uploaded = () => import('@/pages/Uploaded.vue');
 const UserProfile = () => import('@/pages/UserProfile.vue');
 const AlbumDetail = () => import('@/pages/AlbumDetail.vue');
 const ArtistDetail = () => import('@/pages/ArtistDetail.vue');
-const CommentDetail = () => import('@/pages/CommentOfSong.vue');
-
+const CommentDetail = () => import('@/pages/CommentSongPage.vue');
+const Uploaded = () => import('@/pages/Uploaded.vue');
 
 const routes = [
   {
@@ -34,16 +31,6 @@ const routes = [
     path: '/pub',
     name: 'Pub',
     component: Pub,
-  },
-  {
-    path: '/manage-songs',
-    name: 'ManageSongs',
-    component: ManageSongs,
-  },
-  {
-    path: '/manage-users',
-    name: 'ManageUsers',
-    component: ManageUsers,
   },
   {
     path: '/profile/:id',

@@ -8,6 +8,7 @@
             :title="album?.name"
             :description="album?.description"
             :meta-items="albumMetaItems"
+            :classification="classification"
           >
             <template #actions>
             </template>
@@ -54,7 +55,7 @@ const albumSortOptions = [
   { label: '点赞最多', value: 'like_count' },
   { label: '最早发布', value: 'oldest' },
 ];
-
+const classification = ref<string>('专辑');
 // --- 计算属性，用于给 EntityInfo 传递数据 ---
 const albumMetaItems = computed(() => {
   if (!album.value) return [];

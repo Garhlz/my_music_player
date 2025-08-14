@@ -69,6 +69,12 @@ func (h *AlbumHandler) GetAlbumInfo(c *gin.Context) {
 	if err != nil {
 		return
 	}
+
+
+
+
+
+	
 	artist, err := h.albumService.GetAlbum(albumID)
 	if err != nil {
 		if errors.Is(err, services.ErrAlbumNotFound) {

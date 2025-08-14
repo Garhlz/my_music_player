@@ -238,26 +238,38 @@ const resetState = () => {
 </script>
 
 <style scoped>
-/* 自定义对话框样式 */
-:deep(.el-dialog) {
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  background: #fff;
+/* Spotify 深色主题样式覆盖 */
+.add-to-playlist-dialog :deep(.el-dialog) {
+  background: #282828;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
-:deep(.el-dialog__header) {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--el-border-color-light);
+.add-to-playlist-dialog :deep(.el-dialog__header) {
+  background: #282828;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-:deep(.el-dialog__body) {
-  padding: 16px 24px;
+.add-to-playlist-dialog :deep(.el-dialog__title) {
+  color: #fff;
 }
 
-:deep(.el-dialog__title) {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
+.add-to-playlist-dialog :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: #b3b3b3;
+}
+
+.add-to-playlist-dialog :deep(.el-dialog__headerbtn .el-dialog__close:hover) {
+  color: #fff;
+}
+
+.add-to-playlist-dialog :deep(.el-dialog__body) {
+  background: #282828;
+  color: #fff;
+}
+
+.add-to-playlist-dialog :deep(.el-dialog__footer) {
+  background: #282828;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* 内容布局 */
@@ -276,25 +288,45 @@ const resetState = () => {
 .existing-playlists {
   flex: 1;
   min-width: 0;
-  max-width: 280px; /* 限制左侧宽度，避免挤压右侧 */
-  border: 1px solid var(--el-border-color-light);
+  max-width: 280px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   overflow: hidden;
-  background: var(--el-fill-color-blank);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .playlist-search-input {
   margin: 12px;
-  max-width: 240px; /* 限制搜索框宽度 */
+  max-width: 240px;
 }
 
-:deep(.playlist-search-input .el-input__wrapper) {
+.playlist-search-input :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   transition: all 0.3s;
 }
 
-:deep(.playlist-search-input .el-input__wrapper:hover) {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.playlist-search-input :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.playlist-search-input :deep(.el-input__wrapper.is-focus) {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.2);
+}
+
+.playlist-search-input :deep(.el-input__inner) {
+  color: #fff;
+}
+
+.playlist-search-input :deep(.el-input__inner::placeholder) {
+  color: #b3b3b3;
+}
+
+.playlist-search-input :deep(.el-input__prefix) {
+  color: #b3b3b3;
 }
 
 .playlist-list {
@@ -304,19 +336,20 @@ const resetState = () => {
 
 .playlist-item {
   padding: 12px 16px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #fff;
 }
 
 .playlist-item:hover {
-  background-color: var(--el-fill-color-light);
+  background-color: rgba(255, 255, 255, 0.1);
   transform: translateX(4px);
 }
 
 .playlist-item-selected {
-  background-color: var(--el-color-primary-light-9);
-  border-left: 4px solid var(--el-color-primary);
+  background-color: rgba(29, 185, 84, 0.2);
+  border-left: 4px solid #1db954;
 }
 
 .playlist-info-row {
@@ -330,7 +363,7 @@ const resetState = () => {
   height: 48px;
   border-radius: 6px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s;
 }
 
@@ -346,7 +379,7 @@ const resetState = () => {
 .playlist-name {
   font-size: 14px;
   font-weight: 500;
-  color: var(--el-text-color-primary);
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -356,21 +389,30 @@ const resetState = () => {
   display: flex;
   gap: 12px;
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  color: #b3b3b3;
   margin-top: 4px;
 }
 
 .playlist-visibility.public {
-  color: var(--el-color-success);
+  color: #1db954;
 }
 
 .playlist-item-selected .playlist-name {
-  color: var(--el-color-primary);
+  color: #1db954;
   font-weight: 600;
 }
 
 .playlist-item-selected .playlist-meta {
-  color: var(--el-color-primary-light-3);
+  color: rgba(29, 185, 84, 0.8);
+}
+
+/* 空状态样式覆盖 */
+.existing-playlists :deep(.el-empty) {
+  background: transparent;
+}
+
+.existing-playlists :deep(.el-empty__description) {
+  color: #b3b3b3;
 }
 
 /* 右侧：创建新歌单 */
@@ -378,26 +420,87 @@ const resetState = () => {
   flex: 1;
   min-width: 200px;
   padding: 12px;
-  border: 1px solid var(--el-border-color-light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  background: var(--el-fill-color-blank);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .create-divider {
   margin: 0 0 12px 0;
 }
 
-:deep(.create-divider .el-divider__text) {
+.create-divider :deep(.el-divider__text) {
   white-space: nowrap;
   font-size: 14px;
   font-weight: 500;
-  color: var(--el-text-color-primary);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.create-divider :deep(.el-divider__line) {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .create-playlist-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.create-playlist-form :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.create-playlist-form :deep(.el-input__wrapper:hover) {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.create-playlist-form :deep(.el-input__wrapper.is-focus) {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.2);
+}
+
+.create-playlist-form :deep(.el-input__inner) {
+  color: #fff;
+}
+
+.create-playlist-form :deep(.el-input__inner::placeholder) {
+  color: #b3b3b3;
+}
+
+.create-playlist-form :deep(.el-textarea__inner) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.create-playlist-form :deep(.el-textarea__inner:hover) {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.create-playlist-form :deep(.el-textarea__inner:focus) {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.2);
+}
+
+.create-playlist-form :deep(.el-textarea__inner::placeholder) {
+  color: #b3b3b3;
+}
+
+.create-playlist-form :deep(.el-switch__label) {
+  color: #fff;
+}
+
+.create-playlist-form :deep(.el-switch__core) {
+  background-color: #5e5e5e;
+  border-color: #5e5e5e;
+}
+
+.create-playlist-form :deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #1db954;
+  border-color: #1db954;
 }
 
 .mt-2 {
@@ -411,11 +514,16 @@ const resetState = () => {
 .create-playlist-btn {
   border-radius: 20px;
   transition: all 0.3s;
+  background: #1db954;
+  border-color: #1db954;
+  color: #fff;
 }
 
 .create-playlist-btn:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+  background: #1ed760;
+  border-color: #1ed760;
 }
 
 /* 滚动条样式 */
@@ -425,12 +533,12 @@ const resetState = () => {
 }
 
 .existing-playlists :deep(.el-scrollbar__thumb) {
-  background-color: var(--el-border-color);
+  background-color: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
 
 .existing-playlists :deep(.el-scrollbar__thumb:hover) {
-  background-color: var(--el-border-color-darker);
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* 对话框底部 */
@@ -438,6 +546,55 @@ const resetState = () => {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.dialog-footer :deep(.el-button) {
+  color: #b3b3b3;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dialog-footer :deep(.el-button:hover) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dialog-footer :deep(.el-button--primary) {
+  background: #1db954;
+  border-color: #1db954;
+  color: #fff;
+}
+
+.dialog-footer :deep(.el-button--primary:hover) {
+  background: #1ed760;
+  border-color: #1ed760;
+}
+
+.dialog-footer :deep(.el-button--primary:disabled) {
+  background: #5e5e5e;
+  border-color: #5e5e5e;
+  color: #999;
+}
+
+/* 字数统计样式 */
+:deep(.el-input__count) {
+  color: #b3b3b3;
+  background: transparent;
+}
+
+:deep(.el-textarea__count) {
+  color: #b3b3b3;
+  background: rgba(40, 40, 40, 0.9);
+}
+
+/* 加载状态覆盖 */
+:deep(.el-loading-mask) {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+:deep(.el-loading-spinner) {
+  color: #1db954;
 }
 
 /* 响应式设计 */
@@ -451,11 +608,11 @@ const resetState = () => {
   .create-playlist {
     border: none;
     padding: 0;
-    max-width: none; /* 移动端取消宽度限制 */
+    max-width: none;
   }
 
   .playlist-search-input {
-    max-width: none; /* 移动端搜索框占满宽度 */
+    max-width: none;
   }
 
   .playlist-item {

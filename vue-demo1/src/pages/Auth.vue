@@ -147,8 +147,8 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
 import { User, Lock, Message, Phone, Location, ArrowDown } from '@element-plus/icons-vue';
-import { authApi } from '@/api';
-import { type ModelsLoginRequest, type ModelsRegisterRequest } from '@/api-client';
+import { authApi, userApi } from '@/api';
+import { type ModelsLoginRequest, type ModelsRegisterRequest, type ModelsUserProfile } from '@/api-client';
 import { AxiosError } from 'axios';
 import { useUserStore } from '@/stores/user';
 // --- 通用状态 ---
@@ -178,8 +178,6 @@ const handleLogin = async () => {
       try {
         const response = await authApi.authLoginPost(loginForm);
         const { token, user_id } = response.data;
-        // localStorage.setItem('token', token);
-        // localStorage.setItem('userId', JSON.stringify(user_id));
         userStore.setCredentials(token, JSON.stringify(user_id));
         if (rememberMe.value) {
           localStorage.setItem('remembered_username', loginForm.username);

@@ -8,6 +8,7 @@
             :title="artist?.name"
             :description="artist?.description"
             :meta-items="artistMetaItems"
+            :classification="classification"
           >
             <template #actions>
             </template>
@@ -54,6 +55,8 @@ const artistSortOptions = [
   { label: '点赞最多', value: 'like_count' },
   { label: '最早发布', value: 'oldest' },
 ];
+
+const classification = ref<string>('艺术家');
 
 // --- 计算属性，用于给 EntityInfo 传递数据 ---
 const artistMetaItems = computed(() => {

@@ -6,6 +6,7 @@
     @update:modelValue="emit('update:visible', $event)"
     @close="handleClose"
     :close-on-click-modal="false"
+    class="playlist-form-dialog"
   >
     <el-form :model="form" ref="formRef" label-position="top">
       <el-form-item label="歌单名称" prop="name"
@@ -130,8 +131,150 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
+/* Spotify 深色主题样式覆盖 */
+.playlist-form-dialog :deep(.el-dialog) {
+  background: #282828;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-dialog__header) {
+  background: #282828;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.playlist-form-dialog :deep(.el-dialog__title) {
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: #b3b3b3;
+}
+
+.playlist-form-dialog :deep(.el-dialog__headerbtn .el-dialog__close:hover) {
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-dialog__body) {
+  background: #282828;
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-dialog__footer) {
+  background: #282828;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 表单样式覆盖 */
+.playlist-form-dialog :deep(.el-form-item__label) {
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-form-item__error) {
+  color: #f56c6c;
+}
+
+/* 输入框样式 */
+.playlist-form-dialog :deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.playlist-form-dialog :deep(.el-input__wrapper:hover) {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.playlist-form-dialog :deep(.el-input__wrapper.is-focus) {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.2);
+}
+
+.playlist-form-dialog :deep(.el-input__inner) {
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-input__inner::placeholder) {
+  color: #b3b3b3;
+}
+
+/* 文本域样式 */
+.playlist-form-dialog :deep(.el-textarea__inner) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-textarea__inner:hover) {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.playlist-form-dialog :deep(.el-textarea__inner:focus) {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.2);
+}
+
+.playlist-form-dialog :deep(.el-textarea__inner::placeholder) {
+  color: #b3b3b3;
+}
+
+/* 开关样式 */
+.playlist-form-dialog :deep(.el-switch__label) {
+  color: #fff;
+}
+
+.playlist-form-dialog :deep(.el-switch__core) {
+  background-color: #5e5e5e;
+  border-color: #5e5e5e;
+}
+
+.playlist-form-dialog :deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #1db954;
+  border-color: #1db954;
+}
+
+/* 字数统计样式 */
+.playlist-form-dialog :deep(.el-input__count) {
+  color: #b3b3b3;
+  background: transparent;
+}
+
+.playlist-form-dialog :deep(.el-textarea__count) {
+  color: #b3b3b3;
+  background: rgba(40, 40, 40, 0.9);
+}
+
+/* 底部按钮样式 */
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
+}
+
+.dialog-footer :deep(.el-button) {
+  color: #b3b3b3;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dialog-footer :deep(.el-button:hover) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dialog-footer :deep(.el-button--primary) {
+  background: #1db954;
+  border-color: #1db954;
+  color: #fff;
+}
+
+.dialog-footer :deep(.el-button--primary:hover) {
+  background: #1ed760;
+  border-color: #1ed760;
+}
+
+.dialog-footer :deep(.el-button--primary:disabled) {
+  background: #5e5e5e;
+  border-color: #5e5e5e;
+  color: #999;
 }
 </style>

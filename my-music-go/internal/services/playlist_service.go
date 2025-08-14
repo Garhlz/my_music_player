@@ -38,7 +38,7 @@ func (s *PlaylistService) checkPlaylistOwner(userID, playlistID int64) (*models.
 
 // ListUserPlaylists 获取指定用户的歌单列表, 又带有常规的分页查询内容
 // 又有并行处理查询分页歌单和数量的逻辑
-func (s *PlaylistService) ListUserPlaylists(userID int64, params *models.ListPlaylistsRequestDTO) (*models.PaginatedResponseDTO, error) {
+func (s *PlaylistService) ListUserPlaylists(userID int64, params *models.ListPlaylistsRequestDTO, publicOnly bool) (*models.PaginatedResponseDTO, error) {
 	if params.Page <= 0 {
 		params.Page = 1
 	}
@@ -54,11 +54,11 @@ func (s *PlaylistService) ListUserPlaylists(userID int64, params *models.ListPla
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		playlists, errPlaylists = s.playlistRepo.ListByUserID(userID, params)
+		playlists, errPlaylists = s.playlistRepo.ListByUserID(userID, params, publicOnly)
 	}()
 	go func() {
 		defer wg.Done()
-		total, errTotal = s.playlistRepo.CountByUserID(userID, params)
+		total, errTotal = s.playlistRepo.CountByUserID(userID, params, publicOnly)
 	}()
 	wg.Wait()
 

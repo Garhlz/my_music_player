@@ -1,112 +1,112 @@
 <template>
   <CommonLayout :page-name="currentName">
-	<template #main>
-	  <div class="playlist-container">
-		<div class="player-content">
-		  <!-- 旋转的专辑封面 -->
-		  <div class="album-container" :class="{ 'is-playing': isPlaying }">
-			<div class="album-cover">
-			  <el-image
-				  :src="currentSong?.cover || '/assets/default-cover.jpg'"
-				  fit="cover"
-			  />
-			</div>
-		  </div>
+    <template #main>
+      <div class="playlist-container">
+        <div class="player-content">
+          <!-- 旋转的专辑封面 -->
+          <div class="album-container" :class="{ 'is-playing': isPlaying }">
+            <div class="album-cover">
+              <el-image
+                :src="currentSong?.cover || '/assets/default-cover.jpg'"
+                fit="cover"
+              />
+            </div>
+          </div>
 
-		  <!-- 歌曲信息 -->
-		  <div class="song-info">
-			<h2 class="song-name">{{ currentSong?.name || '未播放' }}</h2>
-			<p class="song-artist">{{ currentSong?.artist || '未知歌手' }}</p>
-		  </div>
+          <!-- 歌曲信息 -->
+          <div class="song-info">
+            <h2 class="song-name">{{ currentSong?.name || '未播放' }}</h2>
+            <p class="song-artist">{{ currentSong?.artist || '未知歌手' }}</p>
+          </div>
 
-		  <!-- 播放控制 -->
-		  <div class="player-controls">
-			<el-button circle @click="previousSong">
-			  <el-icon>
-				<ArrowLeft/>
-			  </el-icon>
-			</el-button>
-			<el-button circle @click="togglePlay">
-			  <el-icon>
-				<VideoPlay v-if="!isPlaying"/>
-				<VideoPause v-else/>
-			  </el-icon>
-			</el-button>
-			<el-button circle @click="nextSong">
-			  <el-icon>
-				<ArrowRight/>
-			  </el-icon>
-			</el-button>
-		  </div>
+          <!-- 播放控制 -->
+          <div class="player-controls">
+            <el-button circle @click="previousSong">
+              <el-icon>
+                <ArrowLeft />
+              </el-icon>
+            </el-button>
+            <el-button circle @click="togglePlay">
+              <el-icon>
+                <VideoPlay v-if="!isPlaying" />
+                <VideoPause v-else />
+              </el-icon>
+            </el-button>
+            <el-button circle @click="nextSong">
+              <el-icon>
+                <ArrowRight />
+              </el-icon>
+            </el-button>
+          </div>
 
-		  <!-- 音频控制器 -->
-		  <audio
-			  v-if="currentSong"
-			  :src="currentSong.url"
-			  ref="audioPlayer"
-			  @play="handlePlay"
-			  @pause="handlePause"
-			  @ended="handleEnded"
-			  @timeupdate="handleTimeUpdate"
-			  controls
-			  class="audio-player"
-		  ></audio>
-		</div>
-	  </div>
-	</template>
+          <!-- 音频控制器 -->
+          <audio
+            v-if="currentSong"
+            :src="currentSong.url"
+            ref="audioPlayer"
+            @play="handlePlay"
+            @pause="handlePause"
+            @ended="handleEnded"
+            @timeupdate="handleTimeUpdate"
+            controls
+            class="audio-player"
+          ></audio>
+        </div>
+      </div>
+    </template>
   </CommonLayout>
 </template>
 
 <script setup>
-import {ref, computed} from 'vue'
-import {useRouter} from 'vue-router'
-import CommonLayout from 'src/layouts/CommonLayout.vue'
-import {usePlayerStore} from 'src/stores/player'
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import CommonLayout from 'src/layouts/CommonLayout.vue';
+import { usePlayerStore } from '@/stores/player.js';
 import {
   ArrowLeft,
   ArrowRight,
   VideoPlay,
-  VideoPause
-} from '@element-plus/icons-vue'
+  VideoPause,
+} from '@element-plus/icons-vue';
 
-const router = useRouter()
-const playerStore = usePlayerStore()
-const currentName = ref('正在播放')
+const router = useRouter();
+const playerStore = usePlayerStore();
+const currentName = ref('正在播放');
 
-const currentSong = computed(() => playerStore.getCurrentSong)
-const isPlaying = computed(() => playerStore.getIsPlaying)
+const currentSong = computed(() => playerStore.getCurrentSong);
+const isPlaying = computed(() => playerStore.getIsPlaying);
 
 const togglePlay = () => {
   if (isPlaying.value) {
-	playerStore.pause()
+    playerStore.pause();
   } else {
-	playerStore.resume()
+    playerStore.resume();
   }
-}
+};
 
 const previousSong = () => {
-  playerStore.previous()
-}
+  playerStore.previous();
+};
 
 const nextSong = () => {
-  playerStore.next()
-}
+  playerStore.next();
+};
 
 const handlePlay = () => {
-  playerStore.resume()
-}
+  playerStore.resume();
+};
 
 const handlePause = () => {
-  playerStore.pause()
-}
+  playerStore.pause();
+};
 
 const handleEnded = () => {
-  playerStore.next()
-}
+  playerStore.next();
+};
 
 const handleTimeUpdate = (event) => {
   // 可以在这里处理播放进度更新
-}
+};
 </script>
 
 <style scoped>
@@ -150,10 +150,10 @@ const handleTimeUpdate = (event) => {
 
 @keyframes rotate {
   from {
-	transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   to {
-	transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 

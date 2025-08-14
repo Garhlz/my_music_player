@@ -1,5 +1,5 @@
 <template>
-  <CommonLayout :page-name="playlist?.name || '歌单详情'" :main-content-scrollable="false">
+  <CommonLayout :page-name="playlist?.name || '歌单详情'" :main-content-scrollable="true">
     <template #main>
       <DetailLayout :loading="isLoading">
         <template #info>
@@ -8,6 +8,7 @@
             :title="playlist?.name"
             :description="playlist?.description"
             :meta-items="playlistMetaItems"
+            :classification="classification"
           >
             <template #actions>
               <el-button v-if="isOwner" type="primary" @click="openEditDialog" round>
@@ -75,6 +76,7 @@ const playlistSortOptions = [
   { label: '点赞最多', value: 'like_count' },
   { label: '最早发布', value: 'oldest' },
 ];
+const classification = ref<string>('歌单');
 
 const isOwner = computed(() => {
   // 确保两个值都不是 null 或 undefined

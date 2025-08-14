@@ -1,9 +1,10 @@
 <template>
   <div class="song-list-container" v-loading="isLoading">
+    <!-- 搜索和筛选栏 -->
     <div class="filter-section">
       <el-input
         v-model="searchQuery"
-        placeholder="搜索歌曲、歌手、专辑"
+        placeholder="搜索歌曲、歌手或专辑"
         class="search-input"
         :prefix-icon="Search"
         clearable
@@ -13,10 +14,9 @@
       <el-select
         :model-value="props.sortBy"
         @update:modelValue="emit('update:sortBy', $event)"
-        placeholder="排序方式"
+        placeholder="排序"
         class="sort-select"
         @change="handleSearch"
-        popper-class="highest-z-index-popper"
       >
         <el-option
           v-for="option in props.sortOptions"
@@ -27,37 +27,44 @@
       </el-select>
     </div>
 
+    <!-- 空状态 -->
     <el-empty v-if="!isLoading && songs.length === 0" description="暂无歌曲" />
 
+    <!-- 歌曲列表 -->
     <div v-else class="song-list">
+      <!-- Spotify风格的简洁表头 -->
       <div class="song-header">
         <div class="col-index">#</div>
         <div class="col-title">标题</div>
-        <div class="col-duration">时长</div>
-        <div class="col-artist">歌手</div>
         <div class="col-album">专辑</div>
+        <div class="col-actions"></div>
+        <div class="col-duration">
+          <el-icon>
+            <Clock />
+          </el-icon>
+        </div>
       </div>
 
+      <!-- 歌曲项 -->
       <SongItem
         v-for="(song, index) in songs"
         :key="song.id"
         :song="song"
-        :index="index"
+        :index="(page - 1) * pageSize + index + 1"
         :is-liked="likedSongIds.has(song.id!)"
         :is-hovered="hoveredSong === song.id"
         :is-playing="playerStore.currentSong?.id === song.id"
         @update:hoveredId="hoveredSong = $event"
         @play="handlePlaySong"
-        @select="handleSelectSong"
         @like="likeSong"
         @addToPlaylist="openAddToPlaylistDialog"
-        @comment="goToComment"
-        @download="downloadSong"
+        @showMoreOptions="openMoreOptions"
         @goToArtist="goToArtist"
         @goToAlbum="goToAlbum"
       />
     </div>
 
+    <!-- 分页器 -->
     <el-pagination
       v-if="!isLoading && songs.length > 0"
       v-model:current-page="page"
@@ -71,26 +78,41 @@
       @current-change="handlePageChange"
     />
 
+    <!-- 添加到歌单对话框 -->
     <AddToPlaylistDialog
       v-model="playlistDialogVisible"
       :song-to-add="selectedSong"
       @confirm="handlePlaylistAddConfirm"
     />
+
+    <!-- 更多选项对话框 -->
+    <MoreOptionsDialog
+      v-model="moreOptionsVisible"
+      :song="selectedSong"
+      @comment="goToComment"
+      @download="downloadSong"
+      @goToArtist="goToArtist"
+      @goToAlbum="goToAlbum"
+      @addToPlaylist="openAddToPlaylistDialog"
+    />
   </div>
 </template>
+
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { Search, VideoPlay, Star, Plus, ChatDotRound, Download } from '@element-plus/icons-vue';
+import { Search, Clock } from '@element-plus/icons-vue';
 import { likeApi } from '@/api';
-import type { ModelsSongDetailDTO, SongsGetSortByEnum, ModelsPaginatedResponseDTO } from '@/api-client';
+import type { ModelsSongDetailDTO, ModelsPaginatedResponseDTO } from '@/api-client';
 import { usePlayerStore } from '@/stores/player';
 import { useUserStore } from '@/stores/user';
+import { storeToRefs } from 'pinia';
 import SongItem from '@/components/SongItem.vue';
 import AddToPlaylistDialog from '@/components/AddToPlaylistDialog.vue';
+import MoreOptionsDialog from '@/components/MoreOptionsDialog.vue';
 
-// --- 1. 定义 Props (组件的对外契约) ---
+// Props定义
 interface SortOption {
   label: string;
   value: string;
@@ -101,58 +123,88 @@ const props = defineProps<{
     data: ModelsPaginatedResponseDTO
   }>;
   sortOptions: SortOption[];
-  sortBy: string; // <--- 新增：接收父组件的 v-model 值
+  sortBy: string;
   searchPlaceholder?: string;
   emptyText?: string;
+  maxSongsForPlaylist?: number;
 }>();
 
-
-// 定义 Emits：明确告诉 Vue 这个组件会发出 update:sortBy 事件
+// Emits定义
 const emit = defineEmits<{
-  (e: 'update:sortBy', value: string): void; // <--- 新增：为 v-model 配套的事件
+  (e: 'update:sortBy', value: string): void;
 }>();
 
 // 初始化
 const router = useRouter();
 const playerStore = usePlayerStore();
 const userStore = useUserStore();
-
-import { storeToRefs } from 'pinia'; // 引入一个重要工具 storeToRefs
-// const contextMenu = ref(null);
 const { userId, isLoggedIn } = storeToRefs(userStore);
 
+// 响应式数据
 const songs = ref<ModelsSongDetailDTO[]>([]);
 const page = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(20); // 默认改为20，更符合Spotify风格
 const totalSongs = ref(0);
 const isLoading = ref(false);
 const searchQuery = ref('');
-
 const hoveredSong = ref<number | null>(null);
 const likedSongIds = ref<Set<number>>(new Set());
-// 似乎是展示专辑封面的窗口
-// const coverDialogVisible = ref(false);
 const playlistDialogVisible = ref(false);
+const moreOptionsVisible = ref(false);
 const selectedSong = ref<ModelsSongDetailDTO | null>(null);
-// const contextSong = ref<ModelsSongDetailDTO | null>(null);
-// const contextMenuPos = reactive<{ x: number; y: number }>({ x: 0, y: 0 });
 
-// 动态对话框宽度
-// const dialogWidth = computed(() => {
-//   return window.innerWidth <= 768 ? '90%' : '400px';
-// });
+// 缓存相关
+const allSongsCache = ref<ModelsSongDetailDTO[]>([]);
+const isCacheValid = ref(false);
 
-// 动态网格布局
-const columnLayout = computed(() => {
-  return window.innerWidth <= 768
-    ? '50px 3fr 100px'
-    : window.innerWidth <= 1200
-      ? '60px 2.5fr 100px 1.2fr 1.2fr'
-      : '60px minmax(300px, 2.5fr) 180px minmax(160px, 1fr) minmax(160px, 1fr)';
-});
+// 加载所有歌曲（用于播放列表）
+const loadAllSongs = async (): Promise<ModelsSongDetailDTO[]> => {
+  if (isCacheValid.value && allSongsCache.value.length > 0) {
+    return allSongsCache.value;
+  }
 
+  const maxSongs = props.maxSongsForPlaylist || 500;
+  const allSongs: ModelsSongDetailDTO[] = [];
+  let currentPage = 1;
+  const batchSize = 100;
 
-// --- 3. 核心数据加载与交互逻辑 ---
+  try {
+    const loadingMessage = ElMessage({
+      message: '正在准备播放列表...',
+      type: 'info',
+      duration: 0,
+      showClose: false,
+    });
+
+    while (allSongs.length < maxSongs) {
+      const response = await props.fetchFunction(
+        currentPage,
+        batchSize,
+        searchQuery.value,
+        props.sortBy,
+      );
+
+      const songs = (response.data.list as ModelsSongDetailDTO[]) || [];
+      allSongs.push(...songs);
+
+      if (songs.length < batchSize || allSongs.length >= response.data.total!) {
+        break;
+      }
+      currentPage++;
+    }
+
+    loadingMessage.close();
+    allSongsCache.value = allSongs;
+    isCacheValid.value = true;
+    return allSongs;
+  } catch (error) {
+    console.error('加载播放列表失败:', error);
+    ElMessage.error('加载播放列表失败');
+    return [];
+  }
+};
+
+// 加载数据
 const loadData = async (refreshLikes: boolean = true) => {
   isLoading.value = true;
   try {
@@ -160,12 +212,8 @@ const loadData = async (refreshLikes: boolean = true) => {
       props.fetchFunction(page.value, pageSize.value, searchQuery.value, props.sortBy),
     ];
 
-    // 仅在需要时刷新喜欢列表（例如，初次加载或页面大小改变时）
-    if (refreshLikes) {
-      // todo 可能需要修改这里的逻辑, 以后微调
-      if (isLoggedIn) {
-        fetchTasks.push(likeApi.meLikedSongsGet(1, 1000));
-      }
+    if (refreshLikes && isLoggedIn.value) {
+      fetchTasks.push(likeApi.meLikedSongsGet(1, 1000));
     }
 
     const [songsResponse, likedSongsResponse] = await Promise.all(fetchTasks);
@@ -184,19 +232,31 @@ const loadData = async (refreshLikes: boolean = true) => {
     isLoading.value = false;
   }
 };
-// 事件处理
-const handlePlaySong = (song: ModelsSongDetailDTO) => {
-  playerStore.setPlaylist([song]);
-  playerStore.play(0);
+
+// 处理播放歌曲
+const handlePlaySong = async (song: ModelsSongDetailDTO) => {
+  const needLoadAll = totalSongs.value > pageSize.value;
+
+  if (needLoadAll) {
+    const allSongs = await loadAllSongs();
+    if (allSongs.length > 0) {
+      const songIndex = allSongs.findIndex(s => s.id === song.id);
+      if (songIndex !== -1) {
+        playerStore.setPlaylist(allSongs, songIndex);
+        ElMessage.success(`已准备 ${allSongs.length} 首歌曲`);
+      }
+    }
+  } else {
+    const songIndex = songs.value.findIndex(s => s.id === song.id);
+    if (songIndex !== -1) {
+      playerStore.setPlaylist(songs.value, songIndex);
+    }
+  }
 };
 
-const handleSelectSong = (song: ModelsSongDetailDTO) => {
-  selectedSong.value = song;
-  coverDialogVisible.value = true;
-};
-
+// 喜欢/取消喜欢歌曲
 const likeSong = async (song: ModelsSongDetailDTO) => {
-  if (!isLoggedIn.value) { // 使用从 store 来的 getter
+  if (!isLoggedIn.value) {
     ElMessage.warning('请先登录');
     return;
   }
@@ -205,11 +265,11 @@ const likeSong = async (song: ModelsSongDetailDTO) => {
     if (likedSongIds.value.has(songId)) {
       await likeApi.meLikedSongsSongIdDelete(songId);
       likedSongIds.value.delete(songId);
-      ElMessage.success(`已取消喜欢: ${song.name}`);
+      ElMessage.success('已取消喜欢');
     } else {
       await likeApi.meLikedSongsSongIdPost(songId);
       likedSongIds.value.add(songId);
-      ElMessage.success(`已添加到我喜欢: ${song.name}`);
+      ElMessage.success('已添加到喜欢的音乐');
     }
   } catch (error) {
     console.error('操作失败:', error);
@@ -217,6 +277,7 @@ const likeSong = async (song: ModelsSongDetailDTO) => {
   }
 };
 
+// 打开添加到歌单对话框
 const openAddToPlaylistDialog = (song: ModelsSongDetailDTO) => {
   if (!isLoggedIn.value) {
     ElMessage.warning('请先登录');
@@ -226,8 +287,16 @@ const openAddToPlaylistDialog = (song: ModelsSongDetailDTO) => {
   playlistDialogVisible.value = true;
 };
 
+// 打开更多选项对话框
+const openMoreOptions = (song: ModelsSongDetailDTO) => {
+  selectedSong.value = song;
+  moreOptionsVisible.value = true;
+};
+
+// 其他事件处理
 const handlePlaylistAddConfirm = (data: { playlistId: number; songName: string }) => {
-  ElMessage.success(`已将歌曲《${data.songName}》成功添加到歌单`);
+  ElMessage.success(`已添加到歌单`);
+  playlistDialogVisible.value = false;
 };
 
 const handleSearch = () => {
@@ -237,7 +306,7 @@ const handleSearch = () => {
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage;
-  loadData();
+  loadData(false);
 };
 
 const handlePageSizeChange = (newSize: number) => {
@@ -249,222 +318,199 @@ const handlePageSizeChange = (newSize: number) => {
 const goToArtist = (artistId?: number | null) => {
   if (artistId) {
     router.push(`/artist/${artistId}`);
-  } else {
-    ElMessage.error('歌手不存在!');
   }
 };
 
 const goToAlbum = (albumId?: number | null) => {
   if (albumId) {
     router.push(`/album/${albumId}`);
-  } else {
-    ElMessage.error('专辑不存在!');
   }
 };
 
 const goToComment = (song: ModelsSongDetailDTO) => {
-  router.push(`/comment/${song.id}`);
+  if (song?.id) {
+    router.push(`/comment/${song.id}`);
+  }
 };
 
-// todo 下载功能
 const downloadSong = (song: ModelsSongDetailDTO) => {
   ElMessage.info(`开始下载: ${song.name}`);
+  // TODO: 实现下载功能
 };
 
-// const handleContextMenu = ({ song, x, y }: { song: ModelsSongDetailDTO; x: number; y: number }) => {
-//   contextSong.value = song;
-//   contextMenuPos.x = x;
-//   contextMenuPos.y = y;
-//   nextTick(() => {
-//     (contextMenu.value as any)?.show();
-//   });
-// };
-
-// const handleContextMenuVisible = (visible: boolean) => {
-//   if (!visible) {
-//     contextSong.value = null;
-//   }
-// };
+// 监听搜索和排序变化
+watch([searchQuery, () => props.sortBy], () => {
+  isCacheValid.value = false;
+  allSongsCache.value = [];
+});
 
 // 生命周期
 onMounted(() => {
   loadData();
 });
-
-// defineExpose({
-//   loadData,
-// });
 </script>
 
 <style scoped>
-/* 容器样式 */
+/* Spotify风格的容器 */
 .song-list-container {
-  margin-right: 16px;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background-color: #121212;
+  color: #fff;
+  border-radius: 8px;
   padding: 24px;
-  //height: 100%;
-  //overflow-y: auto;
-  animation: fadeIn 0.5s ease-in;
+  min-height: 100%;
 }
 
-/* 过滤区域 */
+/* 搜索和筛选栏 */
 .filter-section {
   display: flex;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   align-items: center;
-  position: relative; /* 必须设置 position 才能让 z-index 生效 */
-  z-index: 2; /* 设置一个比 song-header 的 z-index: 1 更高的值 */
 }
 
 .search-input {
-  width: 300px;
-  transition: all 0.3s;
+  width: 350px;
+  --el-input-bg-color: #242424;
+  --el-input-border-color: transparent;
+  --el-input-text-color: #fff;
+  --el-input-placeholder-color: #b3b3b3;
 }
 
 :deep(.search-input .el-input__wrapper) {
-  border-radius: 20px;
+  background-color: #242424;
+  border-radius: 500px;
+  padding: 6px 14px;
+  box-shadow: none;
 }
 
 :deep(.search-input .el-input__wrapper:hover) {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #2a2a2a;
+  border-color: #535353;
+}
+
+:deep(.search-input .el-input__wrapper.is-focus) {
+  border-color: #fff;
+  background-color: #2a2a2a;
 }
 
 .sort-select {
   width: 160px;
+  --el-select-input-color: #fff;
+  --el-select-border-color-hover: #535353;
 }
 
 :deep(.sort-select .el-select__wrapper) {
-  border-radius: 20px;
+  background-color: #242424;
+  border-radius: 4px;
+  border-color: transparent;
 }
 
 :deep(.sort-select .el-select__wrapper:hover) {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #2a2a2a;
+  border-color: #535353;
 }
 
 /* 歌曲列表 */
 .song-list {
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  overflow: hidden;
+  margin-top: 16px;
 }
 
-/* 表头样式 */
+/* Spotify风格的表头 */
 .song-header {
-  position: sticky;
-  top: 0;
   display: grid;
-  grid-template-columns: v-bind(columnLayout);
-  padding: 12px 24px;
-  background: linear-gradient(180deg, #f5f7fa, #ffffff);
-  border-bottom: 1px solid #ebeef5;
-  font-weight: 600;
-  color: #303133;
-  align-items: center;
-  z-index: 1;
+  grid-template-columns: 48px 1fr minmax(120px, 1fr) 180px 60px;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+  color: #b3b3b3;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 .col-index {
   text-align: center;
-  font-size: 14px;
 }
 
 .col-title {
-  padding-left: 16px;
+  padding-left: 52px;
 }
 
-.col-duration,
-.col-artist,
 .col-album {
-  padding: 0 12px;
+  padding-left: 4px;
+}
+
+.col-duration {
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.col-duration .el-icon {
+  font-size: 16px;
 }
 
 /* 分页器 */
 .pagination {
-  margin-top: 24px;
-  padding: 16px 0;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: center;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+  --el-pagination-bg-color: transparent;
+  --el-pagination-text-color: #b3b3b3;
+  --el-pagination-hover-color: #fff;
+  --el-pagination-button-disabled-bg-color: transparent;
 }
 
-:deep(.el-pagination.is-background .el-pager li.is-active) {
-  background-color: var(--el-color-primary);
+:deep(.el-pagination.is-background .btn-prev),
+:deep(.el-pagination.is-background .btn-next),
+:deep(.el-pagination.is-background .el-pager li) {
+  background-color: transparent;
+  color: #b3b3b3;
+}
+
+:deep(.el-pagination.is-background .el-pager li:hover) {
   color: #fff;
 }
 
-:deep(.el-pagination.is-background .btn-prev, .el-pagination.is-background .btn-next) {
-  border-radius: 8px;
-}
-
-/* 封面预览 */
-.cover-preview {
-  display: flex;
-  justify-content: center;
-}
-
-.cover-preview .el-image {
-  width: 100%;
-  max-width: 300px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+  background-color: #1db954;
+  color: #000;
+  font-weight: 600;
 }
 
 /* 滚动条样式 */
 .song-list-container::-webkit-scrollbar {
-  width: 6px;
+  width: 12px;
 }
 
 .song-list-container::-webkit-scrollbar-thumb {
-  background-color: #dcdfe6;
-  border-radius: 3px;
+  background-color: #535353;
+  border-radius: 6px;
+}
+
+.song-list-container::-webkit-scrollbar-thumb:hover {
+  background-color: #b3b3b3;
 }
 
 .song-list-container::-webkit-scrollbar-track {
-  background-color: #f5f7fa;
-}
-
-/* 动画 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  background-color: transparent;
 }
 
 /* 响应式设计 */
-@media screen and (max-width: 1200px) {
-  .filter-section {
-    gap: 12px;
-  }
-
-  .search-input {
-    width: 250px;
-  }
-
-  .sort-select {
-    width: 140px;
-  }
-}
-
 @media screen and (max-width: 768px) {
   .song-list-container {
-    margin-right: 0;
     padding: 16px;
   }
 
   .filter-section {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
   }
 
   .search-input,
@@ -473,11 +519,11 @@ onMounted(() => {
   }
 
   .song-header {
-    display: none; /* 移动端隐藏表头 */
+    grid-template-columns: 40px 1fr 50px;
   }
-}
 
-:deep(.highest-z-index-popper) {
-  z-index: 9999 !important;
+  .col-album {
+    display: none;
+  }
 }
 </style>
