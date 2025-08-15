@@ -52,6 +52,7 @@
             @view="navigateToDetail"
             @edit="handleOpenEditDialog"
             @delete="handleDelete"
+            @play="handleSongPlay"
           />
 
           <!-- 空状态 -->
@@ -106,6 +107,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, Plus, FolderOpened } from '@element-plus/icons-vue';
+import { usePlayerStore } from '@/stores/player';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 import { playlistApi, userApi } from '@/api';
@@ -120,6 +122,7 @@ import PlaylistFormDialog from '@/components/PlaylistFormDialog.vue';
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
+const playerStore = usePlayerStore();
 const { userId: currentUserId } = storeToRefs(userStore);
 
 // --- Page State ---
@@ -203,6 +206,17 @@ const handlePageChange = () => {
 const navigateToDetail = (id: number) => {
   router.push(`/playlist/${id}`);
 };
+
+const handleSongPlay =  async (id: number) => {
+  const resp = await playlistApi.playlistsPlaylistIdSongsGet(id);
+  const songs = resp.data.list;
+  if (songs.length > 0) {
+    playerStore.setPlaylist(songs, 0);
+  } else {
+    ElMessage.warning('该歌单没有歌曲');
+  }
+}
+
 
 const handleOpenCreateDialog = () => {
   dialogMode.value = 'create';

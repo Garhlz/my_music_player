@@ -1012,6 +1012,70 @@
                 }
             }
         },
+        "/me/liked-songs/{songId}/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "喜欢 (Like)"
+                ],
+                "summary": "检查歌曲喜欢状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "歌曲 ID",
+                        "name": "songId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回喜欢状态",
+                        "schema": {
+                            "$ref": "#/definitions/models.LikeStatusResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证（未提供Token或Token无效）\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"歌曲不存在\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"服务器内部错误\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/me/playlists": {
             "get": {
                 "security": [
@@ -2306,6 +2370,16 @@
                 },
                 "like_count": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.LikeStatusResponse": {
+            "type": "object",
+            "properties": {
+                "isLiked": {
+                    "description": "是否已喜欢",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },

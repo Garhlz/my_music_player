@@ -421,6 +421,19 @@ export interface ModelsLikeCommentResponseDTO {
 /**
  * 
  * @export
+ * @interface ModelsLikeStatusResponse
+ */
+export interface ModelsLikeStatusResponse {
+    /**
+     * 是否已喜欢
+     * @type {boolean}
+     * @memberof ModelsLikeStatusResponse
+     */
+    'isLiked'?: boolean;
+}
+/**
+ * 
+ * @export
  * @interface ModelsLoginRequest
  */
 export interface ModelsLoginRequest {
@@ -2480,6 +2493,43 @@ export const LikeApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
+         * 根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+         * @summary 检查歌曲喜欢状态
+         * @param {number} songId 歌曲 ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        meLikedSongsSongIdStatusGet: async (songId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'songId' is not null or undefined
+            assertParamExists('meLikedSongsSongIdStatusGet', 'songId', songId)
+            const localVarPath = `/me/liked-songs/{songId}/status`
+                .replace(`{${"songId"}}`, encodeURIComponent(String(songId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 获取指定用户的公开喜欢歌曲分页列表，支持搜索和排序。
          * @summary 获取指定用户的喜欢列表
          * @param {number} id 用户 ID
@@ -2589,6 +2639,19 @@ export const LikeApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * 根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+         * @summary 检查歌曲喜欢状态
+         * @param {number} songId 歌曲 ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async meLikedSongsSongIdStatusGet(songId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelsLikeStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.meLikedSongsSongIdStatusGet(songId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['LikeApi.meLikedSongsSongIdStatusGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 获取指定用户的公开喜欢歌曲分页列表，支持搜索和排序。
          * @summary 获取指定用户的喜欢列表
          * @param {number} id 用户 ID
@@ -2649,6 +2712,16 @@ export const LikeApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.meLikedSongsSongIdPost(songId, options).then((request) => request(axios, basePath));
         },
         /**
+         * 根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+         * @summary 检查歌曲喜欢状态
+         * @param {number} songId 歌曲 ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        meLikedSongsSongIdStatusGet(songId: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsLikeStatusResponse> {
+            return localVarFp.meLikedSongsSongIdStatusGet(songId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 获取指定用户的公开喜欢歌曲分页列表，支持搜索和排序。
          * @summary 获取指定用户的喜欢列表
          * @param {number} id 用户 ID
@@ -2703,6 +2776,16 @@ export interface LikeApiInterface {
      * @memberof LikeApiInterface
      */
     meLikedSongsSongIdPost(songId: number, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: string; }>;
+
+    /**
+     * 根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+     * @summary 检查歌曲喜欢状态
+     * @param {number} songId 歌曲 ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LikeApiInterface
+     */
+    meLikedSongsSongIdStatusGet(songId: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsLikeStatusResponse>;
 
     /**
      * 获取指定用户的公开喜欢歌曲分页列表，支持搜索和排序。
@@ -2764,6 +2847,18 @@ export class LikeApi extends BaseAPI implements LikeApiInterface {
      */
     public meLikedSongsSongIdPost(songId: number, options?: RawAxiosRequestConfig) {
         return LikeApiFp(this.configuration).meLikedSongsSongIdPost(songId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+     * @summary 检查歌曲喜欢状态
+     * @param {number} songId 歌曲 ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof LikeApi
+     */
+    public meLikedSongsSongIdStatusGet(songId: number, options?: RawAxiosRequestConfig) {
+        return LikeApiFp(this.configuration).meLikedSongsSongIdStatusGet(songId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

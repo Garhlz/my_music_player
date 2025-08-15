@@ -25,3 +25,10 @@ type ListLikedSongsRequestDTO struct {
 	Search   string `form:"search"`
 	SortBy   string `form:"sortBy"`
 }
+
+// LikeStatusResponse 定义了检查喜欢状态接口的成功响应体
+type LikeStatusResponse struct {
+	IsLiked bool `json:"isLiked" example:"true"` // 是否已喜欢
+}
+
+// ErrorResponse 定义了通用的错误响应体

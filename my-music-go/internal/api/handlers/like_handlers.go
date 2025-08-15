@@ -162,3 +162,39 @@ func (h *LikeHandler) UnlikeSong(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "取消成功"})
 }
+
+// GetMyLikedSongStatus 检查当前认证用户是否喜欢某首歌曲
+// @Summary      检查歌曲喜欢状态
+// @Description  根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+// @Tags         喜欢 (Like)
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        songId   path      int  true  "歌曲 ID"
+// @Success      200      {object}  models.LikeStatusResponse "成功返回喜欢状态"
+// @Failure      401      {object}  map[string]string "{"error": "需要认证（未提供Token或Token无效）"}"
+// @Failure      404      {object}  map[string]string "{"error": "歌曲不存在"}"
+// @Failure      500      {object}  map[string]string "{"error": "服务器内部错误"}"
+// @Router       /me/liked-songs/{songId}/status [get]
+func (h *LikeHandler) GetMyLikedSongStatus(c *gin.Context) {
+	authUserID := c.MustGet("userID").(int64)
+	songID, err := GetIDFromParam(c, "songId")
+	if err != nil {
+		return
+	}
+
+	isLiked, err := h.likeService.GetLikedSongStatus(authUserID, songID)
+	if err != nil {
+		if errors.Is(err, services.ErrSongNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "歌曲不存在"})
+		} else {
+			log.Printf("获取当前用户喜欢状态失败: %+v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "操作失败，请稍后重试"})
+		}
+		return // 如果出错, 要停止执行...
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"isLiked": *isLiked,
+	})
+}

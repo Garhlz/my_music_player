@@ -13,7 +13,7 @@
   </div>
 
   <!-- 空状态 - 使用深色主题样式 -->
-  <div v-else class="empty-grid">
+  <!-- <div v-else class="empty-grid">
     <div class="empty-content">
       <el-icon class="empty-icon">
         <FolderOpened />
@@ -21,7 +21,7 @@
       <h3 class="empty-title">还没有创建歌单</h3>
       <p class="empty-description">开始创建你的第一个歌单，收集喜欢的音乐</p>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup lang="ts">

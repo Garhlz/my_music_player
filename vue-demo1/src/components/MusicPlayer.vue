@@ -59,12 +59,15 @@
               <Right />
             </el-icon>
           </el-button>
-
-          <el-button text circle size="small" class="like-button">
-            <el-icon size="16">
-              <Star />
-            </el-icon>
-          </el-button>
+          <el-tooltip :content="isCurrentSongLiked ? '取消喜欢' : '喜欢'" placement="top" :hide-after="0">
+            <el-button text circle @click="handleLikeToggle" class="control-button">
+              <el-icon size="16"
+                       :class="{active: isCurrentSongLiked}">
+                <StarFilled v-if="isCurrentSongLiked" />
+                <Star v-else />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
 
         </div>
 
@@ -111,15 +114,24 @@
 import { ref, watch, computed, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePlayerStore, PlaybackMode } from '@/stores/player';
+import { useUserStore } from '@/stores/user';
+import { useLikeStore } from '@/stores/like';
 import { storeToRefs } from 'pinia';
 import { formatDuration } from '@/utils/format';
 import {
   VideoPlay, VideoPause, Back, Right, Mute, Headset,
-  Sort, Switch, Operation, Refresh, Star,
+  Sort, Switch, Operation, Refresh, Star, StarFilled,
 } from '@element-plus/icons-vue';
 
+import { likeApi } from '@/api';
+import type { ModelsSongDetailDTO } from '@/api-client';
+import { ElMessage } from 'element-plus';
+
 const playerStore = usePlayerStore();
+const userStore = useUserStore();
+const likeStore = useLikeStore();
 const { currentSong, isPlaying, currentTime, duration } = storeToRefs(playerStore);
+const { isLoggedIn } = storeToRefs(userStore);
 const router = useRouter();
 const audioEl = ref<HTMLAudioElement | null>(null);
 const volume = ref(80);
@@ -128,6 +140,11 @@ const isDraggingProgress = ref(false);
 
 // 添加一个标记，防止恢复进度时触发 timeupdate
 const isRestoringProgress = ref(false);
+
+const isCurrentSongLiked = computed(() => {
+  if (!currentSong.value?.id) return false;
+  return likeStore.isLiked(currentSong.value.id);
+});
 
 const currentVolume = computed(() => (isMuted.value ? 0 : volume.value / 100));
 const playbackModeTooltip = computed(() => {
@@ -143,6 +160,7 @@ onMounted(() => {
     restorePlaybackState();
   }
 });
+
 
 // 恢复播放状态的函数
 const restorePlaybackState = async () => {
@@ -253,6 +271,21 @@ const goToPlayerPage = () => {
   }
 };
 
+const handleLikeToggle = () => {
+  if (!isLoggedIn.value) {
+    ElMessage.warning('请先登录');
+    return;
+  }
+  const songId = currentSong.value?.id;
+  if (!songId) return;
+
+  if (isCurrentSongLiked.value) {
+    likeStore.unlikeSong(songId);
+  } else {
+    likeStore.likeSong(songId);
+  }
+};
+
 // --- Watchers for State Synchronization ---
 watch(isPlaying, (newIsPlaying) => {
   if (!audioEl.value) return;
@@ -292,6 +325,7 @@ watch(() => currentSong.value?.id, (newId, oldId) => {
         }
       }
     });
+
   }
 }, { immediate: true });
 </script>
@@ -446,6 +480,11 @@ watch(() => currentSong.value?.id, (newId, oldId) => {
   transition: all 0.2s ease;
   width: 32px;
   height: 32px;
+}
+
+/* 激活状态的图标变为 Spotify 绿 */
+.control-button .el-icon.active {
+  color: #1db954;
 }
 
 .mode-button:hover,

@@ -125,6 +125,13 @@ definitions:
       like_count:
         type: integer
     type: object
+  models.LikeStatusResponse:
+    properties:
+      isLiked:
+        description: 是否已喜欢
+        example: true
+        type: boolean
+    type: object
   models.LoginRequest:
     properties:
       password:
@@ -957,6 +964,47 @@ paths:
       security:
       - BearerAuth: []
       summary: 添加歌曲到我喜欢列表
+      tags:
+      - 喜欢 (Like)
+  /me/liked-songs/{songId}/status:
+    get:
+      consumes:
+      - application/json
+      description: 根据歌曲ID，检查当前通过认证的用户是否已经喜欢了该歌曲。
+      parameters:
+      - description: 歌曲 ID
+        in: path
+        name: songId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回喜欢状态
+          schema:
+            $ref: '#/definitions/models.LikeStatusResponse'
+        "401":
+          description: '{"error": "需要认证（未提供Token或Token无效）"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "歌曲不存在"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "服务器内部错误"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 检查歌曲喜欢状态
       tags:
       - 喜欢 (Like)
   /me/playlists:

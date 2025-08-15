@@ -93,3 +93,16 @@ func (s *LikeService) UnlikeSong(userID, songID int64) error {
 	}
 	return nil
 }
+
+func (s *LikeService) GetLikedSongStatus(userID, songID int64) (*bool, error) {
+	song, err := s.songRepo.FindDetailByID(songID)
+	if err != nil {
+		return nil, fmt.Errorf("database error on find song: %w", err)
+	}
+	if song == nil {
+		return nil, ErrSongNotFound
+	}
+
+	res, err := s.likeRepo.IsLiked(userID, songID)
+	return &res, err
+}

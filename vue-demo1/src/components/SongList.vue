@@ -51,12 +51,12 @@
         :key="song.id"
         :song="song"
         :index="(page - 1) * pageSize + index + 1"
-        :is-liked="likedSongIds.has(song.id!)"
+        :is-liked="likeStore.isLiked(song.id!)"
         :is-hovered="hoveredSong === song.id"
         :is-playing="playerStore.currentSong?.id === song.id"
         @update:hoveredId="hoveredSong = $event"
         @play="handlePlaySong"
-        @like="likeSong"
+        @like="handleLikeToggle"
         @addToPlaylist="openAddToPlaylistDialog"
         @showMoreOptions="openMoreOptions"
         @goToArtist="goToArtist"
@@ -107,6 +107,7 @@ import { likeApi } from '@/api';
 import type { ModelsSongDetailDTO, ModelsPaginatedResponseDTO } from '@/api-client';
 import { usePlayerStore } from '@/stores/player';
 import { useUserStore } from '@/stores/user';
+import { useLikeStore } from '@/stores/like';
 import { storeToRefs } from 'pinia';
 import SongItem from '@/components/SongItem.vue';
 import AddToPlaylistDialog from '@/components/AddToPlaylistDialog.vue';
@@ -138,6 +139,7 @@ const emit = defineEmits<{
 const router = useRouter();
 const playerStore = usePlayerStore();
 const userStore = useUserStore();
+const likeStore = useLikeStore();
 const { userId, isLoggedIn } = storeToRefs(userStore);
 
 // 响应式数据
@@ -148,7 +150,6 @@ const totalSongs = ref(0);
 const isLoading = ref(false);
 const searchQuery = ref('');
 const hoveredSong = ref<number | null>(null);
-const likedSongIds = ref<Set<number>>(new Set());
 const playlistDialogVisible = ref(false);
 const moreOptionsVisible = ref(false);
 const selectedSong = ref<ModelsSongDetailDTO | null>(null);
@@ -205,26 +206,12 @@ const loadAllSongs = async (): Promise<ModelsSongDetailDTO[]> => {
 };
 
 // 加载数据
-const loadData = async (refreshLikes: boolean = true) => {
+const loadData = async () => {
   isLoading.value = true;
   try {
-    const fetchTasks = [
-      props.fetchFunction(page.value, pageSize.value, searchQuery.value, props.sortBy),
-    ];
-
-    if (refreshLikes && isLoggedIn.value) {
-      fetchTasks.push(likeApi.meLikedSongsGet(1, 1000));
-    }
-
-    const [songsResponse, likedSongsResponse] = await Promise.all(fetchTasks);
-
+    const songsResponse = await props.fetchFunction(page.value, pageSize.value, searchQuery.value, props.sortBy);
     songs.value = (songsResponse.data.list as ModelsSongDetailDTO[]) || [];
     totalSongs.value = songsResponse.data.total || 0;
-
-    if (likedSongsResponse) {
-      const likedData = (likedSongsResponse.data.list as ModelsSongDetailDTO[]) || [];
-      likedSongIds.value = new Set(likedData.map(song => song.id!));
-    }
   } catch (error) {
     console.error('加载数据失败:', error);
     ElMessage.error('加载数据失败，请稍后重试');
@@ -255,25 +242,18 @@ const handlePlaySong = async (song: ModelsSongDetailDTO) => {
 };
 
 // 喜欢/取消喜欢歌曲
-const likeSong = async (song: ModelsSongDetailDTO) => {
+const handleLikeToggle = (song: ModelsSongDetailDTO) => {
   if (!isLoggedIn.value) {
     ElMessage.warning('请先登录');
     return;
   }
-  try {
-    const songId = song.id!;
-    if (likedSongIds.value.has(songId)) {
-      await likeApi.meLikedSongsSongIdDelete(songId);
-      likedSongIds.value.delete(songId);
-      ElMessage.success('已取消喜欢');
-    } else {
-      await likeApi.meLikedSongsSongIdPost(songId);
-      likedSongIds.value.add(songId);
-      ElMessage.success('已添加到喜欢的音乐');
-    }
-  } catch (error) {
-    console.error('操作失败:', error);
-    ElMessage.error('操作失败，请稍后重试');
+  const songId = song.id!;
+  if (likeStore.isLiked(songId)) {
+    likeStore.unlikeSong(songId);
+    ElMessage.success('已取消喜欢');
+  } else {
+    likeStore.likeSong(songId);
+    ElMessage.success('已添加到喜欢的音乐');
   }
 };
 

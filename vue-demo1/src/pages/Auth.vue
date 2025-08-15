@@ -151,9 +151,11 @@ import { authApi, userApi } from '@/api';
 import { type ModelsLoginRequest, type ModelsRegisterRequest, type ModelsUserProfile } from '@/api-client';
 import { AxiosError } from 'axios';
 import { useUserStore } from '@/stores/user';
+import { useLikeStore } from '@/stores/like';
 // --- 通用状态 ---
 const router = useRouter();
 const userStore = useUserStore();
+const likeStore = useLikeStore();
 const loading = ref(false);
 const activeTab = ref<'login' | 'register'>('login');
 
@@ -179,6 +181,7 @@ const handleLogin = async () => {
         const response = await authApi.authLoginPost(loginForm);
         const { token, user_id } = response.data;
         userStore.setCredentials(token, JSON.stringify(user_id));
+        await likeStore.fetchLikedSongs();
         if (rememberMe.value) {
           localStorage.setItem('remembered_username', loginForm.username);
         } else {

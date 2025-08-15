@@ -58,6 +58,7 @@ func SetupRouter(
 					likedSongsRoutes := meRoutes.Group("/liked-songs")
 					{
 						likedSongsRoutes.GET("", likeHandler.ListMyLikedSongs)
+						likedSongsRoutes.GET("/:songId/status", likeHandler.GetMyLikedSongStatus)
 						likedSongsRoutes.POST("/:songId", likeHandler.LikeSong)
 						likedSongsRoutes.DELETE("/:songId", likeHandler.UnlikeSong)
 					}
