@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'; // 引入 watch
-import { useRoute } from "vue-router";
+import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 import { likeApi, userApi } from '@/api';
@@ -75,7 +75,7 @@ const handleIdChange = async (id: number) => {
       const res = await userApi.usersIdNameGet(id);
       targetUserName.value = res.data.name || res.data.username || '用户';
     } catch {
-      targetUserName.value = '一位用户';
+      targetUserName.value = '某用户';
     }
   }
 };
@@ -88,7 +88,7 @@ watch(
       handleIdChange(Number(newId));
     }
   },
-  { immediate: true } // immediate: true 确保组件首次加载时也会执行
+  { immediate: true }, // immediate: true 确保组件首次加载时也会执行
 );
 
 </script>

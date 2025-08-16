@@ -29,10 +29,13 @@
 
     <div v-if="comments.length > 0" class="comment-list">
       <div v-for="comment in comments" :key="comment.id" class="comment-item">
-        <el-avatar :size="40" :src="comment.avatar" class="comment-avatar" />
+        <el-avatar :size="40" :src="comment.avatar" class="comment-avatar clickable"
+                   @click="goToUserProfile(comment.user_id)" />
         <div class="comment-body">
           <div class="comment-header">
-            <span class="username">{{ comment.name || comment.username }}</span>
+            <span class="username clickable"
+                  @click="goToUserProfile(comment.user_id)">{{ comment.name || comment.username
+              }}</span>
             <span class="timestamp">{{ formatTime(comment.created_at) }}</span>
           </div>
           <p class="comment-text">{{ comment.text }}</p>
@@ -49,14 +52,19 @@
 
           <div v-if="comment.replies && comment.replies.length > 0" class="reply-list">
             <div v-for="reply in comment.replies" :key="reply.id" class="comment-item reply-item">
-              <el-avatar :size="32" :src="reply.avatar" class="comment-avatar" />
+              <el-avatar :size="32" :src="reply.avatar" class="comment-avatar clickable"
+                         @click="goToUserProfile(reply.user_id)" />
               <div class="comment-body">
                 <div class="comment-header">
-                  <span class="username">{{ reply.name || reply.username }}</span>
+                  <span class="username clickable"
+                        @click="goToUserProfile(reply.user_id)">{{ reply.name || reply.username
+                    }}</span>
                   <el-icon class="reply-arrow">
                     <CaretRight />
                   </el-icon>
-                  <span class="username reply-to-user">{{ reply.reply_to_name || reply.reply_to_username }}</span>
+                  <span class="username reply-to-user clickable"
+                        @click="goToUserProfile(reply.reply_to_user_id)">{{ reply.reply_to_name || reply.reply_to_username
+                    }}</span>
                   <span class="timestamp">{{ formatTime(reply.created_at) }}</span>
                 </div>
                 <p class="comment-text">{{ reply.text }}</p>
@@ -95,6 +103,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 import { commentApi, userApi } from '@/api';
@@ -105,10 +114,11 @@ import { ArrowUpBold, Close, CaretRight } from '@element-plus/icons-vue';
 import { zhCN } from 'date-fns/locale';
 import { formatRelativeTime } from '@/utils/format';
 
+
 const formatTime = formatRelativeTime;
 const props = defineProps<{ songId: number }>();
+const router = useRouter();
 const userStore = useUserStore();
-// [THE FIX] 同时获取 isLoggedIn 和 userId，并重命名 userProfile
 const { userId: currentUserId, isLoggedIn } = storeToRefs(userStore); // 从 store 获取 isLoggedIn
 
 
@@ -216,6 +226,12 @@ const handlePageSizeChange = (newSize: number) => {
   pageSize.value = newSize;
   page.value = 1;
   loadData();
+};
+
+const goToUserProfile = (userId?: number) => {
+  if (userId) {
+    router.push(`/profile/${userId}`);
+  }
 };
 
 onMounted(async () => {
@@ -406,5 +422,19 @@ onMounted(async () => {
   background-color: #1db954;
   color: #000;
   font-weight: 600;
+}
+
+/* [THE FIX] Add styles for clickable elements */
+.clickable {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clickable:hover {
+  opacity: 0.8;
+}
+
+.username.clickable:hover {
+  text-decoration: underline;
 }
 </style>
