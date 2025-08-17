@@ -40,7 +40,7 @@
           </div>
           <p class="comment-text">{{ comment.text }}</p>
           <div class="comment-footer">
-            <el-button text :icon="ArrowUpBold" @click="likeComment(comment)">
+            <el-button text :icon="ArrowUpBold" @click="toggleLikeComment(comment)">
               {{ comment.like_count || 0 }}
             </el-button>
             <el-button text @click="setReplyTarget(comment)">回复</el-button>
@@ -69,7 +69,7 @@
                 </div>
                 <p class="comment-text">{{ reply.text }}</p>
                 <div class="comment-footer">
-                  <el-button text :icon="ArrowUpBold" @click="likeComment(reply)">{{ reply.like_count || 0 }}
+                  <el-button text :icon="ArrowUpBold" @click="toggleLikeComment(reply)">{{ reply.like_count || 0 }}
                   </el-button>
                   <el-button text @click="setReplyTarget(comment, reply)">回复</el-button>
                   <el-button v-if="reply.user_id === currentUserId" text @click="deleteComment(reply.id)"
@@ -182,11 +182,11 @@ const submitComment = async () => {
   }
 };
 
-const likeComment = async (comment: ModelsCommentDTO) => {
+const toggleLikeComment = async (comment: ModelsCommentDTO) => {
   try {
-    await commentApi.commentsCommentIdLikePost(comment.id!);
-    // 乐观更新UI
-    comment.like_count = (comment.like_count || 0) + 1;
+    const res = await commentApi.commentsCommentIdLikePost(comment.id!);
+    // 其实应该设置不同的状态的图标
+    comment.like_count = res.data.like_count;
   } catch (error) {
     ElMessage.error('点赞失败');
   }
@@ -233,6 +233,10 @@ const goToUserProfile = (userId?: number) => {
     router.push(`/profile/${userId}`);
   }
 };
+
+const goToLogin = () => {
+  router.push('/auth');
+}
 
 onMounted(async () => {
   // 使用 Promise.all 并行执行，提升速度

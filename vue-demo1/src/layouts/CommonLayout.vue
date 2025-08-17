@@ -13,7 +13,6 @@
           <Navbar />
         </div>
       </div>
-
       <!-- 主内容区 -->
       <div class="main-content-wrapper">
         <div class="main-content" :class="{ 'is-scrollable': mainContentScrollable }">

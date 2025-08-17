@@ -698,6 +698,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/comments/{commentId}/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据评论id获取点赞数量",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 (Comment)"
+                ],
+                "summary": "根据评论id获取点赞数量",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论 ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.CommentLikeCountResponseDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/comments/{commentId}/like": {
             "post": {
                 "security": [
@@ -2298,6 +2332,10 @@ const docTemplate = `{
                 "like_count": {
                     "type": "integer"
                 },
+                "name": {
+                    "description": "新增， 用于展示",
+                    "type": "string"
+                },
                 "parent_id": {
                     "description": "使用指针类型处理 NULL",
                     "type": "integer"
@@ -2308,6 +2346,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.CommentDTO"
                     }
+                },
+                "reply_to_name": {
+                    "type": "string"
                 },
                 "reply_to_user_id": {
                     "description": "使用指针",
@@ -2330,6 +2371,14 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "models.CommentLikeCountResponseDTO": {
+            "type": "object",
+            "properties": {
+                "like_count": {
+                    "type": "integer"
                 }
             }
         },

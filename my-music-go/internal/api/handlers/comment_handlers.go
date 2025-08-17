@@ -226,3 +226,32 @@ func (h *CommentHandler) ToggleLikeComment(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, response)
 }
+
+// GetLikeCount 根据评论id获取点赞数量
+// @Summary 根据评论id获取点赞数量
+// @Description 根据评论id获取点赞数量
+// @Tags  评论 (Comment)
+// @Produce json
+// @Security BearerAuth
+// @Param commentId path int true "评论 ID"
+// @Success 200 {object} models.CommentLikeCountResponseDTO
+// @Router /comments/{commentId}/count [get]
+func (h *CommentHandler) GetLikeCount(c *gin.Context) {
+	commentID, err := GetIDFromParam(c, "commentId")
+	if err != nil {
+		return
+	}
+
+	likeCount, err := h.commentService.GetLikeCount(commentID)
+	response := models.CommentLikeCountResponseDTO{LikeCount: *likeCount}
+	if err != nil {
+		if errors.Is(err, services.ErrCommentNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "评论不存在"})
+		} else {
+			log.Printf("获取评论点赞数失败: %+v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "操作失败"})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}

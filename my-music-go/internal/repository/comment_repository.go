@@ -31,7 +31,7 @@ func (r *CommentRepository) FindDTOByID(commentID int64, currentUserID *int64) (
 	var comment models.CommentDTO
 	query := `
 		SELECT 
-			c.*, u.username, u.avatar, ru.username as reply_to_username,
+			c.*, u.username, u.name, u.avatar, ru.username as reply_to_username, ru.name as reply_to_name,
 			EXISTS(SELECT 1 FROM comment_like cl WHERE cl.comment_id = c.id AND cl.user_id = ?) as is_liked_by_me
 		FROM comment c
 		LEFT JOIN user u ON c.user_id = u.id
@@ -54,7 +54,7 @@ func (r *CommentRepository) ListBySongID(songID int64, currentUserID *int64, par
 	// 【修改】: 使用 is_root = TRUE 来查找根评论
 	query := `
 		SELECT 
-			c.*, u.username, u.avatar, ru.username as reply_to_username,
+			c.*, u.username, u.name, u.avatar, ru.username as reply_to_username, ru.name as reply_to_name,
 			EXISTS(SELECT 1 FROM comment_like cl WHERE cl.comment_id = c.id AND cl.user_id = ?) as is_liked_by_me
 		FROM comment c
 		LEFT JOIN user u ON c.user_id = u.id
@@ -81,7 +81,7 @@ func (r *CommentRepository) ListByParentID(parentID int64, currentUserID *int64)
 	var comments []models.CommentDTO
 	query := `
 		SELECT 
-			c.*, u.username, u.avatar, ru.username as reply_to_username,
+			c.*, u.username, u.name, u.avatar, ru.username as reply_to_username, ru.name as reply_to_name,
 			EXISTS(SELECT 1 FROM comment_like cl WHERE cl.comment_id = c.id AND cl.user_id = ?) as is_liked_by_me
 		FROM comment c
 		LEFT JOIN user u ON c.user_id = u.id

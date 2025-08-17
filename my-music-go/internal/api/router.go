@@ -116,6 +116,7 @@ func SetupRouter(
 					commentsRoutes.PUT("/:commentId", commentHandler.UpdateComment)
 					commentsRoutes.DELETE("/:commentId", commentHandler.DeleteComment)
 					commentsRoutes.POST("/:commentId/like", commentHandler.ToggleLikeComment)
+					commentsRoutes.GET("/:commentId/count", commentHandler.GetLikeCount)
 				}
 			}
 		}

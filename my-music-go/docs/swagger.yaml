@@ -71,6 +71,9 @@ definitions:
         type: boolean
       like_count:
         type: integer
+      name:
+        description: 新增， 用于展示
+        type: string
       parent_id:
         description: 使用指针类型处理 NULL
         type: integer
@@ -79,6 +82,8 @@ definitions:
         items:
           $ref: '#/definitions/models.CommentDTO'
         type: array
+      reply_to_name:
+        type: string
       reply_to_user_id:
         description: 使用指针
         type: integer
@@ -94,6 +99,11 @@ definitions:
         type: integer
       username:
         type: string
+    type: object
+  models.CommentLikeCountResponseDTO:
+    properties:
+      like_count:
+        type: integer
     type: object
   models.CreateCommentRequestDTO:
     properties:
@@ -759,6 +769,27 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新我的评论
+      tags:
+      - 评论 (Comment)
+  /comments/{commentId}/count:
+    get:
+      description: 根据评论id获取点赞数量
+      parameters:
+      - description: 评论 ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CommentLikeCountResponseDTO'
+      security:
+      - BearerAuth: []
+      summary: 根据评论id获取点赞数量
       tags:
       - 评论 (Comment)
   /comments/{commentId}/like:

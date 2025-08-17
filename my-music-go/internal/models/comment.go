@@ -23,8 +23,10 @@ type Comment struct {
 type CommentDTO struct {
 	Comment
 	Username        string       `db:"username" json:"username"`
+	Name            string       `db:"name" json:"name"` // 新增， 用于展示
 	Avatar          string       `db:"avatar" json:"avatar"`
 	ReplyToUsername *string      `db:"reply_to_username" json:"reply_to_username,omitempty"`
+	ReplyToName     *string      `db:"reply_to_name" json:"reply_to_name,omitempty"`
 	IsLikedByMe     bool         `db:"is_liked_by_me" json:"is_liked_by_me"`
 	Replies         []CommentDTO `json:"replies,omitempty"` // 用于嵌套回复
 }
@@ -51,4 +53,9 @@ type UpdateCommentRequestDTO struct {
 type LikeCommentResponseDTO struct {
 	LikeCount   int  `json:"like_count"`
 	IsLikedByMe bool `json:"is_liked_by_me"`
+}
+
+// LikeCommentResponseDTO 定义获取评论赞数的响应
+type CommentLikeCountResponseDTO struct {
+	LikeCount int `json:"like_count"`
 }

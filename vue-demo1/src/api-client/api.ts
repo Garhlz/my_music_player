@@ -295,6 +295,12 @@ export interface ModelsCommentDTO {
      */
     'like_count'?: number;
     /**
+     * 新增， 用于展示
+     * @type {string}
+     * @memberof ModelsCommentDTO
+     */
+    'name'?: string;
+    /**
      * 使用指针类型处理 NULL
      * @type {number}
      * @memberof ModelsCommentDTO
@@ -306,6 +312,12 @@ export interface ModelsCommentDTO {
      * @memberof ModelsCommentDTO
      */
     'replies'?: Array<ModelsCommentDTO>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsCommentDTO
+     */
+    'reply_to_name'?: string;
     /**
      * 使用指针
      * @type {number}
@@ -348,6 +360,19 @@ export interface ModelsCommentDTO {
      * @memberof ModelsCommentDTO
      */
     'username'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface ModelsCommentLikeCountResponseDTO
+ */
+export interface ModelsCommentLikeCountResponseDTO {
+    /**
+     * 
+     * @type {number}
+     * @memberof ModelsCommentLikeCountResponseDTO
+     */
+    'like_count'?: number;
 }
 /**
  * 
@@ -1795,6 +1820,43 @@ export class AuthApi extends BaseAPI implements AuthApiInterface {
 export const CommentApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * 根据评论id获取点赞数量
+         * @summary 根据评论id获取点赞数量
+         * @param {number} commentId 评论 ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        commentsCommentIdCountGet: async (commentId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'commentId' is not null or undefined
+            assertParamExists('commentsCommentIdCountGet', 'commentId', commentId)
+            const localVarPath = `/comments/{commentId}/count`
+                .replace(`{${"commentId"}}`, encodeURIComponent(String(commentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 删除当前认证用户发表的一条评论（及其所有回复）。
          * @summary 删除我的评论
          * @param {number} commentId 评论 ID
@@ -2043,6 +2105,19 @@ export const CommentApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CommentApiAxiosParamCreator(configuration)
     return {
         /**
+         * 根据评论id获取点赞数量
+         * @summary 根据评论id获取点赞数量
+         * @param {number} commentId 评论 ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async commentsCommentIdCountGet(commentId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelsCommentLikeCountResponseDTO>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.commentsCommentIdCountGet(commentId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CommentApi.commentsCommentIdCountGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 删除当前认证用户发表的一条评论（及其所有回复）。
          * @summary 删除我的评论
          * @param {number} commentId 评论 ID
@@ -2135,6 +2210,16 @@ export const CommentApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = CommentApiFp(configuration)
     return {
         /**
+         * 根据评论id获取点赞数量
+         * @summary 根据评论id获取点赞数量
+         * @param {number} commentId 评论 ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        commentsCommentIdCountGet(commentId: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsCommentLikeCountResponseDTO> {
+            return localVarFp.commentsCommentIdCountGet(commentId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 删除当前认证用户发表的一条评论（及其所有回复）。
          * @summary 删除我的评论
          * @param {number} commentId 评论 ID
@@ -2208,6 +2293,16 @@ export const CommentApiFactory = function (configuration?: Configuration, basePa
  */
 export interface CommentApiInterface {
     /**
+     * 根据评论id获取点赞数量
+     * @summary 根据评论id获取点赞数量
+     * @param {number} commentId 评论 ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CommentApiInterface
+     */
+    commentsCommentIdCountGet(commentId: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsCommentLikeCountResponseDTO>;
+
+    /**
      * 删除当前认证用户发表的一条评论（及其所有回复）。
      * @summary 删除我的评论
      * @param {number} commentId 评论 ID
@@ -2280,6 +2375,18 @@ export interface CommentApiInterface {
  * @extends {BaseAPI}
  */
 export class CommentApi extends BaseAPI implements CommentApiInterface {
+    /**
+     * 根据评论id获取点赞数量
+     * @summary 根据评论id获取点赞数量
+     * @param {number} commentId 评论 ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CommentApi
+     */
+    public commentsCommentIdCountGet(commentId: number, options?: RawAxiosRequestConfig) {
+        return CommentApiFp(this.configuration).commentsCommentIdCountGet(commentId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 删除当前认证用户发表的一条评论（及其所有回复）。
      * @summary 删除我的评论

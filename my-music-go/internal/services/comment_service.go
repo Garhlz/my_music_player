@@ -177,3 +177,22 @@ func (s *CommentService) ToggleLikeComment(userID, commentID int64) (*models.Lik
 		IsLikedByMe: isLiked,
 	}, nil
 }
+
+func (s *CommentService) GetLikeCount(commentID int64) (*int, error) {
+	// 检查评论是否存在
+	var currentUserIDPtr *int64
+	comment, err := s.commentRepo.FindDTOByID(commentID, currentUserIDPtr)
+	if err != nil {
+		return nil, fmt.Errorf("db error on find comment: %w", err)
+	}
+	if comment == nil {
+		return nil, ErrCommentNotFound
+	}
+
+	likeCount, err := s.commentRepo.GetLikeCount(commentID)
+	if err != nil {
+		return nil, fmt.Errorf("db error on get like count: %w", err)
+	}
+
+	return &likeCount, err
+}
