@@ -1,7 +1,7 @@
 // internal/repository/user_repository.go
 package repository
 
-// todo
+// TODO
 // IUserRepository 定义了用户仓库需要实现的所有方法
 // 这使得我们的 Service 层可以依赖这个接口，而不是具体的实现
 import (

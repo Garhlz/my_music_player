@@ -160,7 +160,7 @@ func (r *PlaylistRepository) Update(playlist *models.PlaylistInfo) error {
 }
 
 // Delete 开启事务, 先删除关联表中的所有歌曲记录, 在删除歌单本身
-// todo 这里还需要深究一下, 不是很熟悉
+// TODO 这里还需要深究一下, 不是很熟悉
 func (r *PlaylistRepository) Delete(playlistID int64) error {
 	tx, err := r.db.Beginx()
 	if err != nil {

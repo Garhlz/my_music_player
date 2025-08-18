@@ -21,7 +21,7 @@ import (
 
 // @contact.name   Elaine
 // @contact.url    https://github.com/Garhlz
-// @contact.email  your.email@example.com
+// @contact.email  garhlz257@gmail.com
 
 // @license.name  MIT License
 // @license.url   https://opensource.org/licenses/MIT

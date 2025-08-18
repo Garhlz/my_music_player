@@ -95,7 +95,7 @@ func (r *SongRepository) List(params *models.ListSongsRequestDTO) ([]models.Song
 	// 添加排序
 	orderBy := "ORDER BY s.create_time DESC" // 默认排序
 	allowedSorts := map[string]string{
-		// todo 依照前端信息, 还有其他支持的排序语句, 之后修改
+		// TODO 依照前端信息, 还有其他支持的排序语句, 之后修改
 		"latest":     "s.create_time DESC",
 		"oldest":     "s.create_time ASC",
 		"play_count": "s.play_count DESC",

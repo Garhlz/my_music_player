@@ -66,7 +66,7 @@ const artistMetaItems = computed(() => {
     items.push(`${songNumber.value} 首歌曲`);
   }
   if (artist.value.album_count) {
-    // todo 需要创建专辑的视图
+    // TODO 需要创建专辑的视图
     items.push(`${artist.value.album_count} 张专辑`);
   }
   return items;

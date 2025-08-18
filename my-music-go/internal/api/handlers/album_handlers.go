@@ -70,11 +70,6 @@ func (h *AlbumHandler) GetAlbumInfo(c *gin.Context) {
 		return
 	}
 
-
-
-
-
-	
 	artist, err := h.albumService.GetAlbum(albumID)
 	if err != nil {
 		if errors.Is(err, services.ErrAlbumNotFound) {
@@ -106,7 +101,7 @@ func (h *AlbumHandler) GetAlbumInfo(c *gin.Context) {
 // @Failure      500       {object}  map[string]string "{"error": "获取歌曲列表失败"}"
 // @Router       /albums/{id}/songs [get]
 func (h *AlbumHandler) ListSongsByAlbum(c *gin.Context) {
-	// todo 其实所有获取艺术家的地方, 都需要考虑有多个艺术家的情况...这里暂且不管
+	// TODO 其实所有获取艺术家的地方, 都需要考虑有多个艺术家的情况...这里暂且不管
 	// 1. 解析路径参数 albumID
 	albumID, err := GetIDFromParam(c, "id")
 	if err != nil {

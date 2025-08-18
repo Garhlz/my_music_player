@@ -39,7 +39,7 @@ func (s *UserService) RegisterUser(req *models.RegisterRequest) error {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	// todo 因为前端在注册的时候, 现在逻辑是必须填入一些不重要信息. 后续应该修改为不重要信息选择性填入, 这里也要修改
+	// TODO 因为前端在注册的时候, 现在逻辑是必须填入一些不重要信息. 后续应该修改为不重要信息选择性填入, 这里也要修改
 	newUser := &models.User{
 		Username: req.Username,
 		Password: string(hashedPassword),

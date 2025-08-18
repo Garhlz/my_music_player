@@ -75,7 +75,7 @@ func (s *PlaylistService) ListUserPlaylists(userID int64, params *models.ListPla
 // CreatePlaylist 为指定用户创建歌单
 func (s *PlaylistService) CreatePlaylist(userID int64, req *models.CreatePlaylistRequestDTO) (int64, error) {
 	defaultCover := "/assets/covers/playlists/default.jpg"
-	// todo 修改封面逻辑, 因为此处连文件上传逻辑都没有
+	// 修改封面逻辑, 因为此处连文件上传逻辑都没有
 	playlist := &models.PlaylistInfo{
 		Name:        req.Name,
 		Description: req.Description,

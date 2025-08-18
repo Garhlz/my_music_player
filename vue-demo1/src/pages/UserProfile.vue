@@ -19,8 +19,8 @@
             </div>
 
             <div class="profile-stats">
-              <span><b>{{ userInfo?.follower_count || 0 }}</b> 粉丝</span>
-              <span><b>{{ userInfo?.following_count || 0 }}</b> 关注</span>
+              <span><b>{{ userInfo?.followers || 0 }}</b> 粉丝数 </span>
+              <span><b>{{ userInfo?.followings || 0 }}</b> 关注数</span>
             </div>
           </div>
 
@@ -33,7 +33,8 @@
                 </el-icon>
                 编辑个人资料
               </el-button>
-              <el-button v-else type="primary" round>
+              <el-button v-else type="primary" round @click="followCurrentUser">
+                <!--TODO 需要根据关注情况确定显示关注还是取关... -->
                 <el-icon>
                   <Plus />
                 </el-icon>
@@ -361,6 +362,13 @@ const handleUpdateProfile = async (updatedData: ModelsUpdateUserRequest) => {
   }
 };
 
+const followCurrentUser = async() => {
+  try {
+    await userApi.follow(targetUserId.value);
+    ElMessage.success("关注成功");
+    
+  }
+}
 onMounted(async () => {
     await setPageTitleAndId();
     await loadPlaylists();
