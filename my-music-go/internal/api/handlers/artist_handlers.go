@@ -31,7 +31,7 @@ func NewArtistHandler(artistService *services.ArtistService, songService *servic
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id        path      int     true   "艺术家 ID"
-// @Success      200       {object}  models.Artist
+// @Success      200       {object}  models.ArtistInfoResponse
 // @Failure      400       {object}  map[string]string "{"error": "无效的艺术家ID"}"
 // @Failure      401       {object}  map[string]string "{"error": "需要认证"}"
 // @Failure      404       {object}  map[string]string "{"error": "艺术家未找到"}"

@@ -146,7 +146,7 @@ const loadData = async () => {
   isLoading.value = true;
   try {
     const res = await commentApi.songsIdCommentsGet(props.songId, page.value, pageSize.value);
-    const rootComments: ModelsCommentDTO[] = res.data.list || [];
+    const rootComments: ModelsCommentDTO[] = res.data.List || [];
     total.value = res.data.total || 0;
 
     // 获取每个根评论的回复
@@ -219,7 +219,7 @@ const cancelReply = () => {
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage;
-  loadData(false);
+  loadData();
 };
 
 const handlePageSizeChange = (newSize: number) => {

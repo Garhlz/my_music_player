@@ -286,7 +286,7 @@ const handleSearch = () => {
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage;
-  loadData(false);
+  loadData();
 };
 
 const handlePageSizeChange = (newSize: number) => {

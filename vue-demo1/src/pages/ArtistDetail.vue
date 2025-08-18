@@ -33,7 +33,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { artistApi } from '@/api'; // 确保你的 API 实例是这样导入的
-import type { ModelsArtist, ArtistsIdSongsGetSortByEnum } from '@/api-client';
+import type { ModelsArtistInfoResponse, ArtistsIdSongsGetSortByEnum } from '@/api-client';
 
 // 导入我们的新组件和已有的SongList
 import CommonLayout from '@/layouts/CommonLayout.vue';
@@ -43,7 +43,7 @@ import SongList from '@/components/SongList.vue';
 
 const route = useRoute();
 const isLoading = ref(true);
-const artist = ref<ModelsArtist>(null);
+const artist = ref<ModelsArtistInfoResponse>(null);
 const artistId = Number(route.params.id);
 
 const songNumber = ref<number>(0);
@@ -66,7 +66,7 @@ const artistMetaItems = computed(() => {
     items.push(`${songNumber.value} 首歌曲`);
   }
   if (artist.value.album_count) {
-    // TODO 需要创建专辑的视图
+    // TODO 需要创建显示全部专辑的页面视图， 可以参考歌单的样式
     items.push(`${artist.value.album_count} 张专辑`);
   }
   return items;

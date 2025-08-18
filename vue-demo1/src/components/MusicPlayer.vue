@@ -497,7 +497,7 @@ watch(() => currentSong.value?.id, (newId, oldId) => {
   width: 32px;
   height: 32px;
   /* 使用 !important 覆盖全局样式，确保背景是白色 */
-  //background: #fff !important;
+  background: #fff !important;
   /* 确保图标是黑色，以形成对比 */
   color: #fff;
   border: none;

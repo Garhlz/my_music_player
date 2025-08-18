@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"database/sql"
-	"errors"
 	"my-music-go/internal/models"
 
 	"github.com/jmoiron/sqlx"
@@ -10,6 +8,7 @@ import (
 
 type IArtistRepository interface {
 	FindByID(artistID int64) (*models.Artist, error)
+	GetAlbumCount(artistID int64) (*models.AlbumCount, error)
 }
 
 type ArtistRepository struct {
@@ -26,10 +25,24 @@ func (r *ArtistRepository) FindByID(artistID int64) (*models.Artist, error) {
 
 	err := r.db.Get(&artist, query, artistID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // 未找到
-		}
-		return nil, err // 数据库错误
+		return nil, err
 	}
 	return &artist, nil
+}
+
+func (r *ArtistRepository) GetAlbumCount(artistID int64) (*models.AlbumCount, error) {
+	var albumCount models.AlbumCount
+	query := `
+		SELECT COUNT(*) as album_count
+		FROM artist_album aa
+		LEFT JOIN artist ar ON ar.id = aa.artist_id
+		WHERE ar.id = ?
+	`
+	err := r.db.Get(&albumCount, query, artistID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &albumCount, nil
 }

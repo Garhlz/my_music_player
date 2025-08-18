@@ -33,7 +33,6 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('userId', JSON.stringify(newUserId));
   }
 
-  const userInfo = computed(() => userProfile.value);
 
   /**
    * 清除用户凭证，用于退出登录
@@ -45,7 +44,7 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
 
-    // 你可能还想清除其他数据，比如播放列表等
+    // 可能还需要清除其他数据，比如播放列表等
     // location.reload() // 可以选择强制刷新页面回到初始状态
   }
 
@@ -59,6 +58,5 @@ export const useUserStore = defineStore('user', () => {
     // Actions
     setCredentials,
     logout,
-    userInfo,
   };
 });

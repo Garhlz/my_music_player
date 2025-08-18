@@ -41,8 +41,10 @@ definitions:
       song_count:
         type: integer
     type: object
-  models.Artist:
+  models.ArtistInfoResponse:
     properties:
+      album_count:
+        type: integer
       avatar:
         type: string
       created_at:
@@ -535,7 +537,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Artist'
+            $ref: '#/definitions/models.ArtistInfoResponse'
         "400":
           description: '{"error": "无效的艺术家ID"}'
           schema:
@@ -1811,6 +1813,10 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - description: 搜索关键词 (匹配歌单名)
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:

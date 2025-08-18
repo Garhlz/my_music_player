@@ -180,7 +180,7 @@ const handleLogin = async () => {
       try {
         const response = await authApi.authLoginPost(loginForm);
         const { token, user_id } = response.data;
-        userStore.setCredentials(token, JSON.stringify(user_id));
+        userStore.setCredentials(token, user_id);
         await likeStore.fetchLikedSongs();
         if (rememberMe.value) {
           localStorage.setItem('remembered_username', loginForm.username);

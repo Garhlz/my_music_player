@@ -329,7 +329,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Artist"
+                            "$ref": "#/definitions/models.ArtistInfoResponse"
                         }
                     },
                     "400": {
@@ -2336,6 +2336,12 @@ const docTemplate = `{
                         "description": "每页数量",
                         "name": "pageSize",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词 (匹配歌单名)",
+                        "name": "search",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2428,9 +2434,12 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Artist": {
+        "models.ArtistInfoResponse": {
             "type": "object",
             "properties": {
+                "album_count": {
+                    "type": "integer"
+                },
                 "avatar": {
                     "type": "string"
                 },

@@ -19,7 +19,7 @@ func NewArtistService(artistRepo repository.IArtistRepository) *ArtistService {
 }
 
 // GetArtist 是新的、职责单一的方法
-func (s *ArtistService) GetArtist(artistID int64) (*models.Artist, error) {
+func (s *ArtistService) GetArtist(artistID int64) (*models.ArtistInfoResponse, error) {
 	artistInfo, err := s.artistRepo.FindByID(artistID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -27,5 +27,17 @@ func (s *ArtistService) GetArtist(artistID int64) (*models.Artist, error) {
 		}
 		return nil, fmt.Errorf("failed to find artist by id: %w", err)
 	}
-	return artistInfo, nil
+
+	albumCount, err := s.artistRepo.GetAlbumCount(artistID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrArtistNotFound // 保持错误类型的封装
+		}
+		return nil, fmt.Errorf("failed to find artist by id: %w", err)
+	}
+
+	return &models.ArtistInfoResponse{
+		Artist:     *artistInfo,
+		AlbumCount: *albumCount,
+	}, nil
 }

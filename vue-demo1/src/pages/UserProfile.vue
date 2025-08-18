@@ -112,6 +112,7 @@
                 @view="navigateToDetail"
                 @edit="handleOpenEditDialog"
                 @delete="handleDelete"
+                @play="handleSongPlay"
               />
 
               <!-- 空状态 -->
@@ -175,6 +176,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router'; // 引入 useRouter
 import { useUserStore } from '@/stores/user';
+import { usePlayerStore } from '@/stores/player';
 import { storeToRefs } from 'pinia';
 import { userApi, playlistApi } from '@/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -188,6 +190,7 @@ import PlaylistFormDialog from '@/components/PlaylistFormDialog.vue';
 const route = useRoute();
 const router = useRouter(); // 初始化 router
 const userStore = useUserStore();
+const playerStore = usePlayerStore();
 const { userId: currentUserId } = storeToRefs(userStore);
 
 const isLoading = ref(true);
@@ -209,6 +212,16 @@ const isOwner = computed(() => {
   return Number(targetUserId.value) === Number(currentUserId.value);
 });
 
+
+const handleSongPlay =  async (id: number) => {
+  const resp = await playlistApi.playlistsPlaylistIdSongsGet(id);
+  const songs = resp.data.List;
+  if (songs.length > 0) {
+    playerStore.setPlaylist(songs, 0);
+  } else {
+    ElMessage.warning('该歌单没有歌曲');
+  }
+}
 
 // --------------------------------------------------------------------------------
 
@@ -400,6 +413,8 @@ watch(() => route.params.id, async (newId) => {
   if (newId) {
     await setPageTitleAndId();
     await loadPlaylists();
+    await fetchUserInfo();
+    await loadFollowing();
   }
 });
 

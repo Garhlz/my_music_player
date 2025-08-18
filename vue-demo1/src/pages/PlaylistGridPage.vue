@@ -209,7 +209,7 @@ const navigateToDetail = (id: number) => {
 
 const handleSongPlay =  async (id: number) => {
   const resp = await playlistApi.playlistsPlaylistIdSongsGet(id);
-  const songs = resp.data.list;
+  const songs = resp.data.List;
   if (songs.length > 0) {
     playerStore.setPlaylist(songs, 0);
   } else {

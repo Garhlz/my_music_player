@@ -212,43 +212,49 @@ export interface ModelsAlbumListDTO {
 /**
  * 
  * @export
- * @interface ModelsArtist
+ * @interface ModelsArtistInfoResponse
  */
-export interface ModelsArtist {
+export interface ModelsArtistInfoResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof ModelsArtistInfoResponse
+     */
+    'album_count'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ModelsArtist
+     * @memberof ModelsArtistInfoResponse
      */
     'avatar'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ModelsArtist
+     * @memberof ModelsArtistInfoResponse
      */
     'created_at'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ModelsArtist
+     * @memberof ModelsArtistInfoResponse
      */
     'description'?: string;
     /**
      * 
      * @type {number}
-     * @memberof ModelsArtist
+     * @memberof ModelsArtistInfoResponse
      */
     'id'?: number;
     /**
      * 
      * @type {string}
-     * @memberof ModelsArtist
+     * @memberof ModelsArtistInfoResponse
      */
     'name'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ModelsArtist
+     * @memberof ModelsArtistInfoResponse
      */
     'sex'?: string;
 }
@@ -1477,7 +1483,7 @@ export const ArtistApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async artistsIdGet(id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelsArtist>> {
+        async artistsIdGet(id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelsArtistInfoResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.artistsIdGet(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ArtistApi.artistsIdGet']?.[localVarOperationServerIndex]?.url;
@@ -1517,7 +1523,7 @@ export const ArtistApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        artistsIdGet(id: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsArtist> {
+        artistsIdGet(id: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsArtistInfoResponse> {
             return localVarFp.artistsIdGet(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1551,7 +1557,7 @@ export interface ArtistApiInterface {
      * @throws {RequiredError}
      * @memberof ArtistApiInterface
      */
-    artistsIdGet(id: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsArtist>;
+    artistsIdGet(id: number, options?: RawAxiosRequestConfig): AxiosPromise<ModelsArtistInfoResponse>;
 
     /**
      * 根据艺术家ID获取其歌曲的分页列表，支持搜索和排序。
@@ -3377,10 +3383,11 @@ export const PlaylistApiAxiosParamCreator = function (configuration?: Configurat
          * @param {number} id 用户 ID
          * @param {number} [page] 页码
          * @param {number} [pageSize] 每页数量
+         * @param {string} [search] 搜索关键词 (匹配歌单名)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersIdPlaylistsGet: async (id: number, page?: number, pageSize?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        usersIdPlaylistsGet: async (id: number, page?: number, pageSize?: number, search?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('usersIdPlaylistsGet', 'id', id)
             const localVarPath = `/users/{id}/playlists`
@@ -3405,6 +3412,10 @@ export const PlaylistApiAxiosParamCreator = function (configuration?: Configurat
 
             if (pageSize !== undefined) {
                 localVarQueryParameter['pageSize'] = pageSize;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
 
@@ -3547,11 +3558,12 @@ export const PlaylistApiFp = function(configuration?: Configuration) {
          * @param {number} id 用户 ID
          * @param {number} [page] 页码
          * @param {number} [pageSize] 每页数量
+         * @param {string} [search] 搜索关键词 (匹配歌单名)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MePlaylistsGet200Response>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.usersIdPlaylistsGet(id, page, pageSize, options);
+        async usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MePlaylistsGet200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.usersIdPlaylistsGet(id, page, pageSize, search, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PlaylistApi.usersIdPlaylistsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3661,11 +3673,12 @@ export const PlaylistApiFactory = function (configuration?: Configuration, baseP
          * @param {number} id 用户 ID
          * @param {number} [page] 页码
          * @param {number} [pageSize] 每页数量
+         * @param {string} [search] 搜索关键词 (匹配歌单名)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response> {
-            return localVarFp.usersIdPlaylistsGet(id, page, pageSize, options).then((request) => request(axios, basePath));
+        usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response> {
+            return localVarFp.usersIdPlaylistsGet(id, page, pageSize, search, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -3771,11 +3784,12 @@ export interface PlaylistApiInterface {
      * @param {number} id 用户 ID
      * @param {number} [page] 页码
      * @param {number} [pageSize] 每页数量
+     * @param {string} [search] 搜索关键词 (匹配歌单名)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PlaylistApiInterface
      */
-    usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response>;
+    usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<MePlaylistsGet200Response>;
 
 }
 
@@ -3897,12 +3911,13 @@ export class PlaylistApi extends BaseAPI implements PlaylistApiInterface {
      * @param {number} id 用户 ID
      * @param {number} [page] 页码
      * @param {number} [pageSize] 每页数量
+     * @param {string} [search] 搜索关键词 (匹配歌单名)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PlaylistApi
      */
-    public usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, options?: RawAxiosRequestConfig) {
-        return PlaylistApiFp(this.configuration).usersIdPlaylistsGet(id, page, pageSize, options).then((request) => request(this.axios, this.basePath));
+    public usersIdPlaylistsGet(id: number, page?: number, pageSize?: number, search?: string, options?: RawAxiosRequestConfig) {
+        return PlaylistApiFp(this.configuration).usersIdPlaylistsGet(id, page, pageSize, search, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
