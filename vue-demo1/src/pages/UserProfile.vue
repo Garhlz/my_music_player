@@ -33,12 +33,12 @@
                 </el-icon>
                 编辑个人资料
               </el-button>
-              <el-button v-else type="primary" round @click="followCurrentUser">
+              <el-button v-else type="primary" round @click="toggleFollow">
                 <!--TODO 需要根据关注情况确定显示关注还是取关... -->
                 <el-icon>
                   <Plus />
                 </el-icon>
-                关注
+                {{ isFollowing ? "取消关注" : "关注" }}
               </el-button>
             </div>
             <div class="quick-links">
@@ -177,7 +177,7 @@ import { useRoute, useRouter } from 'vue-router'; // 引入 useRouter
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 import { userApi, playlistApi } from '@/api';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import type { ModelsUserProfile, ModelsUpdateUserRequest, ModelsPlaylistInfoDTO } from '@/api-client';
 import { Edit, Plus, Star, Menu, Location, User, Search, FolderOpened } from '@element-plus/icons-vue';
 import CommonLayout from '@/layouts/CommonLayout.vue';
@@ -195,6 +195,8 @@ const isLoading = ref(true);
 
 const userInfo = ref<ModelsUserProfile | null>(null);
 const targetUserId = ref<number | null>(null);
+
+const isFollowing = ref<boolean | null>(null);
 
 const showEditDialog = ref(false);
 const editForm = ref<ModelsUpdateUserRequest | null>(null);
@@ -247,6 +249,29 @@ const loadPlaylists = async () => {
     isLoading.value = false;
   }
 };
+
+const loadFollowing = async () => {
+  if(!targetUserId.value) return;
+  try{
+    const resp = await userApi.meUserIdFollowGet(targetUserId.value);
+    isFollowing.value = resp.data.is_following;
+  } catch(error) {
+    console.error('获取关注状态失败:', error);
+    ElMessage.error('获取关注状态失败');
+  }
+}
+
+const toggleFollow = async () => {
+  if(!targetUserId.value) return;
+  try {
+    await userApi.meUserIdFollowPost(targetUserId.value);
+    loadFollowing();
+    fetchUserInfo();
+  } catch (error) {
+    console.error('修改关注状态失败:', error);
+    ElMessage.error('修改关注状态失败');
+  }
+}
 
 // 设置页面标题
 const setPageTitleAndId = async () => {
@@ -362,19 +387,12 @@ const handleUpdateProfile = async (updatedData: ModelsUpdateUserRequest) => {
   }
 };
 
-const followCurrentUser = async() => {
-  try {
-    await userApi.follow(targetUserId.value);
-    ElMessage.success("关注成功");
-    
-  }
-}
+
 onMounted(async () => {
     await setPageTitleAndId();
     await loadPlaylists();
     await fetchUserInfo();
-    console.log(currentUserId.value);
-    console.log(targetUserId.value);
+    await loadFollowing();
   },
 );
 

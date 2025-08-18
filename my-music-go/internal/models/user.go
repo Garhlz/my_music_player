@@ -90,3 +90,7 @@ type UsernameResponse struct {
 	Username string  `json:"username"`
 	Name     *string `json:"name,omitempty"` // 可以顺便带上昵称
 }
+
+type FollowStatusResponse struct {
+	IsFollowing bool `json:"is_following" db:"is_following"`
+}

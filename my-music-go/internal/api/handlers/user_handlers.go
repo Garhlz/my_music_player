@@ -193,3 +193,69 @@ func (h *UserHandler) UpdateMyProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "用户信息更新成功"})
 }
+
+// GetFollowStatus 处理获取用户关注状态的请求
+// @Summary      获取用户关注状态
+// @Description  根据用户ID获取用户的关注状态
+// @Tags         用户信息 (User)
+// @Produce      json
+// @Security     BearerAuth
+// @Param        userId   path      int  true  "对象用户 ID"
+// @Success      200  {object}  models.FollowStatusResponse
+// @Failure      400  {object}  map[string]string "{"error": "无效的用户ID格式"}"
+// @Failure      401  {object}  map[string]string "{"error": "需要认证"}"
+// @Failure      404  {object}  map[string]string "{"error": "用户未找到"}"
+// @Failure      500  {object}  map[string]string "{"error": "获取关注状态失败，请稍后重试"}"
+// @Router       /me/{userId}/follow [get]
+func (h *UserHandler) GetFollowStatus(c *gin.Context) {
+	currentUserID := c.MustGet("userID").(int64)
+	targetUserID, err := GetIDFromParam(c, "userId")
+	if err != nil {
+		return
+	} // 已经在辅助函数内处理了返回值了
+
+	followStatus, err := h.userService.GetFollowStatus(currentUserID, targetUserID)
+	if err != nil {
+		if errors.Is(err, services.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "用户未找到"})
+		} else {
+			log.Printf("获取关注状态失败: %+v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取关注状态失败，请稍后重试"})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, followStatus)
+}
+
+// ToggleFollow 关注/取关用户
+// @Summary 关注或者取消关注用户
+// @Description 对一位用户进行关注。如果已经关注，则取消关注。
+// @Tags  用户信息 (User)
+// @Produce json
+// @Security BearerAuth
+// @Param userId path int true "关注对象用户 ID"
+// @Success 200  {object}  map[string]string "{"message": "关注用户更新成功"}"
+// @Failure      400  {object}  map[string]string "{"error": "无效的用户ID格式"}"
+// @Failure      401  {object}  map[string]string "{"error": "需要认证"}"
+// @Failure      404  {object}  map[string]string "{"error": "用户未找到"}"
+// @Failure      500  {object}  map[string]string "{"error": "关注或取关失败操作失败，请稍后重试"}"
+// @Router /me/{userId}/follow [post]
+func (h *UserHandler) ToggleFollow(c *gin.Context) {
+	currentUserID := c.MustGet("userID").(int64)
+	targetUserID, err := GetIDFromParam(c, "userId")
+	if err != nil {
+		return
+	}
+
+	err1 := h.userService.ToggleFollow(currentUserID, targetUserID)
+	if err1 != nil {
+		if errors.Is(err1, services.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+		} else {
+			log.Printf("关注或取关失败: %+v", err1)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "关注或取关失败操作失败"})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "用户信息更新成功"})
+}

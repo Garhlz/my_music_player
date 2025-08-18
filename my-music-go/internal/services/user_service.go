@@ -169,3 +169,58 @@ func (s *UserService) UpdateUserProfile(userID int64, req *models.UpdateUserRequ
 	// 调用 repository 的 Update 方法
 	return s.userRepo.Update(user)
 }
+
+func (s *UserService) GetFollowStatus(currentUserID, targetUserID int64) (*models.FollowStatusResponse, error) {
+	// 确认两个用户存在
+	resp0, err := s.userRepo.FindUsernameAndNameByID(currentUserID)
+	if err != nil {
+		return nil, fmt.Errorf("database error on find username: %w", err)
+	}
+	if resp0 == nil {
+		return nil, ErrUserNotFound
+	}
+
+	resp1, err := s.userRepo.FindUsernameAndNameByID(targetUserID)
+	if err != nil {
+		return nil, fmt.Errorf("database error on find username: %w", err)
+	}
+	if resp1 == nil {
+		return nil, ErrUserNotFound
+	}
+
+	resp, err := s.userRepo.GetFollowStatus(currentUserID, targetUserID)
+	if err != nil {
+		return nil, fmt.Errorf("database error on find username: %w", err)
+	}
+	if resp == nil {
+		return nil, ErrUserNotFound
+	}
+
+	return resp, err
+}
+
+func (s *UserService) ToggleFollow(currentUserID, targetUserID int64) error {
+	// 确认两个用户存在
+	resp0, err := s.userRepo.FindUsernameAndNameByID(currentUserID)
+	if err != nil {
+		return fmt.Errorf("database error on find username: %w", err)
+	}
+	if resp0 == nil {
+		return ErrUserNotFound
+	}
+
+	resp1, err := s.userRepo.FindUsernameAndNameByID(targetUserID)
+	if err != nil {
+		return fmt.Errorf("database error on find username: %w", err)
+	}
+	if resp1 == nil {
+		return ErrUserNotFound
+	}
+
+	err1 := s.userRepo.ToggleFollow(currentUserID, targetUserID)
+	if err1 != nil {
+		return fmt.Errorf("database error on find username: %w", err1)
+	}
+
+	return nil
+}

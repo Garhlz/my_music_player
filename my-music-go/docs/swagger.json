@@ -7,7 +7,7 @@
         "contact": {
             "name": "Elaine",
             "url": "https://github.com/Garhlz",
-            "email": "your.email@example.com"
+            "email": "garhlz257@gmail.com"
         },
         "license": {
             "name": "MIT License",
@@ -1457,6 +1457,147 @@
                 }
             }
         },
+        "/me/{userId}/follow": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据用户ID获取用户的关注状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户信息 (User)"
+                ],
+                "summary": "获取用户关注状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "对象用户 ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FollowStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的用户ID格式\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"用户未找到\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"获取关注状态失败，请稍后重试\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "对一位用户进行关注。如果已经关注，则取消关注。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户信息 (User)"
+                ],
+                "summary": "关注或者取消关注用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "关注对象用户 ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"message\": \"关注用户更新成功\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "{\"error\": \"无效的用户ID格式\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "{\"error\": \"需要认证\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{\"error\": \"用户未找到\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "{\"error\": \"关注或取关失败操作失败，请稍后重试\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/playlists/{playlistId}": {
             "get": {
                 "security": [
@@ -2408,6 +2549,14 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.FollowStatusResponse": {
+            "type": "object",
+            "properties": {
+                "is_following": {
+                    "type": "boolean"
                 }
             }
         },

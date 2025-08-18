@@ -19,6 +19,8 @@ type IUserRepository interface {
 	FindUsernameAndNameByID(userID int64) (*models.UsernameResponse, error)
 	FindProfileByID(userID int64) (*models.UserProfile, error)
 	Update(user *models.User) error
+	GetFollowStatus(currentUserID, targetUserID int64) (*models.FollowStatusResponse, error)
+	ToggleFollow(currentUserID, targetUserId int64) error
 }
 
 // UserRepository 提供了访问用户数据的方法
@@ -138,4 +140,46 @@ func (r *UserRepository) Update(user *models.User) error {
 
 	_, err := r.db.NamedExec(query, user)
 	return err
+}
+
+// follower是发出者， following是承受者
+// followings表示关注数量， followers表示粉丝数量
+func (r *UserRepository) GetFollowStatus(currentUserID, targetUserID int64) (*models.FollowStatusResponse, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM follow where follower_id = ? AND following_id = ?) as is_following`
+	var resp models.FollowStatusResponse
+	err := r.db.Get(&resp, query, currentUserID, targetUserID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (r *UserRepository) ToggleFollow(currentUserID, targetUserID int64) error {
+	query := `SELECT EXISTS(SELECT 1 FROM follow where follower_id = ? AND following_id = ?) as is_following`
+	var resp models.FollowStatusResponse
+	err := r.db.Get(&resp, query, currentUserID, targetUserID)
+
+	if err != nil {
+		return nil
+	}
+
+	if resp.IsFollowing {
+		query := `
+		DELETE FROM follow 
+		WHERE follower_id = ? AND following_id = ?`
+
+		_, err := r.db.Exec(query, currentUserID, targetUserID)
+		return err
+	} else {
+		query := `
+			INSERT INTO follow
+			(follower_id, following_id) VALUES (?, ?)
+		`
+		_, err := r.db.Exec(query, currentUserID, targetUserID)
+		return err
+	}
 }

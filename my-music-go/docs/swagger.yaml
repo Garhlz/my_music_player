@@ -128,6 +128,11 @@ definitions:
     required:
     - name
     type: object
+  models.FollowStatusResponse:
+    properties:
+      is_following:
+        type: boolean
+    type: object
   models.LikeCommentResponseDTO:
     properties:
       is_liked_by_me:
@@ -328,7 +333,7 @@ definitions:
 host: localhost:8080
 info:
   contact:
-    email: your.email@example.com
+    email: garhlz257@gmail.com
     name: Elaine
     url: https://github.com/Garhlz
   description: 这是一个使用 Go 语言和 Gin 框架开发的音乐播放器后端 API.
@@ -834,6 +839,97 @@ paths:
       summary: 获取评论回复
       tags:
       - 评论 (Comment)
+  /me/{userId}/follow:
+    get:
+      description: 根据用户ID获取用户的关注状态
+      parameters:
+      - description: 对象用户 ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FollowStatusResponse'
+        "400":
+          description: '{"error": "无效的用户ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "用户未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "获取关注状态失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取用户关注状态
+      tags:
+      - 用户信息 (User)
+    post:
+      description: 对一位用户进行关注。如果已经关注，则取消关注。
+      parameters:
+      - description: 关注对象用户 ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "关注用户更新成功"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: '{"error": "无效的用户ID格式"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: '{"error": "需要认证"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: '{"error": "用户未找到"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: '{"error": "关注或取关失败操作失败，请稍后重试"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 关注或者取消关注用户
+      tags:
+      - 用户信息 (User)
   /me/liked-songs:
     get:
       description: 获取当前认证用户（通过JWT Token识别）的喜欢歌曲分页列表，支持搜索和排序。

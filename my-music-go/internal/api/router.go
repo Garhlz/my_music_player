@@ -54,6 +54,8 @@ func SetupRouter(
 				meRoutes := protected.Group("/me")
 				{
 					meRoutes.PUT("/profile", userHandler.UpdateMyProfile)
+					meRoutes.GET("/:userId/follow", userHandler.GetFollowStatus)
+					meRoutes.POST("/:userId/follow", userHandler.ToggleFollow)
 
 					likedSongsRoutes := meRoutes.Group("/liked-songs")
 					{
