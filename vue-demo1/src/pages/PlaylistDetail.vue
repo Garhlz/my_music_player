@@ -134,7 +134,7 @@ const fetchPlaylistInfo = async () => {
 // 2. 准备一个函数，传递给 SongList 组件，让它自己去获取歌曲列表
 const fetchPlaylistSongs = async (page: number, pageSize: number, search: string, sortBy: string) => {
   if (!playlistId) throw new Error('歌单ID无效');
-  const response = await playlistApi.playlistsPlaylistIdSongsGet(playlistId, page, pageSize, search, sortBy as PlaylistsIdSongsGetSortByEnum);
+  const response = await playlistApi.playlistsPlaylistIdSongsGet(playlistId, page, pageSize, search, sortBy as PlaylistsPlaylistIdSongsGetSortByEnum);
   // SongList 需要一个 { total: number, list: any[] } 格式的对象
   songNumber.value = response.data.total;
   return response;

@@ -61,7 +61,7 @@ func main() {
 	var commentRepo repository.ICommentRepository = repository.NewCommentRepository(db)
 
 	// 将 repo 和 config 实例注入到 Service 中
-	userService := services.NewUserService(userRepo, cfg)
+	userService := services.NewUserService(userRepo, cfg) // 只有userService需要config的实例
 	songService := services.NewSongService(songRepo)
 	artistService := services.NewArtistService(artistRepo)
 	albumService := services.NewAlbumService(albumRepo)

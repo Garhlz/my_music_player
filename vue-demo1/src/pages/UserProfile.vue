@@ -215,7 +215,7 @@ const isOwner = computed(() => {
 
 const handleSongPlay =  async (id: number) => {
   const resp = await playlistApi.playlistsPlaylistIdSongsGet(id);
-  const songs = resp.data.List;
+  const songs = resp.data.list;
   if (songs.length > 0) {
     playerStore.setPlaylist(songs, 0);
   } else {

@@ -39,7 +39,7 @@ func (s *UserService) RegisterUser(req *models.RegisterRequest) error {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	// TODO 因为前端在注册的时候, 现在逻辑是必须填入一些不重要信息. 后续应该修改为不重要信息选择性填入, 这里也要修改
+	// 已经实现了不必要的字段可以不存在
 	newUser := &models.User{
 		Username: req.Username,
 		Password: string(hashedPassword),
@@ -56,6 +56,7 @@ func (s *UserService) RegisterUser(req *models.RegisterRequest) error {
 	if req.Avatar != nil {
 		newUser.Avatar = *req.Avatar
 	} else {
+		// 这里其实没有必要手动设置默认头像， 在前端处理即可
 		newUser.Avatar = "/assets/avatars/default-user.jpg"
 	}
 	if req.Bio != nil {

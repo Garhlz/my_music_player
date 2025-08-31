@@ -146,7 +146,8 @@ const loadData = async () => {
   isLoading.value = true;
   try {
     const res = await commentApi.songsIdCommentsGet(props.songId, page.value, pageSize.value);
-    const rootComments: ModelsCommentDTO[] = res.data.List || [];
+    const rootComments: ModelsCommentDTO[] = res.data.list || [];
+    // TODO 这里openapi生成的interface的逻辑有点奇怪， 只有List有类型，list是object...反正改回来可以用就是了
     total.value = res.data.total || 0;
 
     // 获取每个根评论的回复
@@ -244,8 +245,6 @@ onMounted(async () => {
     fetchCurrentUserProfile(),
     loadData(),
   ]);
-  console.log(total.value);
-  console.log(pageSize.value);
 });
 </script>
 
